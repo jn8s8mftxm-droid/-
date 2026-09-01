@@ -758,7 +758,7 @@
                 };
             }
             else if (n.includes("エチレン") && n.includes("重合触媒(Ziegler)")) {
-                baseDamage = 400;
+                baseDamage = 300;
                 quizToSet = {
                     question: "【付加重合】多数のエチレン分子が触媒のもと二重結合を開いて連続結合する高分子は？",
                     options: ["ポリエチレン(PE)", "ポリプロピレン(PP)", "PET樹脂", "ポリスチレン(PS)"],
