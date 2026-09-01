@@ -63,6 +63,12 @@
         .card.selected { background: #fde047; box-shadow: 0 0 10px #fde047; transform: translateY(-5px); }
         .card-rarity { font-size: 8px; font-weight: bold; padding: 1px 4px; border-radius: 3px; color: white; width: fit-content; }
         .rarity-SSR { background: #f97316; } .rarity-SR { background: #a855f7; } .rarity-R { background: #3b82f6; }
+        .rarity-SSSR { background: linear-gradient(90deg, #ff0000, #ff00ff); animation: rainbow 1.5s linear infinite; }
+
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
 
         #deck-edit-screen { background: #111; padding: 40px 16px; height: 100%; }
         .deck-list { flex: 1; overflow-y: auto; margin-top: 10px; }
@@ -105,7 +111,9 @@
                 <div style="color: white;">🧪 試薬: <span id="field-reagents">150</span></div>
                 <div style="color: #4ade80;">❤️ HP: <span id="field-hp">200</span>/200</div>
             </div>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                <button class="glass-btn" style="background: linear-gradient(135deg, #10b981, #059669); padding: 8px 12px; font-size: 12px;" onclick="saveGame()">セーブ</button>
+                <button class="glass-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 8px 12px; font-size: 12px;" onclick="loadGame()">ロード</button>
                 <button class="glass-btn" style="background: linear-gradient(135deg, #06b6d4, #3b82f6);" onclick="switchState('deckEdit')">デッキ</button>
                 <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7);" onclick="switchState('gacha')">ガチャ</button>
             </div>
@@ -167,8 +175,12 @@
             <span style="color: #888;">ガチャを回すと出現</span>
         </div>
 
-        <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 12px 24px;" onclick="drawGacha()">ガチャ (試薬100)</button>
-        <button class="glass-btn" style="background: #333;" onclick="switchState('field')">フィールドに戻る</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+            <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 12px 24px;" onclick="drawGacha()">ガチャ (試薬100)</button>
+            <button class="glass-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="saveGame()">セーブ</button>
+            <button class="glass-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5);" onclick="loadGame()">ロード</button>
+            <button class="glass-btn" style="background: #333;" onclick="switchState('field')">フィールドに戻る</button>
+        </div>
     </div>
 
     <script>
@@ -190,9 +202,9 @@
             { name: "重合触媒(Ziegler)", formula: "[Cat]", attackPower: 30, healPower: 0, attribute: "Catalyst", rarity: "SSR" },
             { name: "グリシン", formula: "H2NCH2COOH", attackPower: 0, healPower: 40, attribute: "Nutrient", rarity: "R" },
             { name: "グルコース", formula: "C6H12O6", attackPower: 0, healPower: 65, attribute: "Nutrient", rarity: "SR" },
-            { name: "トリニトロトルエン", formula: "C7H5N3O6", attackPower: 120, healPower: 0, attribute: "Explosive", rarity: "SSR" },
-            { name: "ピクリン酸", formula: "C6H3N3O7", attackPower: 120, healPower: 0, attribute: "Explosive", rarity: "SSR" },
-            { name: "フッ化水素酸", formula: "HF", attackPower: 200, healPower: 0, attribute: "Acid", rarity: "SSR" },
+            { name: "トリニトロトルエン", formula: "C7H5N3O6", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
+            { name: "ピクリン酸", formula: "C6H3N3O7", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
+            { name: "フッ化水素酸", formula: "HF", attackPower: Infinity, healPower: 0, attribute: "Acid", rarity: "SSSR" },
 
             { name: "o-クレゾール", formula: "CH3C6H4OH", attackPower: 40, healPower: 0, attribute: "Phenol", rarity: "R" },
             { name: "m-クレゾール", formula: "CH3C6H4OH", attackPower: 40, healPower: 0, attribute: "Phenol", rarity: "R" },
@@ -237,6 +249,40 @@
         };
 
         let isBattleOver = false;
+
+        // ===== セーブ / ロード =====
+        function saveGame() {
+            const data = {
+                reagents: gameState.reagents,
+                playerHP: gameState.playerHP,
+                playerMaxHP: gameState.playerMaxHP,
+                collection: gameState.collection,
+                currentDeck: gameState.currentDeck
+            };
+            localStorage.setItem('organicChemBattleSave', JSON.stringify(data));
+            alert('セーブしました！');
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('organicChemBattleSave');
+            if (!saved) {
+                alert('セーブデータがありません');
+                return;
+            }
+            try {
+                const data = JSON.parse(saved);
+                gameState.reagents = data.reagents ?? 150;
+                gameState.playerHP = data.playerHP ?? 200;
+                gameState.playerMaxHP = data.playerMaxHP ?? 200;
+                gameState.collection = data.collection || [];
+                gameState.currentDeck = data.currentDeck || [];
+                updateFieldUI();
+                switchState('field');
+                alert('ロードしました！');
+            } catch (e) {
+                alert('ロードに失敗しました');
+            }
+        }
 
         function switchState(stateName) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -525,6 +571,10 @@
 
         function drawCard() { if(bHand.length < 7 && bDeck.length > 0) bHand.push(bDeck.shift()); }
 
+        function formatPower(val) {
+            return val === Infinity ? "∞" : val;
+        }
+
         function updateBattleUI() {
             document.getElementById('battle-deck-count').innerText = bDeck.length;
             document.getElementById('hand-count').innerText = bHand.length;
@@ -536,7 +586,9 @@
                 let div = document.createElement('div');
                 div.className = `card ${isSel ? 'selected' : ''}`;
                 div.onclick = () => toggleSelectCard(card);
-                let val = card.healPower > 0 ? `<div style="font-size: 10px; color: #16a34a; font-weight: bold;">回復:+${card.healPower}</div>` : `<div style="font-size: 10px; color: #ef4444; font-weight: bold;">威力:${card.attackPower}</div>`;
+                let val = card.healPower > 0 
+                    ? `<div style="font-size: 10px; color: #16a34a; font-weight: bold;">回復:+${card.healPower}</div>` 
+                    : `<div style="font-size: 10px; color: #ef4444; font-weight: bold;">威力:${formatPower(card.attackPower)}</div>`;
                 div.innerHTML = `
                     <div class="card-rarity rarity-${card.rarity}">${card.rarity}</div>
                     <div style="font-weight: bold; font-size: 11px;">${card.name}</div>
@@ -562,12 +614,12 @@
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
 
-            if (bSelected.length === 1 && (bSelected[0].name === "フッ化水素酸")) {
-                baseDamage = 200;
-                logMessage = `☠️【最強試薬】フッ化水素酸を投擲！ 超高威力 ${baseDamage} ダメージ！`;
+            if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
+                baseDamage = Infinity;
+                logMessage = `☠️【究極試薬】フッ化水素酸を投擲！ ダメージ ∞ ！！`;
             }
             else if (bSelected.length === 1 && (bSelected[0].name === "トリニトロトルエン" || bSelected[0].name === "ピクリン酸")) {
-                baseDamage = 120;
+                baseDamage = 180;
                 logMessage = `💥【爆薬】${bSelected[0].name}を起爆！ ${baseDamage} ダメージ！`;
             }
             else if ((n.includes("酢酸") && n.includes("エタノール") && n.includes("水酸化ナトリウム")) || (n.includes("酢酸") && n.includes("水酸化ナトリウム"))) {
@@ -642,11 +694,11 @@
                     logMessage = `🧪【代謝】${single.name} を吸収！ HPが ${baseHeal} 回復！`;
                 } else {
                     baseDamage = single.attackPower;
-                    logMessage = `⚗️【単体攻撃】${single.name} を投擲！ ${baseDamage} ダメージ！`;
+                    logMessage = `⚗️【単体攻撃】${single.name} を投擲！ ${formatPower(baseDamage)} ダメージ！`;
                 }
             } else {
                 let healSum = bSelected.reduce((sum, c) => sum + c.healPower, 0);
-                let atkSum = bSelected.reduce((sum, c) => sum + c.attackPower, 0);
+                let atkSum = bSelected.reduce((sum, c) => sum + (c.attackPower === Infinity ? 99999 : c.attackPower), 0);
                 if(healSum > 0 && atkSum === 0) {
                     baseHeal = healSum;
                     logMessage = `🧪【複合代謝】薬品を同時吸収！ HPが ${baseHeal} 回復！`;
@@ -690,9 +742,9 @@
         function answerQuiz(isCorrect) {
             let finalDmg = 0, finalHeal = 0, quizLog = "";
             if(isCorrect) {
-                finalDmg = Math.floor(pendingDamage * 1.5);
+                finalDmg = pendingDamage === Infinity ? Infinity : Math.floor(pendingDamage * 1.5);
                 finalHeal = Math.floor(pendingHeal * 1.5);
-                let resStr = finalHeal > 0 ? `HPが ${finalHeal} 大回復！` : `${finalDmg} 大ダメージ！`;
+                let resStr = finalHeal > 0 ? `HPが ${finalHeal} 大回復！` : `${formatPower(finalDmg)} 大ダメージ！`;
                 quizLog = `⭕ 正解！${activeQuiz.explanation}\n反応成功！威力1.5倍！(${resStr})`;
             } else {
                 finalDmg = 0; finalHeal = 0;
@@ -708,7 +760,11 @@
         function applyEffectAndEndTurn(damage, heal, message) {
             if (isBattleOver) return;
 
-            monsterHP -= damage;
+            if (damage === Infinity) {
+                monsterHP = 0;
+            } else {
+                monsterHP -= damage;
+            }
             if(heal > 0) {
                 gameState.playerHP = Math.min(gameState.playerMaxHP, gameState.playerHP + heal);
                 document.getElementById('battle-player-hp').innerText = gameState.playerHP;
@@ -773,7 +829,7 @@
                 let inDeckCount = gameState.currentDeck.filter(c => c.name === name).length;
                 let card = gameState.collection.find(c => c.name === name);
                 let isInDeck = inDeckCount > 0;
-                let valStr = card.healPower > 0 ? `HEAL: +${card.healPower}` : `PWR: ${card.attackPower}`;
+                let valStr = card.healPower > 0 ? `HEAL: +${card.healPower}` : `PWR: ${formatPower(card.attackPower)}`;
 
                 let div = document.createElement('div');
                 div.className = `deck-item ${isInDeck ? 'in-deck' : ''}`;
@@ -828,16 +884,22 @@
             gameState.reagents -= 100;
             document.getElementById('gacha-reagents').innerText = gameState.reagents;
 
-            // 確率変更: R 82% / SR 15% / SSR 3%
-            let rand = Math.floor(Math.random() * 100) + 1;
-            let rarity = rand <= 3 ? 'SSR' : (rand <= 18 ? 'SR' : 'R');
+            // 確率: SSSR 0.2% / SSR 2.8% / SR 15% / R 82%
+            let rand = Math.random() * 100;
+            let rarity;
+            if (rand < 0.2) rarity = 'SSSR';
+            else if (rand < 0.2 + 2.8) rarity = 'SSR';
+            else if (rand < 0.2 + 2.8 + 15) rarity = 'SR';
+            else rarity = 'R';
+
             let candidates = ALL_CARDS.filter(c => c.rarity === rarity);
+            if (candidates.length === 0) candidates = ALL_CARDS.filter(c => c.rarity === 'R');
             let pulled = candidates[Math.floor(Math.random() * candidates.length)];
 
             let newCard = { ...pulled, id: Math.random().toString(36).substr(2, 9) };
             gameState.collection.push(newCard);
 
-            let valStr = newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${newCard.attackPower}`;
+            let valStr = newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${formatPower(newCard.attackPower)}`;
             let resDiv = document.getElementById('gacha-result');
             resDiv.innerHTML = `
                 <span class="card-rarity rarity-${newCard.rarity}" style="margin-bottom: 4px;">${newCard.rarity}</span>
@@ -845,7 +907,7 @@
                 <div style="font-size: 11px; color: #ccc;">${newCard.formula}</div>
                 <div style="font-size: 10px; color: #facc15; margin-top: 4px;">${valStr} | 属性: ${newCard.attribute}</div>
             `;
-            resDiv.style.borderColor = newCard.rarity === 'SSR' ? '#f97316' : (newCard.rarity === 'SR' ? '#a855f7' : '#3b82f6');
+            resDiv.style.borderColor = newCard.rarity === 'SSSR' ? '#ff00ff' : (newCard.rarity === 'SSR' ? '#f97316' : (newCard.rarity === 'SR' ? '#a855f7' : '#3b82f6'));
         }
     </script>
 </body>
