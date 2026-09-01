@@ -177,13 +177,12 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h3>デッキ編集 (<span id="deck-count">0</span>/40)</h3>
-                <p style="font-size: 11px; color: #888;">🟢 デッキ中 ⚪ 未編成（所持枚数まで）</p>
+                <p style="font-size: 11px; color: #888;">最低20枚必要 ／ 🟢 デッキ中 ⚪ 未編成</p>
             </div>
             <button id="deck-done-btn" class="glass-btn" onclick="finishDeckEdit()">完了</button>
         </div>
         <div id="deck-list" class="deck-list"></div>
 
-        <!-- 反応一覧（ダメージ順） -->
         <div class="info-box" style="max-height: 32vh;">
             <div class="info-title">📖 反応一覧（ダメージ高い順）</div>
             <div id="reaction-list" style="white-space: pre-line; color: #ddd;"></div>
@@ -200,12 +199,9 @@
 
         <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
             <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 10px 18px;" onclick="drawGacha()">ガチャ (試薬100)</button>
-            <button class="glass-btn" style="background: linear-gradient(135deg, #10b981, #059669); padding: 10px 14px;" onclick="saveGame()">セーブ</button>
-            <button class="glass-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 10px 14px;" onclick="loadGame()">ロード</button>
             <button class="glass-btn" style="background: #333; padding: 10px 14px;" onclick="switchState('field')">戻る</button>
         </div>
 
-        <!-- 排出一覧（レア度順） -->
         <div class="info-box" style="width: 100%; max-width: 420px; max-height: 38vh;">
             <div class="info-title">📋 排出一覧（レア度順）</div>
             <div id="gacha-list" style="white-space: pre-line; color: #ddd;"></div>
@@ -254,7 +250,7 @@
             { name: "ベンジル基", formula: "-CH2C6H5", attackPower: 38, healPower: 0, attribute: "Hydrocarbon", rarity: "SR" },
             { name: "ビニル基", formula: "-CH=CH2", attackPower: 35, healPower: 0, attribute: "Hydrocarbon", rarity: "R" },
 
-            { name: "ヒドロキシ基", formula: "-OH", attackPower: 25,healPower: 0, attribute: "FunctionalGroup", rarity: "R" },
+            { name: "ヒドロキシ基", formula: "-OH", attackPower: 25, healPower: 0, attribute: "FunctionalGroup", rarity: "R" },
             { name: "カルボキシ基", formula: "-COOH", attackPower: 40, healPower: 0, attribute: "FunctionalGroup", rarity: "SR" },
             { name: "アミノ基", formula: "-NH2", attackPower: 30, healPower: 0, attribute: "FunctionalGroup", rarity: "R" },
             { name: "アルデヒド基", formula: "-CHO", attackPower: 35, healPower: 0, attribute: "FunctionalGroup", rarity: "R" },
@@ -273,23 +269,21 @@
             { name: "アントラセン", formula: "C14H10", attackPower: 120, healPower: 0, attribute: "Aromatic", rarity: "SSR" }
         ];
 
-        // 反応一覧データ（ダメージ降順）
         const REACTION_LIST = [
             { dmg: 440, text: "トルエン + 濃硝酸（触媒あり） → 440" },
             { dmg: 420, text: "けん化（触媒あり） → 420" },
-            { dmg: 400, text: "エチレン + 重合触媒 → 400" },
             { dmg: 360, text: "ベンゼン + 濃硝酸（触媒あり） → 360" },
             { dmg: 340, text: "酸化（触媒あり） → 340" },
+            { dmg: 300, text: "エチレン + 重合触媒 → 300" },
             { dmg: 260, text: "エステル化（触媒あり） → 260" },
             { dmg: 220, text: "トルエン + 濃硝酸 → 220" },
             { dmg: 210, text: "けん化 → 210" },
-            { dmg: 180, text: "ベンゼン + 塩素 → 180（ヘキサクロロシクロヘキサン）" },
-            { dmg: 180, text: "トリニトロトルエン / ピクリン酸（単体） → 180" },
+            { dmg: 180, text: "ベンゼン + 塩素 / TNT・ピクリン酸 → 180" },
             { dmg: 170, text: "酸化 → 170" },
             { dmg: 150, text: "ベンゼン + 濃硫酸 → 150" },
             { dmg: 140, text: "ハロゲン付加 / フェノール+金属Na → 140" },
             { dmg: 130, text: "エステル化 / ニトロ化 → 130" },
-            { dmg: 120, text: "エタノール + 金属ナトリウム → 120" },
+            { dmg: 120, text: "エタノール + 金属ナトリウム / アントラセン → 120" },
             { dmg: 110, text: "フェニル基 + ニトロ基 → 110" },
             { dmg: 105, text: "フェニル基 + スルホン基 → 105" },
             { dmg: 100, text: "フェニル基 + カルボキシ基 → 100" },
@@ -298,12 +292,12 @@
             { dmg: 85,  text: "アルキル基 + カルボキシ基 → 85" },
             { dmg: 80,  text: "ベンジル基 + ヒドロキシ基 / フェニル基 + ハロゲン基 → 80" },
             { dmg: 75,  text: "ブチル基 + ヒドロキシ基 / フェニル基 + アミノ基 → 75" },
-            { dmg: 70,  text: "イソプロピル/ビニル + ヒドロキシ基 / アルキル + アルデヒド / ベンジル + アミノ → 70" },
-            { dmg: 65,  text: "プロピル基 + ヒドロキシ基 / アルキル基 + ハロゲン基 → 65" },
+            { dmg: 70,  text: "イソプロピル/ビニル + ヒドロキシ基 など → 70" },
+            { dmg: 65,  text: "プロピル基 + ヒドロキシ基 など → 65" },
             { dmg: 60,  text: "エチル基 + ヒドロキシ基 → 60" },
             { dmg: 55,  text: "アルキル基 + アミノ基 → 55" },
             { dmg: 50,  text: "メチル基 + ヒドロキシ基 → 50" },
-            { dmg: Infinity, text: "フッ化水素酸（単体） → ∞" }
+            { dmg: Infinity, text: "フッ化水素酸（単体） → ∞（10%で自滅）" }
         ];
 
         let gameState = {
@@ -313,7 +307,7 @@
 
         let isBattleOver = false;
 
-        function saveGame() {
+        function saveGame(silent = false) {
             const data = {
                 reagents: gameState.reagents,
                 playerHP: gameState.playerHP,
@@ -322,7 +316,7 @@
                 currentDeck: gameState.currentDeck
             };
             localStorage.setItem('organicChemBattleSave', JSON.stringify(data));
-            alert('セーブしました！');
+            if (!silent) alert('セーブしました！');
         }
 
         function loadGame() {
@@ -388,7 +382,6 @@
         }
 
         function renderReactionList() {
-            // ダメージ降順で既に並んでいる
             let html = REACTION_LIST.map(r => `・${r.text}`).join("\n");
             document.getElementById('reaction-list').innerText = html;
         }
@@ -700,7 +693,21 @@
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
 
+            // フッ化水素酸：1/10で自滅
             if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
+                if (Math.random() < 0.1) {
+                    // 自滅演出
+                    isBattleOver = true;
+                    document.getElementById('battle-log').innerText = "☠️ 自分にかかってしまった！\nフッ化水素酸の猛毒により敗北...";
+                    setTimeout(() => {
+                        gameState.playerHP = gameState.playerMaxHP;
+                        switchState('field');
+                    }, 2200);
+                    bHand = bHand.filter(c => !bSelected.some(sc => sc.id === c.id));
+                    bSelected = [];
+                    updateBattleUI();
+                    return;
+                }
                 baseDamage = Infinity;
                 logMessage = `☠️【究極試薬】フッ化水素酸を投擲！ ダメージ ∞ ！！`;
             }
@@ -1034,9 +1041,15 @@
                 list.appendChild(div);
             });
 
+            // 最低20枚チェック
             let doneBtn = document.getElementById('deck-done-btn');
-            doneBtn.disabled = false;
-            doneBtn.style.background = 'linear-gradient(135deg, #10b981, #14b8a6)';
+            if (gameState.currentDeck.length >= 20) {
+                doneBtn.disabled = false;
+                doneBtn.style.background = 'linear-gradient(135deg, #10b981, #14b8a6)';
+            } else {
+                doneBtn.disabled = true;
+                doneBtn.style.background = '#555';
+            }
         }
 
         function addToDeck(cardName) {
@@ -1058,6 +1071,10 @@
         }
 
         function finishDeckEdit() {
+            if (gameState.currentDeck.length < 20) {
+                alert('デッキは最低20枚必要です');
+                return;
+            }
             switchState('field');
         }
 
@@ -1066,11 +1083,12 @@
             gameState.reagents -= 100;
             document.getElementById('gacha-reagents').innerText = gameState.reagents;
 
+            // 確率：SSSR 0.1% / SSR 2.9% / SR 15% / R 82%
             let rand = Math.random() * 100;
             let rarity;
-            if (rand < 0.2) rarity = 'SSSR';
-            else if (rand < 0.2 + 2.8) rarity = 'SSR';
-            else if (rand < 0.2 + 2.8 + 15) rarity = 'SR';
+            if (rand < 0.1) rarity = 'SSSR';
+            else if (rand < 0.1 + 2.9) rarity = 'SSR';
+            else if (rand < 0.1 + 2.9 + 15) rarity = 'SR';
             else rarity = 'R';
 
             let candidates = ALL_CARDS.filter(c => c.rarity === rarity);
@@ -1079,6 +1097,9 @@
 
             let newCard = { ...pulled, id: Math.random().toString(36).substr(2, 9) };
             gameState.collection.push(newCard);
+
+            // 裏で自動セーブ（表示なし）
+            saveGame(true);
 
             let valStr = newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${formatPower(newCard.attackPower)}`;
             let resDiv = document.getElementById('gacha-result');
