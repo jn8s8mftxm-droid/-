@@ -205,6 +205,7 @@
             { name: "トリニトロトルエン", formula: "C7H5N3O6", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
             { name: "ピクリン酸", formula: "C6H3N3O7", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
             { name: "フッ化水素酸", formula: "HF", attackPower: Infinity, healPower: 0, attribute: "Acid", rarity: "SSSR" },
+            { name: "金属ナトリウム", formula: "Na", attackPower: 40, healPower: 0, attribute: "Metal", rarity: "SR" },
 
             { name: "o-クレゾール", formula: "CH3C6H4OH", attackPower: 40, healPower: 0, attribute: "Phenol", rarity: "R" },
             { name: "m-クレゾール", formula: "CH3C6H4OH", attackPower: 40, healPower: 0, attribute: "Phenol", rarity: "R" },
@@ -250,7 +251,6 @@
 
         let isBattleOver = false;
 
-        // ===== セーブ / ロード =====
         function saveGame() {
             const data = {
                 reagents: gameState.reagents,
@@ -614,6 +614,7 @@
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
 
+            // ===== 既存の高威力反応 =====
             if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
                 baseDamage = Infinity;
                 logMessage = `☠️【究極試薬】フッ化水素酸を投擲！ ダメージ ∞ ！！`;
@@ -687,6 +688,108 @@
                     correctIndex: 0, explanation: "正解！アルコール→アルデヒド→カルボン酸(酢酸)へ酸化されます！"
                 };
             }
+
+            // ===== 新規追加反応 =====
+            else if (n.includes("ベンゼン") && n.includes("塩素")) {
+                baseDamage = 180;
+                logMessage = `🧪【付加】ベンゼン + 塩素 → ヘキサクロロシクロヘキサン生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("エタノール") && n.includes("金属ナトリウム")) {
+                baseDamage = 120;
+                logMessage = `🧪【反応】エタノール + 金属ナトリウム → ナトリウムエトキシド生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェノール") && n.includes("金属ナトリウム")) {
+                baseDamage = 140;
+                logMessage = `🧪【反応】フェノール + 金属ナトリウム → ナトリウムフェノキシド生成！ ${baseDamage} ダメージ！`;
+            }
+
+            // ===== 炭化水素基 × 官能基 =====
+            else if (n.includes("メチル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 50;
+                logMessage = `🧪【合成】メチル基 + ヒドロキシ基 → メタノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("エチル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 60;
+                logMessage = `🧪【合成】エチル基 + ヒドロキシ基 → エタノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("プロピル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 65;
+                logMessage = `🧪【合成】プロピル基 + ヒドロキシ基 → プロパノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("イソプロピル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 70;
+                logMessage = `🧪【合成】イソプロピル基 + ヒドロキシ基 → イソプロパノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("ブチル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 75;
+                logMessage = `🧪【合成】ブチル基 + ヒドロキシ基 → ブタノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 90;
+                logMessage = `🧪【合成】フェニル基 + ヒドロキシ基 → フェノール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("ベンジル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 80;
+                logMessage = `🧪【合成】ベンジル基 + ヒドロキシ基 → ベンジルアルコール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("ビニル基") && n.includes("ヒドロキシ基")) {
+                baseDamage = 70;
+                logMessage = `🧪【合成】ビニル基 + ヒドロキシ基 → ビニルアルコール生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("カルボキシ基")) {
+                baseDamage = 85;
+                logMessage = `🧪【合成】アルキル基 + カルボキシ基 → カルボン酸生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("アミノ基")) {
+                baseDamage = 55;
+                logMessage = `🧪【合成】アルキル基 + アミノ基 → アミン生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("アルデヒド基")) {
+                baseDamage = 70;
+                logMessage = `🧪【合成】アルキル基 + アルデヒド基 → アルデヒド生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("ニトロ基")) {
+                baseDamage = 95;
+                logMessage = `🧪【合成】アルキル基 + ニトロ基 → ニトロ化合物生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("スルホン基")) {
+                baseDamage = 90;
+                logMessage = `🧪【合成】アルキル基 + スルホン基 → スルホン酸生成！ ${baseDamage} ダメージ！`;
+            }
+            else if ((n.includes("メチル基") || n.includes("エチル基") || n.includes("プロピル基") || n.includes("イソプロピル基") || n.includes("ブチル基") || n.includes("ビニル基")) && n.includes("ハロゲン基")) {
+                baseDamage = 65;
+                logMessage = `🧪【合成】アルキル基 + ハロゲン基 → ハロゲン化アルキル生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("カルボキシ基")) {
+                baseDamage = 100;
+                logMessage = `🧪【合成】フェニル基 + カルボキシ基 → 安息香酸生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("アミノ基")) {
+                baseDamage = 75;
+                logMessage = `🧪【合成】フェニル基 + アミノ基 → アニリン生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("ニトロ基")) {
+                baseDamage = 110;
+                logMessage = `🧪【合成】フェニル基 + ニトロ基 → ニトロベンゼン生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("スルホン基")) {
+                baseDamage = 105;
+                logMessage = `🧪【合成】フェニル基 + スルホン基 → ベンゼンスルホン酸生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("フェニル基") && n.includes("ハロゲン基")) {
+                baseDamage = 80;
+                logMessage = `🧪【合成】フェニル基 + ハロゲン基 → ハロゲン化ベンゼン生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("ベンジル基") && n.includes("カルボキシ基")) {
+                baseDamage = 95;
+                logMessage = `🧪【合成】ベンジル基 + カルボキシ基 → フェニル酢酸生成！ ${baseDamage} ダメージ！`;
+            }
+            else if (n.includes("ベンジル基") && n.includes("アミノ基")) {
+                baseDamage = 70;
+                logMessage = `🧪【合成】ベンジル基 + アミノ基 → ベンジルアミン生成！ ${baseDamage} ダメージ！`;
+            }
+
+            // ===== 単体・不活性 =====
             else if (bSelected.length === 1) {
                 let single = bSelected[0];
                 if(single.healPower > 0) {
@@ -884,7 +987,6 @@
             gameState.reagents -= 100;
             document.getElementById('gacha-reagents').innerText = gameState.reagents;
 
-            // 確率: SSSR 0.2% / SSR 2.8% / SR 15% / R 82%
             let rand = Math.random() * 100;
             let rarity;
             if (rand < 0.2) rarity = 'SSSR';
