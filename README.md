@@ -70,14 +70,31 @@
             100% { filter: hue-rotate(360deg); }
         }
 
-        #deck-edit-screen { background: #111; padding: 40px 16px; height: 100%; }
-        .deck-list { flex: 1; overflow-y: auto; margin-top: 10px; }
+        #deck-edit-screen { background: #111; padding: 40px 16px 10px; height: 100%; overflow: hidden; }
+        .deck-list { flex: 1; overflow-y: auto; margin-top: 8px; max-height: 38vh; }
         .deck-item { display: flex; justify-content: space-between; align-items: center; background: #222; padding: 8px 10px; margin-bottom: 6px; border-radius: 8px; }
         .deck-item.in-deck { background: rgba(34, 197, 94, 0.12); }
         .action-btn { background: none; border: none; font-size: 18px; cursor: pointer; }
 
-        #gacha-screen { background: linear-gradient(to bottom, #1a0d26, #000); padding: 40px 20px; align-items: center; gap: 20px; }
-        .gacha-card-view { width: 220px; height: 160px; border-radius: 16px; border: 2px solid #a855f7; background: rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
+        .info-box {
+            background: rgba(30,30,30,0.9);
+            border: 1px solid #444;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 8px;
+            overflow-y: auto;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+        .info-title {
+            font-weight: bold;
+            color: #facc15;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        #gacha-screen { background: linear-gradient(to bottom, #1a0d26, #000); padding: 30px 16px 20px; align-items: center; gap: 12px; overflow-y: auto; }
+        .gacha-card-view { width: 220px; height: 140px; border-radius: 16px; border: 2px solid #a855f7; background: rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
     </style>
 </head>
 <body>
@@ -165,21 +182,33 @@
             <button id="deck-done-btn" class="glass-btn" onclick="finishDeckEdit()">完了</button>
         </div>
         <div id="deck-list" class="deck-list"></div>
+
+        <!-- 反応一覧（ダメージ順） -->
+        <div class="info-box" style="max-height: 32vh;">
+            <div class="info-title">📖 反応一覧（ダメージ高い順）</div>
+            <div id="reaction-list" style="white-space: pre-line; color: #ddd;"></div>
+        </div>
     </div>
 
     <div id="gacha-screen" class="screen">
-        <h2 style="margin-top: 20px;">🧪 化合物ガチャ</h2>
+        <h2 style="margin-top: 10px;">🧪 化合物ガチャ</h2>
         <p style="color: #06b6d4;">所持試薬: <span id="gacha-reagents">150</span></p>
         
         <div id="gacha-result" class="gacha-card-view">
             <span style="color: #888;">ガチャを回すと出現</span>
         </div>
 
-        <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-            <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 12px 24px;" onclick="drawGacha()">ガチャ (試薬100)</button>
-            <button class="glass-btn" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="saveGame()">セーブ</button>
-            <button class="glass-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5);" onclick="loadGame()">ロード</button>
-            <button class="glass-btn" style="background: #333;" onclick="switchState('field')">フィールドに戻る</button>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;">
+            <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 10px 18px;" onclick="drawGacha()">ガチャ (試薬100)</button>
+            <button class="glass-btn" style="background: linear-gradient(135deg, #10b981, #059669); padding: 10px 14px;" onclick="saveGame()">セーブ</button>
+            <button class="glass-btn" style="background: linear-gradient(135deg, #6366f1, #4f46e5); padding: 10px 14px;" onclick="loadGame()">ロード</button>
+            <button class="glass-btn" style="background: #333; padding: 10px 14px;" onclick="switchState('field')">戻る</button>
+        </div>
+
+        <!-- 排出一覧（レア度順） -->
+        <div class="info-box" style="width: 100%; max-width: 420px; max-height: 38vh;">
+            <div class="info-title">📋 排出一覧（レア度順）</div>
+            <div id="gacha-list" style="white-space: pre-line; color: #ddd;"></div>
         </div>
     </div>
 
@@ -244,6 +273,39 @@
             { name: "アントラセン", formula: "C14H10", attackPower: 70, healPower: 0, attribute: "Aromatic", rarity: "SSR" }
         ];
 
+        // 反応一覧データ（ダメージ降順）
+        const REACTION_LIST = [
+            { dmg: 440, text: "トルエン + 濃硝酸（触媒あり） → 440" },
+            { dmg: 420, text: "けん化（触媒あり） → 420" },
+            { dmg: 400, text: "エチレン + 重合触媒 → 400" },
+            { dmg: 360, text: "ベンゼン + 濃硝酸（触媒あり） → 360" },
+            { dmg: 340, text: "酸化（触媒あり） → 340" },
+            { dmg: 260, text: "エステル化（触媒あり） → 260" },
+            { dmg: 220, text: "トルエン + 濃硝酸 → 220" },
+            { dmg: 210, text: "けん化 → 210" },
+            { dmg: 180, text: "ベンゼン + 塩素 → 180（ヘキサクロロシクロヘキサン）" },
+            { dmg: 180, text: "トリニトロトルエン / ピクリン酸（単体） → 180" },
+            { dmg: 170, text: "酸化 → 170" },
+            { dmg: 150, text: "ベンゼン + 濃硫酸 → 150" },
+            { dmg: 140, text: "ハロゲン付加 / フェノール+金属Na → 140" },
+            { dmg: 130, text: "エステル化 / ニトロ化 → 130" },
+            { dmg: 120, text: "エタノール + 金属ナトリウム → 120" },
+            { dmg: 110, text: "フェニル基 + ニトロ基 → 110" },
+            { dmg: 105, text: "フェニル基 + スルホン基 → 105" },
+            { dmg: 100, text: "フェニル基 + カルボキシ基 → 100" },
+            { dmg: 95,  text: "アルキル基 + ニトロ基 / ベンジル基 + カルボキシ基 → 95" },
+            { dmg: 90,  text: "フェニル基 + ヒドロキシ基 / アルキル基 + スルホン基 → 90" },
+            { dmg: 85,  text: "アルキル基 + カルボキシ基 → 85" },
+            { dmg: 80,  text: "ベンジル基 + ヒドロキシ基 / フェニル基 + ハロゲン基 → 80" },
+            { dmg: 75,  text: "ブチル基 + ヒドロキシ基 / フェニル基 + アミノ基 → 75" },
+            { dmg: 70,  text: "イソプロピル/ビニル + ヒドロキシ基 / アルキル + アルデヒド / ベンジル + アミノ → 70" },
+            { dmg: 65,  text: "プロピル基 + ヒドロキシ基 / アルキル基 + ハロゲン基 → 65" },
+            { dmg: 60,  text: "エチル基 + ヒドロキシ基 → 60" },
+            { dmg: 55,  text: "アルキル基 + アミノ基 → 55" },
+            { dmg: 50,  text: "メチル基 + ヒドロキシ基 → 50" },
+            { dmg: Infinity, text: "フッ化水素酸（単体） → ∞" }
+        ];
+
         let gameState = {
             reagents: 150, playerHP: 200, playerMaxHP: 200,
             collection: [], currentDeck: [], currentMonster: null
@@ -300,11 +362,35 @@
             if(stateName === 'deckEdit') {
                 document.getElementById('deck-edit-screen').classList.add('active');
                 renderDeckEdit();
+                renderReactionList();
             }
             if(stateName === 'gacha') {
                 document.getElementById('gacha-screen').classList.add('active');
                 document.getElementById('gacha-reagents').innerText = gameState.reagents;
+                renderGachaList();
             }
+        }
+
+        function renderGachaList() {
+            const order = ["SSSR", "SSR", "SR", "R"];
+            let html = "";
+            order.forEach(r => {
+                const cards = ALL_CARDS.filter(c => c.rarity === r);
+                if (cards.length === 0) return;
+                html += `【${r}】\n`;
+                cards.forEach(c => {
+                    const pwr = c.attackPower === Infinity ? "∞" : (c.healPower > 0 ? `回復${c.healPower}` : c.attackPower);
+                    html += `・${c.name}（${pwr}）\n`;
+                });
+                html += "\n";
+            });
+            document.getElementById('gacha-list').innerText = html.trim();
+        }
+
+        function renderReactionList() {
+            // ダメージ降順で既に並んでいる
+            let html = REACTION_LIST.map(r => `・${r.text}`).join("\n");
+            document.getElementById('reaction-list').innerText = html;
         }
 
         function assignStarterDeck(type) {
@@ -614,7 +700,6 @@
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
 
-            // ===== 既存の高威力反応 =====
             if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
                 baseDamage = Infinity;
                 logMessage = `☠️【究極試薬】フッ化水素酸を投擲！ ダメージ ∞ ！！`;
@@ -688,8 +773,6 @@
                     correctIndex: 0, explanation: "正解！アルコール→アルデヒド→カルボン酸(酢酸)へ酸化されます！"
                 };
             }
-
-            // ===== 新規追加反応 =====
             else if (n.includes("ベンゼン") && n.includes("塩素")) {
                 baseDamage = 180;
                 logMessage = `🧪【付加】ベンゼン + 塩素 → ヘキサクロロシクロヘキサン生成！ ${baseDamage} ダメージ！`;
@@ -702,8 +785,6 @@
                 baseDamage = 140;
                 logMessage = `🧪【反応】フェノール + 金属ナトリウム → ナトリウムフェノキシド生成！ ${baseDamage} ダメージ！`;
             }
-
-            // ===== 炭化水素基 × 官能基 =====
             else if (n.includes("メチル基") && n.includes("ヒドロキシ基")) {
                 baseDamage = 50;
                 logMessage = `🧪【合成】メチル基 + ヒドロキシ基 → メタノール生成！ ${baseDamage} ダメージ！`;
@@ -788,8 +869,6 @@
                 baseDamage = 70;
                 logMessage = `🧪【合成】ベンジル基 + アミノ基 → ベンジルアミン生成！ ${baseDamage} ダメージ！`;
             }
-
-            // ===== 単体・不活性 =====
             else if (bSelected.length === 1) {
                 let single = bSelected[0];
                 if(single.healPower > 0) {
