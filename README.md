@@ -57,13 +57,14 @@
 
         .hand-container { overflow-x: auto; display: flex; gap: 8px; padding: 8px 0; }
         .card {
-            min-width: 90px; width: 90px; height: 120px; background: white; color: black; border-radius: 10px; padding: 6px;
+            min-width: 90px; width: 90px; height: 125px; background: white; color: black; border-radius: 10px; padding: 5px;
             display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .card.selected { background: #fde047; box-shadow: 0 0 10px #fde047; transform: translateY(-5px); }
         .card-rarity { font-size: 8px; font-weight: bold; padding: 1px 4px; border-radius: 3px; color: white; width: fit-content; }
         .rarity-SSR { background: #f97316; } .rarity-SR { background: #a855f7; } .rarity-R { background: #3b82f6; }
         .rarity-SSSR { background: linear-gradient(90deg, #ff0000, #ff00ff); animation: rainbow 1.5s linear infinite; }
+        .card-attr { font-size: 8px; color: #666; }
 
         @keyframes rainbow {
             0% { filter: hue-rotate(0deg); }
@@ -142,10 +143,12 @@
             <div>
                 <div style="color: #4ade80; font-weight: bold;">🧑 HP: <span id="battle-player-hp">200</span> / <span id="battle-player-maxhp">200</span></div>
                 <div style="color: #06b6d4; font-size: 11px;">📚 山札: <span id="battle-deck-count">0</span>枚</div>
+                <div id="next-bonus" style="font-size: 11px; color: #facc15; display: none;">次ターン火力UP</div>
             </div>
             <div style="text-align: right;">
                 <div style="font-size: 11px; color: #aaa;">👾 <span id="monster-name">敵分子</span> (Lv.<span id="monster-level">1</span>)</div>
                 <div style="color: #ef4444; font-weight: bold;"><span id="monster-hp">500</span> / <span id="monster-maxhp">500</span></div>
+                <div id="monster-weak" style="font-size: 10px; color: #f97316; margin-top: 2px;"></div>
                 <div style="margin-top: 6px; display: flex; gap: 6px; justify-content: flex-end;">
                     <button class="glass-btn" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); padding: 6px 10px; font-size: 11px;" onclick="switchState('deckEdit')">デッキ</button>
                     <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 6px 10px; font-size: 11px;" onclick="switchState('gacha')">ガチャ</button>
@@ -270,8 +273,8 @@
         ];
 
         const REACTION_LIST = [
-            { dmg: 440, text: "トルエン + 濃硝酸（触媒あり） → 440" },
-            { dmg: 420, text: "けん化（触媒あり） → 420" },
+            { dmg: 440, text: "トルエン + 濃硝酸（触媒あり） → 440 ※試薬消費" },
+            { dmg: 420, text: "けん化（触媒あり） → 420 ※試薬消費" },
             { dmg: 360, text: "ベンゼン + 濃硝酸（触媒あり） → 360" },
             { dmg: 340, text: "酸化（触媒あり） → 340" },
             { dmg: 300, text: "エチレン + 重合触媒 → 300" },
@@ -287,22 +290,23 @@
             { dmg: 110, text: "フェニル基 + ニトロ基 → 110" },
             { dmg: 105, text: "フェニル基 + スルホン基 → 105" },
             { dmg: 100, text: "フェニル基 + カルボキシ基 → 100" },
-            { dmg: 95,  text: "アルキル基 + ニトロ基 / ベンジル基 + カルボキシ基 → 95" },
-            { dmg: 90,  text: "フェニル基 + ヒドロキシ基 / アルキル基 + スルホン基 → 90" },
+            { dmg: 95,  text: "アルキル基 + ニトロ基 など → 95" },
+            { dmg: 90,  text: "フェニル基 + ヒドロキシ基 など → 90" },
             { dmg: 85,  text: "アルキル基 + カルボキシ基 → 85" },
-            { dmg: 80,  text: "ベンジル基 + ヒドロキシ基 / フェニル基 + ハロゲン基 → 80" },
-            { dmg: 75,  text: "ブチル基 + ヒドロキシ基 / フェニル基 + アミノ基 → 75" },
+            { dmg: 80,  text: "ベンジル基 + ヒドロキシ基 など → 80" },
+            { dmg: 75,  text: "ブチル基 + ヒドロキシ基 など → 75" },
             { dmg: 70,  text: "イソプロピル/ビニル + ヒドロキシ基 など → 70" },
             { dmg: 65,  text: "プロピル基 + ヒドロキシ基 など → 65" },
             { dmg: 60,  text: "エチル基 + ヒドロキシ基 → 60" },
             { dmg: 55,  text: "アルキル基 + アミノ基 → 55" },
             { dmg: 50,  text: "メチル基 + ヒドロキシ基 → 50" },
-            { dmg: Infinity, text: "フッ化水素酸（単体） → ∞（10%で自滅）" }
+            { dmg: Infinity, text: "フッ化水素酸 → ∞（10%自滅）※試薬消費" }
         ];
 
         let gameState = {
             reagents: 150, playerHP: 200, playerMaxHP: 200,
-            collection: [], currentDeck: [], currentMonster: null
+            collection: [], currentDeck: [], currentMonster: null,
+            nextDamageBonus: 1.0   // 継続効果用
         };
 
         let isBattleOver = false;
@@ -374,7 +378,7 @@
                 html += `【${r}】\n`;
                 cards.forEach(c => {
                     const pwr = c.attackPower === Infinity ? "∞" : (c.healPower > 0 ? `回復${c.healPower}` : c.attackPower);
-                    html += `・${c.name}（${pwr}）\n`;
+                    html += `・${c.name}（${pwr}） [${c.attribute}]\n`;
                 });
                 html += "\n";
             });
@@ -568,19 +572,42 @@
         }
 
         function spawnMonster() {
-            let level = Math.floor(Math.random() * 3) + 1;
-            let colorHex = level === 1 ? 0x22c55e : (level === 2 ? 0xf97316 : 0xef4444);
-            let hp = 450 + level * 30;
-            let atk = 12 + level * 8;
-            let nameList = ["アルキル変異体", "環状高分子体", "フリーラジカル塊"];
-            let name = nameList[level - 1];
+            // ボス出現確率 12%
+            const isBoss = Math.random() < 0.12;
+            let level, colorHex, hp, atk, name, weakness;
+
+            if (isBoss) {
+                level = 5;
+                colorHex = 0x7c3aed;
+                hp = 900 + Math.floor(Math.random() * 200);
+                atk = 28 + Math.floor(Math.random() * 10);
+                const bossList = [
+                    { name: "超高分子ラジカル塊", weakness: ["Aromatic", "Explosive"] },
+                    { name: "濃縮フリーラジカル核", weakness: ["Acid", "Oxidant"] },
+                    { name: "芳香族クラスター体", weakness: ["Halogen", "Reagent"] }
+                ];
+                const b = bossList[Math.floor(Math.random() * bossList.length)];
+                name = "【BOSS】" + b.name;
+                weakness = b.weakness;
+            } else {
+                level = Math.floor(Math.random() * 3) + 1;
+                colorHex = level === 1 ? 0x22c55e : (level === 2 ? 0xf97316 : 0xef4444);
+                hp = 450 + level * 30;
+                atk = 12 + level * 8;
+                const nameList = ["アルキル変異体", "環状高分子体", "フリーラジカル塊"];
+                name = nameList[level - 1];
+                // 弱点をランダムに付与
+                const weakPool = ["Aromatic", "Alkenyl", "Acid", "Alcohol", "Halogen", "Oxidant", "Phenol", "Explosive"];
+                weakness = [weakPool[Math.floor(Math.random() * weakPool.length)]];
+            }
 
             let mesh = createMoleculeMesh(colorHex);
             mesh.position.set((Math.random() - 0.5) * 18, 0.5, -Math.random() * 12 - 2);
             scene.add(mesh);
 
             monsters.push({
-                name: name, level: level, hp: hp, maxHP: hp, attackPower: atk, mesh: mesh, isActive: true,
+                name, level, hp, maxHP: hp, attackPower: atk, mesh, isActive: true,
+                weakness, isBoss,
                 vx: 0, vz: 0, changeDirTimer: 0
             });
         }
@@ -626,6 +653,9 @@
 
         function setupBattle() {
             isBattleOver = false;
+            gameState.nextDamageBonus = 1.0;
+            document.getElementById('next-bonus').style.display = 'none';
+
             bDeck = [...gameState.currentDeck].sort(() => Math.random() - 0.5);
             bHand = []; bSelected = [];
             monsterHP = gameState.currentMonster ? gameState.currentMonster.hp : 500;
@@ -635,6 +665,10 @@
             document.getElementById('monster-maxhp').innerText = gameState.currentMonster.maxHP;
             document.getElementById('monster-hp').innerText = monsterHP;
             document.getElementById('battle-player-hp').innerText = gameState.playerHP;
+
+            // 弱点表示
+            const weak = gameState.currentMonster.weakness || [];
+            document.getElementById('monster-weak').innerText = weak.length ? `弱点: ${weak.join(", ")}` : "";
 
             for(let i=0; i<5; i++) drawCard();
             startPlayerTurn(true);
@@ -672,6 +706,7 @@
                     <div class="card-rarity rarity-${card.rarity}">${card.rarity}</div>
                     <div style="font-weight: bold; font-size: 11px;">${card.name}</div>
                     <div style="font-size: 9px; color: #666;">${card.formula}</div>
+                    <div class="card-attr">属性:${card.attribute}</div>
                     ${val}
                 `;
                 handContainer.appendChild(div);
@@ -692,11 +727,11 @@
             let baseDamage = 0, baseHeal = 0, quizToSet = null, logMessage = "";
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
+            let appliedEffect = null; // 継続効果用
 
             // フッ化水素酸：1/10で自滅
             if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
                 if (Math.random() < 0.1) {
-                    // 自滅演出
                     isBattleOver = true;
                     document.getElementById('battle-log').innerText = "☠️ 自分にかかってしまった！\nフッ化水素酸の猛毒により敗北...";
                     setTimeout(() => {
@@ -717,18 +752,19 @@
             }
             else if ((n.includes("酢酸") && n.includes("エタノール") && n.includes("水酸化ナトリウム")) || (n.includes("酢酸") && n.includes("水酸化ナトリウム"))) {
                 baseDamage = hasCatalyst ? 420 : 210;
+                appliedEffect = "saponification";
                 quizToSet = {
                     question: "【けん化】油脂やエステルに水酸化ナトリウムなどの強塩基を加えて加熱加水分解した際、生成するトリオール（アルコール）は？",
                     options: ["グリセリン", "エチレングリコール", "フェノール", "メタノール"],
-                    correctIndex: 0, explanation: "正解！エステルが加水分解され、脂肪酸塩（石けん）とグリセリン（高級トリオール）が生成されます！"
+                    correctIndex: 0, explanation: "正解！エステルが加水分解され、脂肪酸塩（石けん）とグリセリンが生成されます！"
                 };
             }
             else if (n.includes("酢酸") && n.includes("エタノール")) {
                 baseDamage = hasCatalyst ? 260 : 130;
                 quizToSet = {
-                    question: hasCatalyst ? "【触媒エステル化】酢酸とエタノールに濃硫酸（脱水触媒）を加えて加熱生成する芳香性の液体は？" : "【エステル化】カルボン酸とアルコールから水が取れて生じる化合物の構造は？",
+                    question: hasCatalyst ? "【触媒エステル化】酢酸とエタノールに濃硫酸を加えて加熱生成する化合物は？" : "【エステル化】カルボン酸とアルコールから水が取れて生じる化合物は？",
                     options: ["酢酸エチル", "ジエチルエーテル", "アセトン", "アセトアルデヒド"],
-                    correctIndex: 0, explanation: "正解！酢酸エチル(CH3COOCH2CH3)が生成される『エステル化』です！"
+                    correctIndex: 0, explanation: "正解！酢酸エチルが生成される『エステル化』です！"
                 };
             }
             else if (n.includes("ベンゼン") && n.includes("濃硝酸")) {
@@ -736,48 +772,49 @@
                 quizToSet = {
                     question: "【ニトロ化】ベンゼンに濃硝酸を作用させた際に生成する化合物は？",
                     options: ["ニトロベンゼン", "安息香酸", "フェノール", "クロロベンゼン"],
-                    correctIndex: 0, explanation: "正解！ニトロ基(-NO2)が置換導入されます！"
+                    correctIndex: 0, explanation: "正解！ニトロ基が置換導入されます！"
                 };
             }
             else if (n.includes("トルエン") && n.includes("濃硝酸")) {
                 baseDamage = hasCatalyst ? 440 : 220;
                 quizToSet = {
-                    question: "【爆発的ニトロ化】トルエンを濃硝酸・濃硫酸で激しくニトロ化して得られる化合物は？",
+                    question: "【爆発的ニトロ化】トルエンを濃硝酸で激しくニトロ化して得られる化合物は？",
                     options: ["トリニトロトルエン(TNT)", "ピクロン酸", "ニトログリセリン", "ペルオキシド"],
-                    correctIndex: 0, explanation: "正解！TNT（トリニトロトルエン）が合成され絶大な威力！"
+                    correctIndex: 0, explanation: "正解！TNTが合成され絶大な威力！"
                 };
             }
             else if (n.includes("ベンゼン") && n.includes("濃硫酸")) {
                 baseDamage = 150;
                 quizToSet = {
-                    question: "【スルホン化】ベンゼンに濃硫酸を加熱作用させて生じる親水性基を持つ化合物は？",
+                    question: "【スルホン化】ベンゼンに濃硫酸を加熱作用させて生じる化合物は？",
                     options: ["ベンゼンスルホン酸", "ベンゼン硫酸エステル", "スルホベンゼン", "フェノール"],
-                    correctIndex: 0, explanation: "正解！ベンゼンスルホン酸(-SO3H)が生成されます！"
+                    correctIndex: 0, explanation: "正解！ベンゼンスルホン酸が生成されます！"
                 };
             }
             else if (n.includes("エチレン") && (n.includes("臭素") || n.includes("塩素"))) {
                 baseDamage = 140;
                 let isBr = n.includes("臭素");
                 quizToSet = {
-                    question: isBr ? "【付加脱色】赤褐色の臭素水にエチレンを通した際の色の変化と生成物は？" : "【付加反応】エチレンに塩素が付加して生じる化合物は？",
+                    question: isBr ? "【付加脱色】臭素水にエチレンを通した際の色の変化と生成物は？" : "【付加反応】エチレンに塩素が付加して生じる化合物は？",
                     options: isBr ? ["赤褐色が消え 1,2-ジブロモエタン", "赤褐色のまま エタノール", "黄色に変色 ブロモベンゼン", "無色のまま 酢酸"] : ["1,2-ジクロロエタン", "クロロエタン", "塩化ビニル", "クロロホルム"],
-                    correctIndex: 0, explanation: "正解！二重結合が開いてハロゲンが『付加』し赤褐色が脱色します！"
+                    correctIndex: 0, explanation: "正解！二重結合が開いてハロゲンが付加します！"
                 };
             }
             else if (n.includes("エチレン") && n.includes("重合触媒(Ziegler)")) {
                 baseDamage = 300;
                 quizToSet = {
-                    question: "【付加重合】多数のエチレン分子が触媒のもと二重結合を開いて連続結合する高分子は？",
+                    question: "【付加重合】エチレンが触媒のもとで連続結合する高分子は？",
                     options: ["ポリエチレン(PE)", "ポリプロピレン(PP)", "PET樹脂", "ポリスチレン(PS)"],
-                    correctIndex: 0, explanation: "正解！『付加重合』によりポリエチレン(PE)が生成！"
+                    correctIndex: 0, explanation: "正解！ポリエチレンが生成！"
                 };
             }
             else if ((n.includes("エタノール") || n.includes("アセトアルデヒド")) && n.includes("過マンガン酸カリウム")) {
                 baseDamage = hasCatalyst ? 340 : 170;
+                appliedEffect = "oxidation"; // 継続効果：次ターン火力UP
                 quizToSet = {
-                    question: "【酸化反応】第一級アルコール(エタノール)を強く酸化させた際の最終生成物は？",
+                    question: "【酸化反応】第一級アルコールを強く酸化させた最終生成物は？",
                     options: ["酢酸", "アセトン", "ジエチルエーテル", "メタン"],
-                    correctIndex: 0, explanation: "正解！アルコール→アルデヒド→カルボン酸(酢酸)へ酸化されます！"
+                    correctIndex: 0, explanation: "正解！カルボン酸へ酸化されます！"
                 };
             }
             else if (n.includes("ベンゼン") && n.includes("塩素")) {
@@ -896,14 +933,46 @@
                 }
             }
 
+            // 弱点判定
+            let weaknessBonus = 1.0;
+            if (gameState.currentMonster && gameState.currentMonster.weakness) {
+                const attrs = bSelected.map(c => c.attribute);
+                if (attrs.some(a => gameState.currentMonster.weakness.includes(a))) {
+                    weaknessBonus = 1.5;
+                }
+            }
+
+            // 継続効果適用
+            let finalBase = baseDamage;
+            if (finalBase !== Infinity) {
+                finalBase = Math.floor(finalBase * gameState.nextDamageBonus * weaknessBonus);
+            }
+
+            // 継続効果のセット
+            if (appliedEffect === "oxidation") {
+                gameState.nextDamageBonus = 1.3;
+                document.getElementById('next-bonus').style.display = 'block';
+                document.getElementById('next-bonus').innerText = "次ターン火力+30%";
+            } else if (appliedEffect === "saponification") {
+                gameState.nextDamageBonus = 1.2;
+                document.getElementById('next-bonus').style.display = 'block';
+                document.getElementById('next-bonus').innerText = "次ターン火力+20%";
+            } else {
+                // 継続効果は1ターンのみ
+                gameState.nextDamageBonus = 1.0;
+                document.getElementById('next-bonus').style.display = 'none';
+            }
+
             bHand = bHand.filter(c => !bSelected.some(sc => sc.id === c.id));
             bSelected = [];
 
             if(quizToSet) {
-                pendingDamage = baseDamage; pendingHeal = baseHeal;
-                activeQuiz = quizToSet; showQuiz(quizToSet);
+                pendingDamage = finalBase;
+                pendingHeal = baseHeal;
+                activeQuiz = quizToSet;
+                showQuiz(quizToSet);
             } else {
-                applyEffectAndEndTurn(baseDamage, baseHeal, logMessage);
+                applyEffectAndEndTurn(finalBase, baseHeal, logMessage, weaknessBonus > 1);
             }
         }
 
@@ -943,11 +1012,29 @@
             document.getElementById('quiz-container').style.display = 'none';
             document.getElementById('battle-log').style.display = 'flex';
             activeQuiz = null;
-            applyEffectAndEndTurn(finalDmg, finalHeal, quizLog);
+            applyEffectAndEndTurn(finalDmg, finalHeal, quizLog, false);
         }
 
-        function applyEffectAndEndTurn(damage, heal, message) {
+        function applyEffectAndEndTurn(damage, heal, message, isWeak = false) {
             if (isBattleOver) return;
+
+            // 400以上は試薬消費
+            let reagentCost = 0;
+            if (damage === Infinity || damage >= 400) {
+                reagentCost = 25;
+                if (gameState.reagents >= reagentCost) {
+                    gameState.reagents -= reagentCost;
+                    message += `\n🧪 試薬を${reagentCost}消費した`;
+                } else {
+                    // 試薬不足ならダメージ半減
+                    if (damage !== Infinity) {
+                        damage = Math.floor(damage * 0.5);
+                        message += `\n⚠️ 試薬不足のため威力半減`;
+                    }
+                }
+            }
+
+            if (isWeak) message += "\n💥 弱点を突いた！";
 
             if (damage === Infinity) {
                 monsterHP = 0;
@@ -964,6 +1051,7 @@
             if(monsterHP <= 0) {
                 isBattleOver = true;
                 let reward = 40 + (gameState.currentMonster ? gameState.currentMonster.level * 20 : 20);
+                if (gameState.currentMonster && gameState.currentMonster.isBoss) reward += 80;
                 gameState.reagents += reward;
                 document.getElementById('battle-log').innerText = `🎉 敵分子を分解！ 試薬 +${reward} 獲得！`;
                 setTimeout(() => { switchState('field'); }, 1600);
@@ -1029,7 +1117,7 @@
                             <div style="font-size: 13px; font-weight: bold; color: ${isInDeck ? '#4ade80' : '#fff'};">
                                 ${name} [${inDeckCount}/${ownedCount}]
                             </div>
-                            <div style="font-size: 9px; color: #888;">${card.formula} | ${valStr}</div>
+                            <div style="font-size: 9px; color: #888;">${card.formula} | ${valStr} | ${card.attribute}</div>
                         </div>
                     </div>
                     <div style="display: flex; gap: 4px;">
@@ -1041,7 +1129,6 @@
                 list.appendChild(div);
             });
 
-            // 最低20枚チェック
             let doneBtn = document.getElementById('deck-done-btn');
             if (gameState.currentDeck.length >= 20) {
                 doneBtn.disabled = false;
@@ -1083,7 +1170,6 @@
             gameState.reagents -= 100;
             document.getElementById('gacha-reagents').innerText = gameState.reagents;
 
-            // 確率：SSSR 0.1% / SSR 2.9% / SR 15% / R 82%
             let rand = Math.random() * 100;
             let rarity;
             if (rand < 0.1) rarity = 'SSSR';
@@ -1098,7 +1184,6 @@
             let newCard = { ...pulled, id: Math.random().toString(36).substr(2, 9) };
             gameState.collection.push(newCard);
 
-            // 裏で自動セーブ（表示なし）
             saveGame(true);
 
             let valStr = newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${formatPower(newCard.attackPower)}`;
