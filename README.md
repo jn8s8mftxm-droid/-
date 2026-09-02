@@ -115,7 +115,7 @@
 <body>
 
     <div id="deck-select-screen" class="screen active">
-        <h2>有機化学バトルワールド</h2>
+        <h2>有機化学バトル</h2>
         <p style="font-size: 13px; color: #aaa;">初期スターターデッキを選択してください</p>
         <div style="width: 100%; max-width: 400px;">
             <div class="select-card purple" onclick="assignStarterDeck('Aromatic')">
