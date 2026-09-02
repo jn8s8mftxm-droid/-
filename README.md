@@ -41,23 +41,29 @@
 
         #battle-screen { 
             background: linear-gradient(to bottom, #0f172a, #1e293b); 
-            padding: 40px 16px 20px; justify-content: space-between; 
+            padding: 20px 12px 16px; justify-content: space-between; 
         }
-        .battle-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .battle-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
         #lab-canvas-container { 
-            width: 100%; height: 120px; border-radius: 16px; 
+            width: 100%; height: 200px; border-radius: 16px; 
             border: 2px solid #06b6d4; overflow: hidden; background: #0284c711;
+            position: relative;
         }
-        .battle-log-box { background: rgba(15, 23, 42, 0.8); border: 1px solid #334155; border-radius: 12px; padding: 10px; min-height: 55px; font-size: 12px; text-align: center; display: flex; align-items: center; justify-content: center; white-space: pre-line; }
+        .battle-log-box { 
+            background: rgba(15, 23, 42, 0.85); border: 1px solid #334155; border-radius: 12px; 
+            padding: 12px; min-height: 58px; font-size: 13px; text-align: center; 
+            display: flex; align-items: center; justify-content: center; white-space: pre-line;
+            margin: 8px 0;
+        }
         
         .quiz-box { background: rgba(147, 51, 234, 0.4); border: 1px solid #a855f7; border-radius: 12px; padding: 10px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
         .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .quiz-btn { background: rgba(37, 99, 235, 0.85); border: none; color: white; padding: 8px; border-radius: 8px; font-size: 11px; font-weight: bold; cursor: pointer; }
         .quiz-btn:active { background: #1d4ed8; }
 
-        .hand-container { overflow-x: auto; display: flex; gap: 8px; padding: 8px 0; }
+        .hand-container { overflow-x: auto; display: flex; gap: 8px; padding: 6px 0; }
         .card {
-            min-width: 90px; width: 90px; height: 125px; background: white; color: black; border-radius: 10px; padding: 5px;
+            min-width: 88px; width: 88px; height: 118px; background: white; color: black; border-radius: 10px; padding: 5px;
             display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);
         }
         .card.selected { background: #fde047; box-shadow: 0 0 10px #fde047; transform: translateY(-5px); }
@@ -96,6 +102,14 @@
 
         #gacha-screen { background: linear-gradient(to bottom, #1a0d26, #000); padding: 30px 16px 20px; align-items: center; gap: 12px; overflow-y: auto; }
         .gacha-card-view { width: 220px; height: 140px; border-radius: 16px; border: 2px solid #a855f7; background: rgba(255,255,255,0.05); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 10px; }
+
+        .battle-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
     </style>
 </head>
 <body>
@@ -144,15 +158,12 @@
                 <div style="color: #4ade80; font-weight: bold;">🧑 HP: <span id="battle-player-hp">200</span> / <span id="battle-player-maxhp">200</span></div>
                 <div style="color: #06b6d4; font-size: 11px;">📚 山札: <span id="battle-deck-count">0</span>枚</div>
                 <div id="next-bonus" style="font-size: 11px; color: #facc15; display: none;">次ターン火力UP</div>
+                <div id="dot-status" style="font-size: 11px; color: #f87171; display: none;">☠️ ボツリヌス毒素: 毎ターン200</div>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 11px; color: #aaa;">👾 <span id="monster-name">敵分子</span> (Lv.<span id="monster-level">1</span>)</div>
-                <div style="color: #ef4444; font-weight: bold;"><span id="monster-hp">500</span> / <span id="monster-maxhp">500</span></div>
+                <div style="font-size: 12px; color: #aaa;">👾 <span id="monster-name">敵分子</span> (Lv.<span id="monster-level">1</span>)</div>
+                <div style="color: #ef4444; font-weight: bold; font-size: 15px;"><span id="monster-hp">500</span> / <span id="monster-maxhp">500</span></div>
                 <div id="monster-weak" style="font-size: 10px; color: #f97316; margin-top: 2px;"></div>
-                <div style="margin-top: 6px; display: flex; gap: 6px; justify-content: flex-end;">
-                    <button class="glass-btn" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); padding: 6px 10px; font-size: 11px;" onclick="switchState('deckEdit')">デッキ</button>
-                    <button class="glass-btn" style="background: linear-gradient(135deg, #ec4899, #a855f7); padding: 6px 10px; font-size: 11px;" onclick="switchState('gacha')">ガチャ</button>
-                </div>
             </div>
         </div>
 
@@ -167,12 +178,14 @@
         <div id="battle-log" class="battle-log-box">実験室でのバトル開始！</div>
 
         <div>
-            <div style="font-size: 10px; color: #aaa; margin-bottom: 2px;">手札 (<span id="hand-count">0</span>/7) ※複数枚選択で反応発生</div>
+            <div style="font-size: 10px; color: #aaa; margin-bottom: 2px;">手札 (<span id="hand-count">0</span>/7)</div>
             <div id="hand-cards" class="hand-container"></div>
         </div>
 
-        <div style="text-align: center;">
-            <button id="attack-btn" class="glass-btn" style="background: linear-gradient(135deg, #ea580c, #ef4444); width: 85%; padding: 10px;" onclick="executePlayerAttack()">化学反応実行</button>
+        <div class="battle-actions">
+            <button id="attack-btn" class="glass-btn" style="background: linear-gradient(135deg, #ea580c, #ef4444); flex: 1; padding: 11px;" onclick="executePlayerAttack()">化学反応実行</button>
+            <button id="skip-btn" class="glass-btn" style="background: linear-gradient(135deg, #64748b, #475569); width: 100px; padding: 11px;" onclick="skipTurn()">ターン終了</button>
+            <button id="flee-btn" class="glass-btn" style="background: linear-gradient(135deg, #dc2626, #991b1b); width: 90px; padding: 11px;" onclick="fleeBattle()">逃げる</button>
         </div>
     </div>
 
@@ -180,7 +193,7 @@
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <h3>デッキ編集 (<span id="deck-count">0</span>/40)</h3>
-                <p style="font-size: 11px; color: #888;">最低20枚必要 ／ 🟢 デッキ中 ⚪ 未編成</p>
+                <p style="font-size: 11px; color: #888;">最低20枚必要</p>
             </div>
             <button id="deck-done-btn" class="glass-btn" onclick="finishDeckEdit()">完了</button>
         </div>
@@ -233,6 +246,7 @@
             { name: "トリニトロトルエン", formula: "C7H5N3O6", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
             { name: "ピクリン酸", formula: "C6H3N3O7", attackPower: 180, healPower: 0, attribute: "Explosive", rarity: "SSR" },
             { name: "フッ化水素酸", formula: "HF", attackPower: Infinity, healPower: 0, attribute: "Acid", rarity: "SSSR" },
+            { name: "ボツリヌス毒素", formula: "BoNT", attackPower: 0, healPower: 0, attribute: "Toxin", rarity: "SSSR" },
             { name: "金属ナトリウム", formula: "Na", attackPower: 40, healPower: 0, attribute: "Metal", rarity: "SR" },
 
             { name: "o-クレゾール", formula: "CH3C6H4OH", attackPower: 40, healPower: 0, attribute: "Phenol", rarity: "R" },
@@ -281,6 +295,7 @@
             { dmg: 260, text: "エステル化（触媒あり） → 260" },
             { dmg: 220, text: "トルエン + 濃硝酸 → 220" },
             { dmg: 210, text: "けん化 → 210" },
+            { dmg: 200, text: "ボツリヌス毒素 → 毎ターン200継続ダメージ" },
             { dmg: 180, text: "ベンゼン + 塩素 / TNT・ピクリン酸 → 180" },
             { dmg: 170, text: "酸化 → 170" },
             { dmg: 150, text: "ベンゼン + 濃硫酸 → 150" },
@@ -288,28 +303,18 @@
             { dmg: 130, text: "エステル化 / ニトロ化 → 130" },
             { dmg: 120, text: "エタノール + 金属ナトリウム / アントラセン → 120" },
             { dmg: 110, text: "フェニル基 + ニトロ基 → 110" },
-            { dmg: 105, text: "フェニル基 + スルホン基 → 105" },
-            { dmg: 100, text: "フェニル基 + カルボキシ基 → 100" },
-            { dmg: 95,  text: "アルキル基 + ニトロ基 など → 95" },
-            { dmg: 90,  text: "フェニル基 + ヒドロキシ基 など → 90" },
-            { dmg: 85,  text: "アルキル基 + カルボキシ基 → 85" },
-            { dmg: 80,  text: "ベンジル基 + ヒドロキシ基 など → 80" },
-            { dmg: 75,  text: "ブチル基 + ヒドロキシ基 など → 75" },
-            { dmg: 70,  text: "イソプロピル/ビニル + ヒドロキシ基 など → 70" },
-            { dmg: 65,  text: "プロピル基 + ヒドロキシ基 など → 65" },
-            { dmg: 60,  text: "エチル基 + ヒドロキシ基 → 60" },
-            { dmg: 55,  text: "アルキル基 + アミノ基 → 55" },
-            { dmg: 50,  text: "メチル基 + ヒドロキシ基 → 50" },
             { dmg: Infinity, text: "フッ化水素酸 → ∞（10%自滅）※試薬消費" }
         ];
 
         let gameState = {
             reagents: 150, playerHP: 200, playerMaxHP: 200,
             collection: [], currentDeck: [], currentMonster: null,
-            nextDamageBonus: 1.0   // 継続効果用
+            nextDamageBonus: 1.0
         };
 
         let isBattleOver = false;
+        let isProcessing = false;
+        let botulinumActive = false; // ボツリヌス毒素の継続効果
 
         function saveGame(silent = false) {
             const data = {
@@ -377,7 +382,8 @@
                 if (cards.length === 0) return;
                 html += `【${r}】\n`;
                 cards.forEach(c => {
-                    const pwr = c.attackPower === Infinity ? "∞" : (c.healPower > 0 ? `回復${c.healPower}` : c.attackPower);
+                    let pwr = c.attackPower === Infinity ? "∞" : (c.healPower > 0 ? `回復${c.healPower}` : c.attackPower);
+                    if (c.name === "ボツリヌス毒素") pwr = "毎ターン200";
                     html += `・${c.name}（${pwr}） [${c.attribute}]\n`;
                 });
                 html += "\n";
@@ -464,14 +470,14 @@
             let mainMat = new THREE.MeshLambertMaterial({ color: colorHex });
             let subMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
             let bondMat = new THREE.MeshLambertMaterial({ color: 0xcccccc });
-            let center = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), mainMat);
+            let center = new THREE.Mesh(new THREE.SphereGeometry(0.55, 20, 20), mainMat);
             group.add(center);
-            let positions = [[0.6, 0.4, 0], [-0.6, 0.4, 0], [0, -0.6, 0.4], [0, 0.4, -0.6]];
+            let positions = [[0.75, 0.5, 0], [-0.75, 0.5, 0], [0, -0.7, 0.5], [0, 0.5, -0.7], [0.5, -0.4, -0.5]];
             positions.forEach(pos => {
-                let atom = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 12), subMat);
+                let atom = new THREE.Mesh(new THREE.SphereGeometry(0.28, 14, 14), subMat);
                 atom.position.set(...pos);
                 group.add(atom);
-                let bond = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.6), bondMat);
+                let bond = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.75), bondMat);
                 bond.position.set(pos[0]/2, pos[1]/2, pos[2]/2);
                 bond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(...pos).normalize());
                 group.add(bond);
@@ -541,17 +547,14 @@
                     if (!isFieldActive) return;
 
                     m.mesh.rotation.y += 0.01;
-
                     m.changeDirTimer--;
                     if(m.changeDirTimer <= 0) {
                         m.vx = (Math.random() - 0.5) * 0.08;
                         m.vz = (Math.random() - 0.5) * 0.08;
                         m.changeDirTimer = Math.floor(Math.random() * 60) + 30;
                     }
-
                     m.mesh.position.x += m.vx;
                     m.mesh.position.z += m.vz;
-
                     if(Math.abs(m.mesh.position.x) > 14) m.vx *= -1;
                     if(m.mesh.position.z < -20 || m.mesh.position.z > 8) m.vz *= -1;
 
@@ -572,7 +575,6 @@
         }
 
         function spawnMonster() {
-            // ボス出現確率 12%
             const isBoss = Math.random() < 0.12;
             let level, colorHex, hp, atk, name, weakness;
 
@@ -596,7 +598,6 @@
                 atk = 12 + level * 8;
                 const nameList = ["アルキル変異体", "環状高分子体", "フリーラジカル塊"];
                 name = nameList[level - 1];
-                // 弱点をランダムに付与
                 const weakPool = ["Aromatic", "Alkenyl", "Acid", "Alcohol", "Halogen", "Oxidant", "Phenol", "Explosive"];
                 weakness = [weakPool[Math.floor(Math.random() * weakPool.length)]];
             }
@@ -612,37 +613,45 @@
             });
         }
 
-        let labScene, labCamera, labRenderer, flaskMesh, isLabInit = false;
+        let labScene, labCamera, labRenderer, enemyMesh, isLabInit = false;
         function initLabThreeJS() {
-            if(isLabInit) return;
+            const container = document.getElementById('lab-canvas-container');
+            container.innerHTML = '';
             isLabInit = true;
 
-            const container = document.getElementById('lab-canvas-container');
             labScene = new THREE.Scene();
-            labScene.background = new THREE.Color(0x0f172a);
+            labScene.background = new THREE.Color(0x0c1a2e);
 
-            labCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-            labCamera.position.set(0, 1.5, 4);
+            labCamera = new THREE.PerspectiveCamera(50, container.clientWidth / container.clientHeight, 0.1, 100);
+            labCamera.position.set(0, 1.8, 5.5);
+            labCamera.lookAt(0, 0.8, 0);
 
             labRenderer = new THREE.WebGLRenderer({ antialias: true });
             labRenderer.setSize(container.clientWidth, container.clientHeight);
             container.appendChild(labRenderer.domElement);
 
-            labScene.add(new THREE.DirectionalLight(0x06b6d4, 1.5));
-            labScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const dirLight = new THREE.DirectionalLight(0x67e8f9, 1.8);
+            dirLight.position.set(3, 5, 4);
+            labScene.add(dirLight);
+            labScene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-            let group = new THREE.Group();
-            let glassMat = new THREE.MeshLambertMaterial({ color: 0x38bdf8, wireframe: true });
-            let body = new THREE.Mesh(new THREE.ConeGeometry(0.8, 1.2, 16), glassMat);
-            let neck = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.6, 16), glassMat);
-            neck.position.y = 0.8;
-            group.add(body); group.add(neck);
-            flaskMesh = group;
-            labScene.add(flaskMesh);
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 12), new THREE.MeshLambertMaterial({ color: 0x1e293b }));
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -0.3;
+            labScene.add(floor);
+
+            const color = gameState.currentMonster && gameState.currentMonster.isBoss ? 0x7c3aed : 0x22d3ee;
+            enemyMesh = createMoleculeMesh(color);
+            enemyMesh.scale.set(1.5, 1.5, 1.5);
+            enemyMesh.position.set(0, 1.0, 0);
+            labScene.add(enemyMesh);
 
             function animateLab() {
                 requestAnimationFrame(animateLab);
-                if(flaskMesh) flaskMesh.rotation.y += 0.01;
+                if (enemyMesh) {
+                    enemyMesh.rotation.y += 0.012;
+                    enemyMesh.position.y = 1.0 + Math.sin(Date.now() * 0.002) * 0.08;
+                }
                 labRenderer.render(labScene, labCamera);
             }
             animateLab();
@@ -653,11 +662,19 @@
 
         function setupBattle() {
             isBattleOver = false;
+            isProcessing = false;
+            botulinumActive = false;
             gameState.nextDamageBonus = 1.0;
+
+            // HPを毎回リセット
+            gameState.playerHP = gameState.playerMaxHP;
+
             document.getElementById('next-bonus').style.display = 'none';
+            document.getElementById('dot-status').style.display = 'none';
 
             bDeck = [...gameState.currentDeck].sort(() => Math.random() - 0.5);
-            bHand = []; bSelected = [];
+            bHand = [];
+            bSelected = [];
             monsterHP = gameState.currentMonster ? gameState.currentMonster.hp : 500;
 
             document.getElementById('monster-name').innerText = gameState.currentMonster.name;
@@ -665,8 +682,8 @@
             document.getElementById('monster-maxhp').innerText = gameState.currentMonster.maxHP;
             document.getElementById('monster-hp').innerText = monsterHP;
             document.getElementById('battle-player-hp').innerText = gameState.playerHP;
+            document.getElementById('battle-player-maxhp').innerText = gameState.playerMaxHP;
 
-            // 弱点表示
             const weak = gameState.currentMonster.weakness || [];
             document.getElementById('monster-weak').innerText = weak.length ? `弱点: ${weak.join(", ")}` : "";
 
@@ -677,12 +694,34 @@
         function startPlayerTurn(isFirst = false) {
             if (isBattleOver) return;
             isPlayerTurn = true;
+            isProcessing = false;
+
+            // ボツリヌス毒素の継続ダメージ
+            if (botulinumActive && monsterHP > 0) {
+                monsterHP -= 200;
+                document.getElementById('monster-hp').innerText = Math.max(0, monsterHP);
+                if (monsterHP <= 0) {
+                    isBattleOver = true;
+                    let reward = 40 + (gameState.currentMonster ? gameState.currentMonster.level * 20 : 20);
+                    if (gameState.currentMonster && gameState.currentMonster.isBoss) reward += 80;
+                    gameState.reagents += reward;
+                    document.getElementById('battle-log').innerText = `☠️ ボツリヌス毒素が敵を完全に麻痺させ分解！\n試薬 +${reward} 獲得！`;
+                    setTimeout(() => { switchState('field'); }, 1800);
+                    return;
+                }
+            }
+
             if(!isFirst) drawCard();
-            document.getElementById('battle-log').innerText = isFirst ? "カードを選んで化学反応を実行してください！" : "あなたのターン！山札からカードを1枚引きました。";
+            document.getElementById('battle-log').innerText = isFirst ? "カードを選んで化学反応を実行してください！" : 
+                (botulinumActive ? "☠️ ボツリヌス毒素が効いている...（毎ターン200）\nあなたのターン！" : "あなたのターン！山札からカードを1枚引きました。");
             updateBattleUI();
         }
 
-        function drawCard() { if(bHand.length < 7 && bDeck.length > 0) bHand.push(bDeck.shift()); }
+        function drawCard() {
+            if(bHand.length < 7 && bDeck.length > 0) {
+                bHand.push(bDeck.shift());
+            }
+        }
 
         function formatPower(val) {
             return val === Infinity ? "∞" : val;
@@ -699,9 +738,14 @@
                 let div = document.createElement('div');
                 div.className = `card ${isSel ? 'selected' : ''}`;
                 div.onclick = () => toggleSelectCard(card);
-                let val = card.healPower > 0 
-                    ? `<div style="font-size: 10px; color: #16a34a; font-weight: bold;">回復:+${card.healPower}</div>` 
-                    : `<div style="font-size: 10px; color: #ef4444; font-weight: bold;">威力:${formatPower(card.attackPower)}</div>`;
+                let val = "";
+                if (card.name === "ボツリヌス毒素") {
+                    val = `<div style="font-size: 9px; color: #dc2626; font-weight: bold;">継続200/ターン</div>`;
+                } else if (card.healPower > 0) {
+                    val = `<div style="font-size: 10px; color: #16a34a; font-weight: bold;">回復:+${card.healPower}</div>`;
+                } else {
+                    val = `<div style="font-size: 10px; color: #ef4444; font-weight: bold;">威力:${formatPower(card.attackPower)}</div>`;
+                }
                 div.innerHTML = `
                     <div class="card-rarity rarity-${card.rarity}">${card.rarity}</div>
                     <div style="font-weight: bold; font-size: 11px;">${card.name}</div>
@@ -711,29 +755,67 @@
                 `;
                 handContainer.appendChild(div);
             });
-            document.getElementById('attack-btn').disabled = !(isPlayerTurn && bSelected.length > 0 && !activeQuiz);
+
+            const canAct = isPlayerTurn && !activeQuiz && !isProcessing && !isBattleOver;
+            document.getElementById('attack-btn').disabled = !(canAct && bSelected.length > 0);
+            document.getElementById('skip-btn').disabled = !canAct;
+            document.getElementById('flee-btn').disabled = !canAct;
         }
 
         function toggleSelectCard(card) {
-            if(!isPlayerTurn || activeQuiz || isBattleOver) return;
+            if(!isPlayerTurn || activeQuiz || isBattleOver || isProcessing) return;
             let idx = bSelected.findIndex(c => c.id === card.id);
             if(idx >= 0) bSelected.splice(idx, 1);
             else bSelected.push(card);
             updateBattleUI();
         }
 
+        function skipTurn() {
+            if (!isPlayerTurn || isBattleOver || isProcessing || activeQuiz) return;
+            isProcessing = true;
+            bSelected = [];
+            document.getElementById('battle-log').innerText = "ターンを終了しました...";
+            updateBattleUI();
+            setTimeout(endPlayerTurn, 700);
+        }
+
+        function fleeBattle() {
+            if (!isPlayerTurn || isBattleOver || isProcessing) return;
+            isBattleOver = true;
+            isProcessing = true;
+            document.getElementById('battle-log').innerText = "🏃 実験室から脱出した...";
+            setTimeout(() => {
+                switchState('field');
+            }, 1200);
+        }
+
         function executePlayerAttack() {
-            if (isBattleOver) return;
+            if (isBattleOver || !isPlayerTurn || isProcessing || activeQuiz) return;
+            if (bSelected.length === 0) return;
+
+            isProcessing = true;
+            document.getElementById('attack-btn').disabled = true;
+            document.getElementById('skip-btn').disabled = true;
+            document.getElementById('flee-btn').disabled = true;
+
             let baseDamage = 0, baseHeal = 0, quizToSet = null, logMessage = "";
             let n = bSelected.map(c => c.name);
             let hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)");
-            let appliedEffect = null; // 継続効果用
+            let appliedEffect = null;
 
-            // フッ化水素酸：1/10で自滅
-            if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
+            // ボツリヌス毒素
+            if (bSelected.length === 1 && bSelected[0].name === "ボツリヌス毒素") {
+                botulinumActive = true;
+                document.getElementById('dot-status').style.display = 'block';
+                logMessage = `☠️【神経毒】ボツリヌス毒素を散布！\n敵に毎ターン200ダメージの継続効果を付与！`;
+                baseDamage = 0;
+            }
+            else if (bSelected.length === 1 && bSelected[0].name === "フッ化水素酸") {
                 if (Math.random() < 0.1) {
                     isBattleOver = true;
                     document.getElementById('battle-log').innerText = "☠️ 自分にかかってしまった！\nフッ化水素酸の猛毒により敗北...";
+                    // 敗北ペナルティ
+                    gameState.reagents = Math.max(0, gameState.reagents - 25);
                     setTimeout(() => {
                         gameState.playerHP = gameState.playerMaxHP;
                         switchState('field');
@@ -754,17 +836,17 @@
                 baseDamage = hasCatalyst ? 420 : 210;
                 appliedEffect = "saponification";
                 quizToSet = {
-                    question: "【けん化】油脂やエステルに水酸化ナトリウムなどの強塩基を加えて加熱加水分解した際、生成するトリオール（アルコール）は？",
+                    question: "【けん化】油脂やエステルに水酸化ナトリウムなどの強塩基を加えて加熱加水分解した際、生成するトリオールは？",
                     options: ["グリセリン", "エチレングリコール", "フェノール", "メタノール"],
-                    correctIndex: 0, explanation: "正解！エステルが加水分解され、脂肪酸塩（石けん）とグリセリンが生成されます！"
+                    correctIndex: 0, explanation: "正解！脂肪酸塩（石けん）とグリセリンが生成されます！"
                 };
             }
             else if (n.includes("酢酸") && n.includes("エタノール")) {
                 baseDamage = hasCatalyst ? 260 : 130;
                 quizToSet = {
-                    question: hasCatalyst ? "【触媒エステル化】酢酸とエタノールに濃硫酸を加えて加熱生成する化合物は？" : "【エステル化】カルボン酸とアルコールから水が取れて生じる化合物は？",
+                    question: "【エステル化】カルボン酸とアルコールから生じる化合物は？",
                     options: ["酢酸エチル", "ジエチルエーテル", "アセトン", "アセトアルデヒド"],
-                    correctIndex: 0, explanation: "正解！酢酸エチルが生成される『エステル化』です！"
+                    correctIndex: 0, explanation: "正解！酢酸エチルが生成されます！"
                 };
             }
             else if (n.includes("ベンゼン") && n.includes("濃硝酸")) {
@@ -780,7 +862,7 @@
                 quizToSet = {
                     question: "【爆発的ニトロ化】トルエンを濃硝酸で激しくニトロ化して得られる化合物は？",
                     options: ["トリニトロトルエン(TNT)", "ピクロン酸", "ニトログリセリン", "ペルオキシド"],
-                    correctIndex: 0, explanation: "正解！TNTが合成され絶大な威力！"
+                    correctIndex: 0, explanation: "正解！TNTが合成されます！"
                 };
             }
             else if (n.includes("ベンゼン") && n.includes("濃硫酸")) {
@@ -793,11 +875,10 @@
             }
             else if (n.includes("エチレン") && (n.includes("臭素") || n.includes("塩素"))) {
                 baseDamage = 140;
-                let isBr = n.includes("臭素");
                 quizToSet = {
-                    question: isBr ? "【付加脱色】臭素水にエチレンを通した際の色の変化と生成物は？" : "【付加反応】エチレンに塩素が付加して生じる化合物は？",
-                    options: isBr ? ["赤褐色が消え 1,2-ジブロモエタン", "赤褐色のまま エタノール", "黄色に変色 ブロモベンゼン", "無色のまま 酢酸"] : ["1,2-ジクロロエタン", "クロロエタン", "塩化ビニル", "クロロホルム"],
-                    correctIndex: 0, explanation: "正解！二重結合が開いてハロゲンが付加します！"
+                    question: "【付加反応】エチレンにハロゲンが付加して生じる化合物は？",
+                    options: ["1,2-ジハロエタン", "ハロエタン", "塩化ビニル", "クロロホルム"],
+                    correctIndex: 0, explanation: "正解！二重結合が開いて付加します！"
                 };
             }
             else if (n.includes("エチレン") && n.includes("重合触媒(Ziegler)")) {
@@ -810,7 +891,7 @@
             }
             else if ((n.includes("エタノール") || n.includes("アセトアルデヒド")) && n.includes("過マンガン酸カリウム")) {
                 baseDamage = hasCatalyst ? 340 : 170;
-                appliedEffect = "oxidation"; // 継続効果：次ターン火力UP
+                appliedEffect = "oxidation";
                 quizToSet = {
                     question: "【酸化反応】第一級アルコールを強く酸化させた最終生成物は？",
                     options: ["酢酸", "アセトン", "ジエチルエーテル", "メタン"],
@@ -942,13 +1023,11 @@
                 }
             }
 
-            // 継続効果適用
             let finalBase = baseDamage;
-            if (finalBase !== Infinity) {
+            if (finalBase !== Infinity && finalBase > 0) {
                 finalBase = Math.floor(finalBase * gameState.nextDamageBonus * weaknessBonus);
             }
 
-            // 継続効果のセット
             if (appliedEffect === "oxidation") {
                 gameState.nextDamageBonus = 1.3;
                 document.getElementById('next-bonus').style.display = 'block';
@@ -957,8 +1036,7 @@
                 gameState.nextDamageBonus = 1.2;
                 document.getElementById('next-bonus').style.display = 'block';
                 document.getElementById('next-bonus').innerText = "次ターン火力+20%";
-            } else {
-                // 継続効果は1ターンのみ
+            } else if (baseDamage > 0 || baseHeal > 0) {
                 gameState.nextDamageBonus = 1.0;
                 document.getElementById('next-bonus').style.display = 'none';
             }
@@ -1018,19 +1096,14 @@
         function applyEffectAndEndTurn(damage, heal, message, isWeak = false) {
             if (isBattleOver) return;
 
-            // 400以上は試薬消費
-            let reagentCost = 0;
             if (damage === Infinity || damage >= 400) {
-                reagentCost = 25;
+                const reagentCost = 25;
                 if (gameState.reagents >= reagentCost) {
                     gameState.reagents -= reagentCost;
                     message += `\n🧪 試薬を${reagentCost}消費した`;
-                } else {
-                    // 試薬不足ならダメージ半減
-                    if (damage !== Infinity) {
-                        damage = Math.floor(damage * 0.5);
-                        message += `\n⚠️ 試薬不足のため威力半減`;
-                    }
+                } else if (damage !== Infinity) {
+                    damage = Math.floor(damage * 0.5);
+                    message += `\n⚠️ 試薬不足のため威力半減`;
                 }
             }
 
@@ -1038,7 +1111,7 @@
 
             if (damage === Infinity) {
                 monsterHP = 0;
-            } else {
+            } else if (damage > 0) {
                 monsterHP -= damage;
             }
             if(heal > 0) {
@@ -1056,7 +1129,7 @@
                 document.getElementById('battle-log').innerText = `🎉 敵分子を分解！ 試薬 +${reward} 獲得！`;
                 setTimeout(() => { switchState('field'); }, 1600);
             } else {
-                setTimeout(endPlayerTurn, 2000);
+                setTimeout(endPlayerTurn, 1600);
             }
         }
 
@@ -1064,6 +1137,7 @@
             if (isBattleOver) return;
 
             isPlayerTurn = false;
+            isProcessing = true;
             document.getElementById('battle-log').innerText = "👾 敵分子の反撃...";
             updateBattleUI();
 
@@ -1079,20 +1153,22 @@
                     if(gameState.playerHP <= 0) {
                         isBattleOver = true;
                         gameState.playerHP = 0;
-                        document.getElementById('battle-log').innerText = "💀 敗北しました...";
+                        // 敗北ペナルティ：試薬25没収
+                        gameState.reagents = Math.max(0, gameState.reagents - 25);
+                        document.getElementById('battle-log').innerText = "💀 敗北しました...\n試薬を25没収された";
                         setTimeout(() => {
                             gameState.playerHP = gameState.playerMaxHP;
                             switchState('field');
-                        }, 1500);
+                        }, 1600);
                         return;
                     }
                     setTimeout(() => {
                         if (!isBattleOver) startPlayerTurn();
-                    }, 1500);
+                    }, 1300);
                 } else {
                     if (!isBattleOver) startPlayerTurn();
                 }
-            }, 1000);
+            }, 900);
         }
 
         function renderDeckEdit() {
@@ -1106,7 +1182,7 @@
                 let inDeckCount = gameState.currentDeck.filter(c => c.name === name).length;
                 let card = gameState.collection.find(c => c.name === name);
                 let isInDeck = inDeckCount > 0;
-                let valStr = card.healPower > 0 ? `HEAL: +${card.healPower}` : `PWR: ${formatPower(card.attackPower)}`;
+                let valStr = card.name === "ボツリヌス毒素" ? "継続200" : (card.healPower > 0 ? `HEAL: +${card.healPower}` : `PWR: ${formatPower(card.attackPower)}`);
 
                 let div = document.createElement('div');
                 div.className = `deck-item ${isInDeck ? 'in-deck' : ''}`;
@@ -1123,7 +1199,8 @@
                     <div style="display: flex; gap: 4px;">
                         ${isInDeck ? `<button class="action-btn" style="color:#ef4444;" onclick="removeFromDeck('${name}')">➖</button>` : ''}
                         <button class="action-btn" style="color:${inDeckCount < ownedCount && gameState.currentDeck.length < 40 ? '#3b82f6' : '#555'};" 
-                                onclick="addToDeck('${name}')" ${inDeckCount >= ownedCount || gameState.currentDeck.length >= 40 ? 'disabled' : ''}>➕</button>
+                                onclick="addToDeck('${name}')" 
+                                ${(inDeckCount >= ownedCount || gameState.currentDeck.length >= 40) ? 'disabled' : ''}>➕</button>
                     </div>
                 `;
                 list.appendChild(div);
@@ -1143,6 +1220,7 @@
             let ownedCount = gameState.collection.filter(c => c.name === cardName).length;
             let inDeckCount = gameState.currentDeck.filter(c => c.name === cardName).length;
             let card = gameState.collection.find(c => c.name === cardName);
+
             if (card && gameState.currentDeck.length < 40 && inDeckCount < ownedCount) {
                 gameState.currentDeck.push({ ...card, id: Math.random().toString(36).substr(2, 9) });
                 renderDeckEdit();
@@ -1186,7 +1264,8 @@
 
             saveGame(true);
 
-            let valStr = newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${formatPower(newCard.attackPower)}`;
+            let valStr = newCard.name === "ボツリヌス毒素" ? "継続200/ターン" : 
+                         (newCard.healPower > 0 ? `HEAL: +${newCard.healPower}` : `PWR: ${formatPower(newCard.attackPower)}`);
             let resDiv = document.getElementById('gacha-result');
             resDiv.innerHTML = `
                 <span class="card-rarity rarity-${newCard.rarity}" style="margin-bottom: 4px;">${newCard.rarity}</span>
