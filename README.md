@@ -200,7 +200,7 @@
         <div id="deck-list" class="deck-list"></div>
 
         <div class="info-box" style="max-height: 32vh;">
-            <div class="info-title">📖 反応一覧（ダメージ高い順）</div>
+            <div class="info-title">📖 反応一覧（ダメージ順）</div>
             <div id="reaction-list" style="white-space: pre-line; color: #ddd;"></div>
         </div>
     </div>
