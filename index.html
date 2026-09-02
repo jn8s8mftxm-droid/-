@@ -136,7 +136,6 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
   </div>
 </div>
 
-<!-- 反応一覧画面（バトルから呼び出す） -->
 <div id="reaction-list-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
     <h3 style="color:#facc15">📖 反応一覧</h3>
@@ -263,7 +262,6 @@ const RANKS = [
   {name:"教授",   kills:120,reagentBonus:2.5,  gachaBoost:2.2}
 ];
 
-// 反応一覧表示用テキスト
 const FULL_REACTION_TEXT = `【中間体・連鎖】
 ・ベンゼン + ニトロ基 → ニトロベンゼン
 ・ニトロベンゼン + 還元剤/NaBH4 → アニリン
@@ -329,7 +327,7 @@ let gameState = {
 
 let isBattleOver=false, isProcessing=false, botulinumActive=false;
 let pendingIntermediate=null;
-let fromBattleToReaction=false; // バトルから反応一覧を開いたフラグ
+let fromBattleToReaction=false;
 
 function getRank(){
   let r = RANKS[0];
@@ -372,7 +370,6 @@ function closeReactionList(){
     fromBattleToReaction = false;
     document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
     document.getElementById('battle-screen').classList.add('active');
-    // バトル状態はそのまま継続（setupBattleは呼ばない）
     updateBattleUI();
   } else {
     switchState('field');
@@ -621,29 +618,39 @@ function executePlayerAttack(){
   const catMul = hasCatalyst ? 2.0 : 1.5;
   const bossCond=gameState.currentMonster?.condition||null;
 
+  // ヘルパー：ダメージ付きログ
+  function dmgLog(text, dmg){
+    if(dmg===Infinity) return text + "\n相手に ∞ ダメージ！";
+    return text + "\n相手に " + dmg + " ダメージ！";
+  }
+
   if(n.includes("ベンゼン")&&n.includes("ニトロ基")){
     product={name:"ニトロベンゼン",formula:"C6H5NO2",attackPower:70,healPower:0,attribute:"Aromatic",rarity:"SR",color:"淡黄色",odor:"アーモンド様"};
-    baseDamage=Math.floor(70*catMul); logMessage="🧪 ベンゼン + ニトロ基 → ニトロベンゼン";
-    quizToSet={question:"【受験】ベンゼンのニトロ化でニトロ基が置換される反応機構は？",options:["求電子置換","求核置換","付加反応","脱離反応"],correctIndex:0,explanation:"正解！芳香族の求電子置換反応です。"};
+    baseDamage=Math.floor(70*catMul);
+    logMessage=dmgLog("🧪 ベンゼン + ニトロ基 → ニトロベンゼン が生成！", baseDamage);
+    quizToSet={question:"ベンゼンのニトロ化でニトロ基が置換される反応機構は？",options:["求電子置換","求核置換","付加反応","脱離反応"],correctIndex:0,explanation:"正解！芳香族の求電子置換反応です。"};
   }
   else if(n.includes("ニトロベンゼン")&&(n.includes("還元剤")||n.includes("水素化ホウ素ナトリウム"))){
     product={name:"アニリン",formula:"C6H5NH2",attackPower:65,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色〜褐色",odor:"特異臭"};
-    baseDamage=Math.floor(65*catMul); logMessage="🧪 ニトロベンゼン還元 → アニリン";
-    quizToSet={question:"【受験】ニトロベンゼンをスズと塩酸で還元すると？",options:["アニリン","フェノール","ベンゼン","トルエン"],correctIndex:0,explanation:"正解！アニリンが生成されます。"};
+    baseDamage=Math.floor(65*catMul);
+    logMessage=dmgLog("🧪 ニトロベンゼンの還元 → アニリン が生成！", baseDamage);
+    quizToSet={question:"ニトロベンゼンをスズと塩酸で還元すると？",options:["アニリン","フェノール","ベンゼン","トルエン"],correctIndex:0,explanation:"正解！アニリンが生成されます。"};
   }
   else if(n.includes("アニリン")&&n.includes("ジアゾ化剤")){
     product={name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:95,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"};
-    baseDamage=Math.floor(95*catMul); logMessage="🧪 ジアゾ化 → アゾ化合物";
-    quizToSet={question:"【受験】アニリンのジアゾ化に必要な試薬は？",options:["NaNO2 + HCl","HNO3","H2SO4","NaOH"],correctIndex:0,explanation:"正解！亜硝酸ナトリウムと塩酸です。"};
+    baseDamage=Math.floor(95*catMul);
+    logMessage=dmgLog("🧪 アニリンのジアゾ化 → アゾ化合物 が生成！", baseDamage);
+    quizToSet={question:"アニリンのジアゾ化に必要な試薬は？",options:["NaNO2 + HCl","HNO3","H2SO4","NaOH"],correctIndex:0,explanation:"正解！亜硝酸ナトリウムと塩酸です。"};
   }
   else if(n.includes("酢酸")&&n.includes("エタノール")){
     product={name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:Math.floor(55*catMul),healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"};
-    baseDamage=Math.floor(55*catMul); logMessage="🧪 エステル化 → 酢酸エチル";
-    quizToSet={question:"【受験】エステル化の触媒として最も一般的なのは？",options:["濃硫酸","NaOH","KMnO4","Fe"],correctIndex:0,explanation:"正解！濃硫酸が触媒と脱水剤を兼ねます。"};
+    baseDamage=Math.floor(55*catMul);
+    logMessage=dmgLog("🧪 酢酸 + エタノール → 酢酸エチル が生成！（エステル化）", baseDamage);
+    quizToSet={question:"エステル化の触媒として最も一般的なのは？",options:["濃硫酸","NaOH","KMnO4","Fe"],correctIndex:0,explanation:"正解！濃硫酸が触媒と脱水剤を兼ねます。"};
   }
   else if(bSelected.length===1&&bSelected[0].name==="ボツリヌス毒素"){
     botulinumActive=true; document.getElementById('dot-status').style.display='block';
-    logMessage="☠️ ボツリヌス毒素！ 毎ターン200継続"; baseDamage=0;
+    logMessage="☠️ ボツリヌス毒素を散布！\n毎ターン200ダメージが継続します"; baseDamage=0;
   }
   else if(bSelected.length===1&&bSelected[0].name==="フッ化水素酸"){
     if(Math.random()<.1){
@@ -652,86 +659,131 @@ function executePlayerAttack(){
       setTimeout(()=>{gameState.playerHP=gameState.playerMaxHP;switchState('field');},2000);
       bHand=bHand.filter(c=>!bSelected.some(s=>s.id===c.id)); bSelected=[]; updateBattleUI(); return;
     }
-    baseDamage=Infinity; logMessage="☠️ フッ化水素酸！ ∞";
+    baseDamage=Infinity;
+    logMessage=dmgLog("☠️ フッ化水素酸を投擲！", Infinity);
   }
   else if(bSelected.length===1&&(bSelected[0].name==="トリニトロトルエン"||bSelected[0].name==="ピクリン酸")){
-    baseDamage=180; logMessage=`💥 ${bSelected[0].name} 起爆！ 180`;
-    quizToSet={question:"【受験】TNTの原料となる芳香族は？",options:["トルエン","ベンゼン","フェノール","アニリン"],correctIndex:0,explanation:"正解！トルエンをニトロ化します。"};
+    baseDamage=180;
+    logMessage=dmgLog(`💥 ${bSelected[0].name} を起爆！`, 180);
+    quizToSet={question:"TNTの原料となる芳香族は？",options:["トルエン","ベンゼン","フェノール","アニリン"],correctIndex:0,explanation:"正解！トルエンをニトロ化します。"};
   }
   else if(n.includes("水酸化ナトリウム")&&(n.includes("酢酸")||n.includes("酢酸エチル")||n.includes("オレイン酸"))){
     baseDamage=Math.floor(210*catMul); appliedEffect="saponification";
-    quizToSet={question:"【受験】けん化で油脂から生じるアルコールは？",options:["グリセリン","エタノール","メタノール","フェノール"],correctIndex:0,explanation:"正解！グリセリンです。"};
+    logMessage=dmgLog("🧪 けん化反応が進行！", baseDamage);
+    quizToSet={question:"けん化で油脂から生じるアルコールは？",options:["グリセリン","エタノール","メタノール","フェノール"],correctIndex:0,explanation:"正解！グリセリンです。"};
   }
   else if(n.includes("ベンゼン")&&n.includes("濃硝酸")){
     baseDamage=Math.floor(130*catMul);
-    quizToSet={question:"【受験】ベンゼンのニトロ化の反応機構は？",options:["求電子置換","求核置換","ラジカル置換","付加"],correctIndex:0,explanation:"正解！ニトロニウムイオンによる求電子置換です。"};
+    logMessage=dmgLog("🧪 ベンゼンのニトロ化が進行！", baseDamage);
+    quizToSet={question:"ベンゼンのニトロ化の反応機構は？",options:["求電子置換","求核置換","ラジカル置換","付加"],correctIndex:0,explanation:"正解！ニトロニウムイオンによる求電子置換です。"};
   }
   else if(n.includes("トルエン")&&n.includes("濃硝酸")){
     baseDamage=Math.floor(220*catMul);
-    quizToSet={question:"【受験】トルエンがベンゼンよりニトロ化されやすい理由は？",options:["メチル基の電子供与性","メチル基の電子求引性","立体障害","水素結合"],correctIndex:0,explanation:"正解！メチル基がオルト・パラ配向性を示します。"};
+    logMessage=dmgLog("🧪 トルエンのニトロ化が進行！", baseDamage);
+    quizToSet={question:"トルエンがベンゼンよりニトロ化されやすい理由は？",options:["メチル基の電子供与性","メチル基の電子求引性","立体障害","水素結合"],correctIndex:0,explanation:"正解！メチル基がオルト・パラ配向性を示します。"};
   }
   else if(n.includes("フェノール")&&n.includes("濃硝酸")){
-    baseDamage=Math.floor(150*catMul); logMessage="🧪 フェノールのニトロ化";
-    quizToSet={question:"【受験】フェノールが極めてニトロ化されやすい理由は？",options:["OH基の強い電子供与性","OH基の電子求引性","酸性度","沸点"],correctIndex:0,explanation:"正解！OH基が強く活性化します。"};
+    baseDamage=Math.floor(150*catMul);
+    logMessage=dmgLog("🧪 フェノールのニトロ化が進行！", baseDamage);
+    quizToSet={question:"フェノールが極めてニトロ化されやすい理由は？",options:["OH基の強い電子供与性","OH基の電子求引性","酸性度","沸点"],correctIndex:0,explanation:"正解！OH基が強く活性化します。"};
   }
   else if(n.includes("ベンゼン")&&n.includes("濃硫酸")){
     baseDamage=Math.floor(150*catMul);
-    quizToSet={question:"【受験】ベンゼンのスルホン化で生成する化合物は？",options:["ベンゼンスルホン酸","フェノール","ニトロベンゼン","安息香酸"],correctIndex:0,explanation:"正解！ベンゼンスルホン酸です。"};
+    logMessage=dmgLog("🧪 ベンゼンのスルホン化 → ベンゼンスルホン酸 が生成！", baseDamage);
+    quizToSet={question:"ベンゼンのスルホン化で生成する化合物は？",options:["ベンゼンスルホン酸","フェノール","ニトロベンゼン","安息香酸"],correctIndex:0,explanation:"正解！ベンゼンスルホン酸です。"};
   }
   else if(n.includes("ベンゼン")&&(n.includes("塩素")||n.includes("臭素"))&&(n.includes("鉄")||n.includes("塩化アルミニウム")||hasCatalyst)){
-    baseDamage=Math.floor(140*catMul); logMessage="🧪 ベンゼンのハロゲン化";
-    quizToSet={question:"【受験】ベンゼンの塩素化に触媒として使われるのは？",options:["Fe または FeCl3","NaOH","KMnO4","白金"],correctIndex:0,explanation:"正解！ルイス酸触媒が必要です。"};
+    baseDamage=Math.floor(140*catMul);
+    logMessage=dmgLog("🧪 ベンゼンのハロゲン化（求電子置換）が進行！", baseDamage);
+    quizToSet={question:"ベンゼンの塩素化に触媒として使われるのは？",options:["Fe または FeCl3","NaOH","KMnO4","白金"],correctIndex:0,explanation:"正解！ルイス酸触媒が必要です。"};
   }
   else if(n.includes("エチレン")&&(n.includes("臭素")||n.includes("塩素"))){
     baseDamage=Math.floor(140*catMul);
-    quizToSet={question:"【受験】エチレンに臭素水を加えるとどうなる？",options:["赤褐色が消える","色が濃くなる","沈殿が生じる","発光する"],correctIndex:0,explanation:"正解！付加反応で脱色します。"};
+    logMessage=dmgLog("🧪 エチレンへのハロゲン付加！（臭素水が脱色）", baseDamage);
+    quizToSet={question:"エチレンに臭素水を加えるとどうなる？",options:["赤褐色が消える","色が濃くなる","沈殿が生じる","発光する"],correctIndex:0,explanation:"正解！付加反応で脱色します。"};
   }
   else if(n.includes("アセチレン")&&n.includes("臭素")){
-    baseDamage=Math.floor(160*catMul); logMessage="🧪 アセチレンへの臭素付加";
+    baseDamage=Math.floor(160*catMul);
+    logMessage=dmgLog("🧪 アセチレンへの臭素付加が進行！", baseDamage);
   }
   else if(n.includes("エチレン")&&n.includes("重合触媒(Ziegler)")){
     baseDamage=Math.floor(300*catMul);
-    quizToSet={question:"【受験】Ziegler-Natta触媒で得られるポリエチレンの特徴は？",options:["高密度・直鎖状","低密度・分岐","環状","三次元網目"],correctIndex:0,explanation:"正解！高密度ポリエチレン(HDPE)が得られます。"};
+    logMessage=dmgLog("🧪 エチレンの付加重合 → ポリエチレン が生成！", baseDamage);
+    quizToSet={question:"Ziegler-Natta触媒で得られるポリエチレンの特徴は？",options:["高密度・直鎖状","低密度・分岐","環状","三次元網目"],correctIndex:0,explanation:"正解！高密度ポリエチレン(HDPE)が得られます。"};
   }
   else if(n.includes("スチレン")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=Math.floor(250*catMul); logMessage="🧪 スチレンの重合 → ポリスチレン";
+    baseDamage=Math.floor(250*catMul);
+    logMessage=dmgLog("🧪 スチレンの重合 → ポリスチレン が生成！", baseDamage);
   }
   else if(n.includes("プロピレン")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=Math.floor(260*catMul); logMessage="🧪 プロピレンの重合 → ポリプロピレン";
+    baseDamage=Math.floor(260*catMul);
+    logMessage=dmgLog("🧪 プロピレンの重合 → ポリプロピレン が生成！", baseDamage);
   }
   else if((n.includes("エタノール")||n.includes("アセトアルデヒド")||n.includes("メタノール"))&&(n.includes("過マンガン酸カリウム")||n.includes("二クロム酸カリウム"))){
     baseDamage=Math.floor(170*catMul); appliedEffect="oxidation";
-    quizToSet={question:"【受験】第一級アルコールを酸化すると最終的に何になる？",options:["カルボン酸","ケトン","エーテル","アルケン"],correctIndex:0,explanation:"正解！アルデヒドを経てカルボン酸になります。"};
+    logMessage=dmgLog("🧪 第一級アルコール／アルデヒドの酸化が進行！", baseDamage);
+    quizToSet={question:"第一級アルコールを酸化すると最終的に何になる？",options:["カルボン酸","ケトン","エーテル","アルケン"],correctIndex:0,explanation:"正解！アルデヒドを経てカルボン酸になります。"};
   }
   else if(n.includes("2-プロパノール")&&(n.includes("過マンガン酸カリウム")||n.includes("二クロム酸カリウム"))){
-    baseDamage=Math.floor(160*catMul); logMessage="🧪 第二級アルコールの酸化 → ケトン";
-    quizToSet={question:"【受験】第二級アルコールの酸化生成物は？",options:["ケトン","カルボン酸","アルデヒド","エーテル"],correctIndex:0,explanation:"正解！ケトンが生成されます。"};
+    baseDamage=Math.floor(160*catMul);
+    logMessage=dmgLog("🧪 第二級アルコールの酸化 → ケトン が生成！", baseDamage);
+    quizToSet={question:"第二級アルコールの酸化生成物は？",options:["ケトン","カルボン酸","アルデヒド","エーテル"],correctIndex:0,explanation:"正解！ケトンが生成されます。"};
   }
   else if(n.includes("トルエン")&&n.includes("過マンガン酸カリウム")){
-    baseDamage=Math.floor(190*catMul); logMessage="🧪 トルエン側鎖酸化 → 安息香酸";
-    quizToSet={question:"【受験】トルエンをKMnO4で酸化すると？",options:["安息香酸","フェノール","ベンゼン","ベンズアルデヒド"],correctIndex:0,explanation:"正解！側鎖が酸化され安息香酸になります。"};
+    baseDamage=Math.floor(190*catMul);
+    logMessage=dmgLog("🧪 トルエンの側鎖酸化 → 安息香酸 が生成！", baseDamage);
+    quizToSet={question:"トルエンをKMnO4で酸化すると？",options:["安息香酸","フェノール","ベンゼン","ベンズアルデヒド"],correctIndex:0,explanation:"正解！側鎖が酸化され安息香酸になります。"};
   }
   else if((n.includes("エタノール")||n.includes("メタノール")||n.includes("1-プロパノール"))&&n.includes("金属ナトリウム")){
-    baseDamage=Math.floor(120*catMul); logMessage="🧪 アルコール + Na → アルコキシド + H2";
-    quizToSet={question:"【受験】アルコールと金属Naの反応で発生する気体は？",options:["水素","酸素","二酸化炭素","塩素"],correctIndex:0,explanation:"正解！水素が発生します。"};
+    baseDamage=Math.floor(120*catMul);
+    logMessage=dmgLog("🧪 アルコール + Na → アルコキシド生成＆水素発生！", baseDamage);
+    quizToSet={question:"アルコールと金属Naの反応で発生する気体は？",options:["水素","酸素","二酸化炭素","塩素"],correctIndex:0,explanation:"正解！水素が発生します。"};
   }
   else if(n.includes("フェノール")&&n.includes("金属ナトリウム")){
-    baseDamage=Math.floor(140*catMul); logMessage="🧪 フェノール + Na → ナトリウムフェノキシド";
+    baseDamage=Math.floor(140*catMul);
+    logMessage=dmgLog("🧪 フェノール + Na → ナトリウムフェノキシド が生成！", baseDamage);
   }
-  else if(n.includes("メチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(50*catMul); logMessage="🧪 メタノール生成";}
-  else if(n.includes("エチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(60*catMul); logMessage="🧪 エタノール生成";}
-  else if(n.includes("フェニル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(90*catMul); logMessage="🧪 フェノール生成";}
-  else if(n.includes("フェニル基")&&n.includes("ニトロ基")){baseDamage=Math.floor(110*catMul); logMessage="🧪 ニトロベンゼン生成";}
-  else if(n.includes("フェニル基")&&n.includes("カルボキシ基")){baseDamage=Math.floor(100*catMul); logMessage="🧪 安息香酸生成";}
-  else if(n.includes("フェニル基")&&n.includes("アミノ基")){baseDamage=Math.floor(75*catMul); logMessage="🧪 アニリン生成";}
+  else if(n.includes("メチル基")&&n.includes("ヒドロキシ基")){
+    baseDamage=Math.floor(50*catMul);
+    logMessage=dmgLog("🧪 メチル基 + ヒドロキシ基 → メタノール が生成！", baseDamage);
+  }
+  else if(n.includes("エチル基")&&n.includes("ヒドロキシ基")){
+    baseDamage=Math.floor(60*catMul);
+    logMessage=dmgLog("🧪 エチル基 + ヒドロキシ基 → エタノール が生成！", baseDamage);
+  }
+  else if(n.includes("フェニル基")&&n.includes("ヒドロキシ基")){
+    baseDamage=Math.floor(90*catMul);
+    logMessage=dmgLog("🧪 フェニル基 + ヒドロキシ基 → フェノール が生成！", baseDamage);
+  }
+  else if(n.includes("フェニル基")&&n.includes("ニトロ基")){
+    baseDamage=Math.floor(110*catMul);
+    logMessage=dmgLog("🧪 フェニル基 + ニトロ基 → ニトロベンゼン が生成！", baseDamage);
+  }
+  else if(n.includes("フェニル基")&&n.includes("カルボキシ基")){
+    baseDamage=Math.floor(100*catMul);
+    logMessage=dmgLog("🧪 フェニル基 + カルボキシ基 → 安息香酸 が生成！", baseDamage);
+  }
+  else if(n.includes("フェニル基")&&n.includes("アミノ基")){
+    baseDamage=Math.floor(75*catMul);
+    logMessage=dmgLog("🧪 フェニル基 + アミノ基 → アニリン が生成！", baseDamage);
+  }
   else if(bSelected.length===1){
     const s=bSelected[0];
-    if(s.healPower>0){baseHeal=s.healPower; logMessage=`🧪 ${s.name} 吸収！ +${baseHeal}`;}
-    else{baseDamage=s.attackPower; logMessage=`⚗️ ${s.name} 投擲！ ${formatPower(baseDamage)}`;}
-  }else{
+    if(s.healPower>0){
+      baseHeal=s.healPower;
+      logMessage=`🧪 ${s.name} を使用！\nHPが ${baseHeal} 回復した！`;
+    } else {
+      baseDamage=s.attackPower;
+      logMessage=`⚗️ ${s.name} を投擲！\n相手に ${formatPower(baseDamage)} ダメージ！`;
+    }
+  } else {
     const healSum=bSelected.reduce((a,c)=>a+c.healPower,0);
-    if(healSum>0){baseHeal=healSum; logMessage=`🧪 複合回復 +${healSum}`;}
-    else logMessage="⚠️ 不活性な組み合わせ";
+    if(healSum>0){
+      baseHeal=healSum;
+      logMessage=`🧪 複合回復！\nHPが ${healSum} 回復した！`;
+    } else {
+      logMessage="⚠️ 不活性な組み合わせだった…";
+    }
   }
 
   if(bossCond && baseDamage>0 && baseDamage!==Infinity){
@@ -750,6 +802,11 @@ function executePlayerAttack(){
 
   let finalBase=baseDamage;
   if(finalBase!==Infinity && finalBase>0) finalBase=Math.floor(finalBase*gameState.nextDamageBonus*weaknessBonus);
+
+  // 最終ダメージをログに反映（弱点・継続ボーナス後）
+  if(finalBase!==baseDamage && finalBase>0 && baseDamage!==Infinity){
+    logMessage = logMessage.replace(/相手に .+ ダメージ！/, `相手に ${finalBase} ダメージ！`);
+  }
 
   if(appliedEffect==="oxidation"){gameState.nextDamageBonus=1.3; document.getElementById('next-bonus').style.display='block'; document.getElementById('next-bonus').innerText="次ターン火力+30%";}
   else if(appliedEffect==="saponification"){gameState.nextDamageBonus=1.2; document.getElementById('next-bonus').style.display='block'; document.getElementById('next-bonus').innerText="次ターン火力+20%";}
@@ -799,8 +856,13 @@ function showQuiz(q){
 }
 function answerQuiz(ok){
   let dmg=0,heal=0,log="";
-  if(ok){dmg=pendingDamage===Infinity?Infinity:Math.floor(pendingDamage*1.5); heal=Math.floor(pendingHeal*1.5); log=`⭕ 正解！ ${activeQuiz.explanation}\n1.5倍！ (${formatPower(dmg)})`;}
-  else{log="❌ 不正解… 効果0";}
+  if(ok){
+    dmg=pendingDamage===Infinity?Infinity:Math.floor(pendingDamage*1.5);
+    heal=Math.floor(pendingHeal*1.5);
+    log=`⭕ 正解！ ${activeQuiz.explanation}\n相手に ${formatPower(dmg)} ダメージ！`;
+  } else {
+    log="❌ 不正解… 効果0";
+  }
   document.getElementById('quiz-container').style.display='none';
   document.getElementById('battle-log').style.display='flex';
   activeQuiz=null; applyEffectAndEndTurn(dmg,heal,log,false);
@@ -831,7 +893,7 @@ function endPlayerTurn(){
       const atk=gameState.currentMonster?.attackPower||15;
       gameState.playerHP-=atk;
       document.getElementById('battle-player-hp').innerText=Math.max(0,gameState.playerHP);
-      document.getElementById('battle-log').innerText=`👾 敵の攻撃！ ${atk} ダメージ`;
+      document.getElementById('battle-log').innerText=`👾 敵の攻撃！\nあなたに ${atk} ダメージ！`;
       if(gameState.playerHP<=0){
         isBattleOver=true; gameState.playerHP=0;
         gameState.reagents=Math.max(0,gameState.reagents-25);
