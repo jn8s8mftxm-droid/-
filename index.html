@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>有機化学バトル</title>
+<title>有機化学バトルフィールド</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
@@ -39,7 +39,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
 .card-attr{font-size:8px;color:#666}
 @keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
 #deck-edit-screen{background:#111;padding:36px 14px 10px;height:100%;overflow:hidden}
-.deck-list{flex:1;overflow-y:auto;margin-top:8px;max-height:36vh}
+.deck-list{flex:1;overflow-y:auto;margin-top:8px;max-height:70vh}
 .deck-item{display:flex;justify-content:space-between;align-items:center;background:#222;padding:7px 9px;margin-bottom:5px;border-radius:8px}
 .deck-item.in-deck{background:rgba(34,197,94,.12)}
 .action-btn{background:none;border:none;font-size:17px;cursor:pointer}
@@ -49,12 +49,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
 .gacha-card-view{width:230px;height:170px;border-radius:14px;border:2px solid #a855f7;background:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
 .battle-actions{display:flex;gap:7px;justify-content:center;margin-top:6px;flex-wrap:wrap}
 .choice-box{background:rgba(15,23,42,.95);border:2px solid #facc15;border-radius:14px;padding:14px;text-align:center;display:none;flex-direction:column;gap:10px;position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:85%;max-width:320px;z-index:50}
+#reaction-list-screen{background:#0f172a;padding:28px 14px 18px;overflow:hidden}
+.reaction-scroll{flex:1;overflow-y:auto;background:rgba(30,30,30,.9);border:1px solid #444;border-radius:12px;padding:12px;font-size:12px;line-height:1.55;white-space:pre-line;color:#ddd;margin:10px 0}
 </style>
 </head>
 <body>
 
 <div id="deck-select-screen" class="screen active">
-  <h2>有機化学バトル</h2>
+  <h2>有機化学バトルフィールド</h2>
   <p style="font-size:13px;color:#aaa">初期スターターデッキを選択してください</p>
   <div style="width:100%;max-width:400px">
     <div class="select-card purple" onclick="assignStarterDeck('Aromatic')">
@@ -120,8 +122,9 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
   </div>
   <div class="battle-actions">
     <button id="attack-btn" class="glass-btn" style="background:linear-gradient(135deg,#ea580c,#ef4444);flex:1;padding:11px" onclick="executePlayerAttack()">化学反応実行</button>
-    <button id="skip-btn" class="glass-btn" style="background:linear-gradient(135deg,#64748b,#475569);width:95px;padding:11px" onclick="skipTurn()">ターン終了</button>
-    <button id="flee-btn" class="glass-btn" style="background:linear-gradient(135deg,#dc2626,#991b1b);width:85px;padding:11px" onclick="fleeBattle()">逃げる</button>
+    <button id="skip-btn" class="glass-btn" style="background:linear-gradient(135deg,#64748b,#475569);width:90px;padding:11px" onclick="skipTurn()">ターン終了</button>
+    <button id="flee-btn" class="glass-btn" style="background:linear-gradient(135deg,#dc2626,#991b1b);width:80px;padding:11px" onclick="fleeBattle()">逃げる</button>
+    <button id="reaction-btn" class="glass-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);width:90px;padding:11px;font-size:12px" onclick="openReactionList()">反応一覧</button>
   </div>
   <div id="choice-box" class="choice-box">
     <div style="font-weight:bold;color:#facc15" id="choice-title">中間物質が生成された！</div>
@@ -133,13 +136,21 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
   </div>
 </div>
 
+<!-- 反応一覧画面（バトルから呼び出す） -->
+<div id="reaction-list-screen" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <h3 style="color:#facc15">📖 反応一覧</h3>
+    <button class="glass-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:8px 14px" onclick="closeReactionList()">バトルに戻る</button>
+  </div>
+  <div id="full-reaction-list" class="reaction-scroll"></div>
+</div>
+
 <div id="deck-edit-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <div><h3>デッキ編集 (<span id="deck-count">0</span>/40)</h3><p style="font-size:11px;color:#888">最低20枚</p></div>
+    <div><h3>デッキ編集 (<span id="deck-count">0</span>/50)</h3><p style="font-size:11px;color:#888">最低20枚 ／ 最大50枚</p></div>
     <button id="deck-done-btn" class="glass-btn" onclick="finishDeckEdit()">完了</button>
   </div>
   <div id="deck-list" class="deck-list"></div>
-  <div class="info-box" style="max-height:30vh"><div class="info-title">📖 反応一覧</div><div id="reaction-list" style="white-space:pre-line;color:#ddd"></div></div>
 </div>
 
 <div id="gacha-screen" class="screen">
@@ -155,35 +166,38 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
 
 <script>
 const ALL_CARDS = [
+  {name:"メタン",formula:"CH4",attackPower:15,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
+  {name:"エタン",formula:"C2H6",attackPower:18,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
+  {name:"プロパン",formula:"C3H8",attackPower:20,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
+  {name:"ブタン",formula:"C4H10",attackPower:22,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
+  {name:"エチレン",formula:"C2H4",attackPower:25,healPower:0,attribute:"Alkenyl",rarity:"R",color:"無色",odor:"わずかに甘い"},
+  {name:"プロピレン",formula:"C3H6",attackPower:28,healPower:0,attribute:"Alkenyl",rarity:"R",color:"無色",odor:"-"},
+  {name:"アセチレン",formula:"C2H2",attackPower:35,healPower:0,attribute:"Alkynyl",rarity:"SR",color:"無色",odor:"特異臭"},
   {name:"ベンゼン",formula:"C6H6",attackPower:30,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色",odor:"特異臭"},
   {name:"トルエン",formula:"C6H5CH3",attackPower:35,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色",odor:"甘い芳香"},
-  {name:"エチレン",formula:"C2H4",attackPower:25,healPower:0,attribute:"Alkenyl",rarity:"R",color:"無色",odor:"わずかに甘い"},
+  {name:"キシレン",formula:"C6H4(CH3)2",attackPower:38,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色",odor:"芳香"},
+  {name:"ナフタレン",formula:"C10H8",attackPower:55,healPower:0,attribute:"Aromatic",rarity:"SR",color:"白色",odor:"樟脳様"},
+  {name:"アントラセン",formula:"C14H10",attackPower:120,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"無色〜淡黄",odor:"-"},
+  {name:"スチレン",formula:"C6H5CH=CH2",attackPower:40,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色",odor:"特異臭"},
+  {name:"メタノール",formula:"CH3OH",attackPower:22,healPower:0,attribute:"Alcohol",rarity:"R",color:"無色",odor:"アルコール臭"},
   {name:"エタノール",formula:"C2H5OH",attackPower:25,healPower:0,attribute:"Alcohol",rarity:"R",color:"無色",odor:"アルコール臭"},
+  {name:"1-プロパノール",formula:"C3H7OH",attackPower:28,healPower:0,attribute:"Alcohol",rarity:"R",color:"無色",odor:"-"},
+  {name:"2-プロパノール",formula:"(CH3)2CHOH",attackPower:28,healPower:0,attribute:"Alcohol",rarity:"R",color:"無色",odor:"-"},
+  {name:"エチレングリコール",formula:"HOCH2CH2OH",attackPower:35,healPower:0,attribute:"Alcohol",rarity:"SR",color:"無色",odor:"無臭"},
+  {name:"グリセリン",formula:"C3H5(OH)3",attackPower:40,healPower:0,attribute:"Alcohol",rarity:"SR",color:"無色",odor:"無臭"},
+  {name:"ジエチルエーテル",formula:"(C2H5)2O",attackPower:30,healPower:0,attribute:"Ether",rarity:"R",color:"無色",odor:"特異臭"},
+  {name:"ホルムアルデヒド",formula:"HCHO",attackPower:30,healPower:0,attribute:"Aldehyde",rarity:"R",color:"無色",odor:"刺激臭"},
   {name:"アセトアルデヒド",formula:"CH3CHO",attackPower:35,healPower:0,attribute:"Aldehyde",rarity:"R",color:"無色",odor:"刺激臭"},
+  {name:"アセトン",formula:"CH3COCH3",attackPower:32,healPower:0,attribute:"Ketone",rarity:"R",color:"無色",odor:"特異臭"},
+  {name:"ベンズアルデヒド",formula:"C6H5CHO",attackPower:45,healPower:0,attribute:"Aldehyde",rarity:"SR",color:"無色",odor:"アーモンド様"},
+  {name:"ギ酸",formula:"HCOOH",attackPower:35,healPower:0,attribute:"Acid",rarity:"R",color:"無色",odor:"刺激臭"},
   {name:"酢酸",formula:"CH3COOH",attackPower:40,healPower:0,attribute:"Acid",rarity:"R",color:"無色",odor:"刺激的な酸味"},
-  {name:"フェノール",formula:"C6H5OH",attackPower:45,healPower:0,attribute:"Phenol",rarity:"SR",color:"無色〜淡紅",odor:"特異臭"},
-  {name:"水酸化ナトリウム",formula:"NaOH",attackPower:35,healPower:0,attribute:"Base",rarity:"SR",color:"白色",odor:"無臭"},
-  {name:"濃硝酸",formula:"HNO3",attackPower:30,healPower:0,attribute:"Reagent",rarity:"SR",color:"無色〜淡黄",odor:"刺激臭"},
-  {name:"濃硫酸",formula:"H2SO4",attackPower:30,healPower:0,attribute:"Reagent",rarity:"SR",color:"無色",odor:"無臭"},
-  {name:"臭素",formula:"Br2",attackPower:35,healPower:0,attribute:"Halogen",rarity:"R",color:"赤褐色",odor:"刺激臭"},
-  {name:"塩素",formula:"Cl2",attackPower:35,healPower:0,attribute:"Halogen",rarity:"R",color:"黄緑色",odor:"刺激臭"},
-  {name:"過マンガン酸カリウム",formula:"KMnO4",attackPower:40,healPower:0,attribute:"Oxidant",rarity:"SR",color:"紫黒色",odor:"無臭"},
-  {name:"水素化ホウ素ナトリウム",formula:"NaBH4",attackPower:40,healPower:0,attribute:"Reductant",rarity:"SR",color:"白色",odor:"無臭"},
-  {name:"重合触媒(Ziegler)",formula:"[Cat]",attackPower:30,healPower:0,attribute:"Catalyst",rarity:"SSR",color:"-",odor:"-"},
-  {name:"グリシン",formula:"H2NCH2COOH",attackPower:0,healPower:40,attribute:"Nutrient",rarity:"R",color:"白色",odor:"無臭"},
-  {name:"グルコース",formula:"C6H12O6",attackPower:0,healPower:65,attribute:"Nutrient",rarity:"SR",color:"白色",odor:"無臭"},
-  {name:"トリニトロトルエン",formula:"C7H5N3O6",attackPower:180,healPower:0,attribute:"Explosive",rarity:"SSR",color:"淡黄色",odor:"無臭"},
-  {name:"ピクリン酸",formula:"C6H3N3O7",attackPower:180,healPower:0,attribute:"Explosive",rarity:"SSR",color:"黄色",odor:"無臭"},
-  {name:"フッ化水素酸",formula:"HF",attackPower:Infinity,healPower:0,attribute:"Acid",rarity:"SSSR",color:"無色",odor:"刺激臭"},
-  {name:"ボツリヌス毒素",formula:"BoNT",attackPower:0,healPower:0,attribute:"Toxin",rarity:"SSSR",color:"-",odor:"-"},
-  {name:"金属ナトリウム",formula:"Na",attackPower:40,healPower:0,attribute:"Metal",rarity:"SR",color:"銀白色",odor:"無臭"},
-  {name:"ニトロベンゼン",formula:"C6H5NO2",attackPower:70,healPower:0,attribute:"Aromatic",rarity:"SR",color:"淡黄色",odor:"アーモンド様"},
-  {name:"アニリン",formula:"C6H5NH2",attackPower:65,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色〜褐色",odor:"特異臭"},
-  {name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:95,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"},
+  {name:"シュウ酸",formula:"(COOH)2",attackPower:50,healPower:0,attribute:"Acid",rarity:"SR",color:"無色",odor:"無臭"},
+  {name:"安息香酸",formula:"C6H5COOH",attackPower:48,healPower:0,attribute:"Acid",rarity:"SR",color:"白色",odor:"-"},
   {name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:55,healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"},
-  {name:"ニトロ基",formula:"-NO2",attackPower:45,healPower:0,attribute:"FunctionalGroup",rarity:"SR",color:"-",odor:"-"},
-  {name:"還元剤",formula:"[Red]",attackPower:30,healPower:0,attribute:"Reductant",rarity:"SR",color:"-",odor:"-"},
-  {name:"ジアゾ化剤",formula:"NaNO2/HCl",attackPower:35,healPower:0,attribute:"Reagent",rarity:"SR",color:"-",odor:"-"},
+  {name:"サリチル酸",formula:"C6H4(OH)COOH",attackPower:55,healPower:0,attribute:"Acid",rarity:"SR",color:"白色",odor:"-"},
+  {name:"アセチルサリチル酸",formula:"C9H8O4",attackPower:70,healPower:0,attribute:"Ester",rarity:"SSR",color:"白色",odor:"-"},
+  {name:"フェノール",formula:"C6H5OH",attackPower:45,healPower:0,attribute:"Phenol",rarity:"SR",color:"無色〜淡紅",odor:"特異臭"},
   {name:"o-クレゾール",formula:"CH3C6H4OH",attackPower:40,healPower:0,attribute:"Phenol",rarity:"R",color:"無色",odor:"フェノール臭"},
   {name:"m-クレゾール",formula:"CH3C6H4OH",attackPower:40,healPower:0,attribute:"Phenol",rarity:"R",color:"無色",odor:"フェノール臭"},
   {name:"p-クレゾール",formula:"CH3C6H4OH",attackPower:42,healPower:0,attribute:"Phenol",rarity:"R",color:"無色",odor:"フェノール臭"},
@@ -191,7 +205,25 @@ const ALL_CARDS = [
   {name:"レゾルシノール",formula:"C6H4(OH)2",attackPower:48,healPower:0,attribute:"Phenol",rarity:"SR",color:"無色",odor:"-"},
   {name:"ヒドロキノン",formula:"C6H4(OH)2",attackPower:55,healPower:0,attribute:"Phenol",rarity:"SR",color:"無色",odor:"-"},
   {name:"ピロガロール",formula:"C6H3(OH)3",attackPower:60,healPower:0,attribute:"Phenol",rarity:"SR",color:"白色",odor:"-"},
-  {name:"フロログルシノール",formula:"C6H3(OH)3",attackPower:58,healPower:0,attribute:"Phenol",rarity:"SR",color:"白色",odor:"-"},
+  {name:"アニリン",formula:"C6H5NH2",attackPower:65,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色〜褐色",odor:"特異臭"},
+  {name:"ニトロベンゼン",formula:"C6H5NO2",attackPower:70,healPower:0,attribute:"Aromatic",rarity:"SR",color:"淡黄色",odor:"アーモンド様"},
+  {name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:95,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"},
+  {name:"塩素",formula:"Cl2",attackPower:35,healPower:0,attribute:"Halogen",rarity:"R",color:"黄緑色",odor:"刺激臭"},
+  {name:"臭素",formula:"Br2",attackPower:35,healPower:0,attribute:"Halogen",rarity:"R",color:"赤褐色",odor:"刺激臭"},
+  {name:"ヨウ素",formula:"I2",attackPower:30,healPower:0,attribute:"Halogen",rarity:"R",color:"紫黒色",odor:"特異臭"},
+  {name:"濃硝酸",formula:"HNO3",attackPower:30,healPower:0,attribute:"Reagent",rarity:"SR",color:"無色〜淡黄",odor:"刺激臭"},
+  {name:"濃硫酸",formula:"H2SO4",attackPower:30,healPower:0,attribute:"Reagent",rarity:"SR",color:"無色",odor:"無臭"},
+  {name:"水酸化ナトリウム",formula:"NaOH",attackPower:35,healPower:0,attribute:"Base",rarity:"SR",color:"白色",odor:"無臭"},
+  {name:"水酸化カルシウム",formula:"Ca(OH)2",attackPower:28,healPower:0,attribute:"Base",rarity:"R",color:"白色",odor:"無臭"},
+  {name:"金属ナトリウム",formula:"Na",attackPower:40,healPower:0,attribute:"Metal",rarity:"SR",color:"銀白色",odor:"無臭"},
+  {name:"過マンガン酸カリウム",formula:"KMnO4",attackPower:40,healPower:0,attribute:"Oxidant",rarity:"SR",color:"紫黒色",odor:"無臭"},
+  {name:"二クロム酸カリウム",formula:"K2Cr2O7",attackPower:38,healPower:0,attribute:"Oxidant",rarity:"SR",color:"橙赤色",odor:"無臭"},
+  {name:"水素化ホウ素ナトリウム",formula:"NaBH4",attackPower:40,healPower:0,attribute:"Reductant",rarity:"SR",color:"白色",odor:"無臭"},
+  {name:"還元剤",formula:"[Red]",attackPower:30,healPower:0,attribute:"Reductant",rarity:"SR",color:"-",odor:"-"},
+  {name:"重合触媒(Ziegler)",formula:"[Cat]",attackPower:30,healPower:0,attribute:"Catalyst",rarity:"SSR",color:"-",odor:"-"},
+  {name:"塩化アルミニウム",formula:"AlCl3",attackPower:35,healPower:0,attribute:"Catalyst",rarity:"SR",color:"白色",odor:"-"},
+  {name:"鉄",formula:"Fe",attackPower:25,healPower:0,attribute:"Catalyst",rarity:"R",color:"灰色",odor:"無臭"},
+  {name:"ジアゾ化剤",formula:"NaNO2/HCl",attackPower:35,healPower:0,attribute:"Reagent",rarity:"SR",color:"-",odor:"-"},
   {name:"メチル基",formula:"-CH3",attackPower:20,healPower:0,attribute:"Hydrocarbon",rarity:"R",color:"-",odor:"-"},
   {name:"エチル基",formula:"-C2H5",attackPower:25,healPower:0,attribute:"Hydrocarbon",rarity:"R",color:"-",odor:"-"},
   {name:"プロピル基",formula:"-C3H7",attackPower:28,healPower:0,attribute:"Hydrocarbon",rarity:"R",color:"-",odor:"-"},
@@ -204,6 +236,7 @@ const ALL_CARDS = [
   {name:"カルボキシ基",formula:"-COOH",attackPower:40,healPower:0,attribute:"FunctionalGroup",rarity:"SR",color:"-",odor:"-"},
   {name:"アミノ基",formula:"-NH2",attackPower:30,healPower:0,attribute:"FunctionalGroup",rarity:"R",color:"-",odor:"-"},
   {name:"アルデヒド基",formula:"-CHO",attackPower:35,healPower:0,attribute:"FunctionalGroup",rarity:"R",color:"-",odor:"-"},
+  {name:"ニトロ基",formula:"-NO2",attackPower:45,healPower:0,attribute:"FunctionalGroup",rarity:"SR",color:"-",odor:"-"},
   {name:"スルホン基",formula:"-SO3H",attackPower:42,healPower:0,attribute:"FunctionalGroup",rarity:"SR",color:"-",odor:"-"},
   {name:"ハロゲン基",formula:"-X",attackPower:30,healPower:0,attribute:"FunctionalGroup",rarity:"R",color:"-",odor:"-"},
   {name:"マレイン酸",formula:"cis-HOOCCH=CHCOOH",attackPower:55,healPower:0,attribute:"CisTrans",rarity:"SR",color:"白色",odor:"-"},
@@ -212,41 +245,81 @@ const ALL_CARDS = [
   {name:"トランス-2-ブテン",formula:"trans-CH3CH=CHCH3",attackPower:35,healPower:0,attribute:"CisTrans",rarity:"R",color:"無色",odor:"-"},
   {name:"オレイン酸",formula:"C18H34O2",attackPower:50,healPower:0,attribute:"CisTrans",rarity:"SR",color:"無色〜淡黄",odor:"-"},
   {name:"スチルベン",formula:"C6H5CH=CHC6H5",attackPower:60,healPower:0,attribute:"CisTrans",rarity:"SR",color:"無色",odor:"-"},
-  {name:"ナフタレン",formula:"C10H8",attackPower:55,healPower:0,attribute:"Aromatic",rarity:"SR",color:"白色",odor:"樟脳様"},
-  {name:"アントラセン",formula:"C14H10",attackPower:120,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"無色〜淡黄",odor:"-"}
+  {name:"グリシン",formula:"H2NCH2COOH",attackPower:0,healPower:40,attribute:"Nutrient",rarity:"R",color:"白色",odor:"無臭"},
+  {name:"グルコース",formula:"C6H12O6",attackPower:0,healPower:65,attribute:"Nutrient",rarity:"SR",color:"白色",odor:"無臭"},
+  {name:"スクロース",formula:"C12H22O11",attackPower:0,healPower:50,attribute:"Nutrient",rarity:"R",color:"白色",odor:"無臭"},
+  {name:"トリニトロトルエン",formula:"C7H5N3O6",attackPower:180,healPower:0,attribute:"Explosive",rarity:"SSR",color:"淡黄色",odor:"無臭"},
+  {name:"ピクリン酸",formula:"C6H3N3O7",attackPower:180,healPower:0,attribute:"Explosive",rarity:"SSR",color:"黄色",odor:"無臭"},
+  {name:"フッ化水素酸",formula:"HF",attackPower:Infinity,healPower:0,attribute:"Acid",rarity:"SSSR",color:"無色",odor:"刺激臭"},
+  {name:"ボツリヌス毒素",formula:"BoNT",attackPower:0,healPower:0,attribute:"Toxin",rarity:"SSSR",color:"-",odor:"-"}
 ];
 
 const RANKS = [
   {name:"初学者", kills:0,  reagentBonus:1.0, gachaBoost:0},
-  {name:"高校生", kills:8,  reagentBonus:1.15, gachaBoost:0.3},
-  {name:"大学生", kills:20, reagentBonus:1.3,  gachaBoost:0.6},
-  {name:"大学院生",kills:40, reagentBonus:1.5,  gachaBoost:1.0},
-  {name:"博士",   kills:70, reagentBonus:1.8,  gachaBoost:1.5},
-  {name:"教授",   kills:120,reagentBonus:2.2,  gachaBoost:2.2}
+  {name:"高校生", kills:8,  reagentBonus:1.2, gachaBoost:0.3},
+  {name:"大学生", kills:20, reagentBonus:1.4,  gachaBoost:0.6},
+  {name:"大学院生",kills:40, reagentBonus:1.7,  gachaBoost:1.0},
+  {name:"博士",   kills:70, reagentBonus:2.0,  gachaBoost:1.5},
+  {name:"教授",   kills:120,reagentBonus:2.5,  gachaBoost:2.2}
 ];
 
-const REACTION_LIST = [
-  {dmg:440,text:"トルエン+濃硝酸(触媒) → 440"},
-  {dmg:420,text:"けん化(触媒) → 420"},
-  {dmg:360,text:"ベンゼン+濃硝酸(触媒) → 360"},
-  {dmg:340,text:"酸化(触媒) → 340"},
-  {dmg:300,text:"エチレン+重合触媒 → 300"},
-  {dmg:200,text:"ボツリヌス毒素 → 毎ターン200"},
-  {dmg:180,text:"TNT/ピクリン酸/ベンゼン+塩素 → 180"},
-  {dmg:150,text:"ベンゼン+濃硫酸 → 150"},
-  {dmg:140,text:"ハロゲン付加 / フェノール+Na → 140"},
-  {dmg:130,text:"エステル化/ニトロ化 → 130"},
-  {dmg:120,text:"アントラセン / エタノール+Na → 120"},
-  {dmg:110,text:"フェニル基+ニトロ基 → 110"},
-  {dmg:95,text:"アゾベンゼン → 95"},
-  {dmg:90,text:"フェニル基+ヒドロキシ基 → 90"},
-  {dmg:70,text:"ニトロベンゼン → 70"},
-  {dmg:65,text:"アニリン → 65"},
-  {dmg:60,text:"エチル基+ヒドロキシ基 → 60"},
-  {dmg:55,text:"酢酸エチル → 55"},
-  {dmg:50,text:"メチル基+ヒドロキシ基 → 50"},
-  {dmg:Infinity,text:"フッ化水素酸 → ∞"}
-];
+// 反応一覧表示用テキスト
+const FULL_REACTION_TEXT = `【中間体・連鎖】
+・ベンゼン + ニトロ基 → ニトロベンゼン
+・ニトロベンゼン + 還元剤/NaBH4 → アニリン
+・アニリン + ジアゾ化剤 → アゾベンゼン
+・酢酸 + エタノール → 酢酸エチル
+
+【特殊】
+・ボツリヌス毒素 → 毎ターン200継続
+・フッ化水素酸 → ∞（10%自滅）
+・トリニトロトルエン / ピクリン酸 → 180
+
+【けん化】
+・NaOH + 酢酸/酢酸エチル/オレイン酸
+  （触媒なし1.5倍 / あり2倍）
+
+【ニトロ化】
+・ベンゼン + 濃硝酸
+・トルエン + 濃硝酸
+・フェノール + 濃硝酸
+
+【スルホン化】
+・ベンゼン + 濃硫酸 → ベンゼンスルホン酸
+
+【ハロゲン化・付加】
+・ベンゼン + 塩素/臭素 + 触媒(Fe/AlCl3)
+・エチレン + 塩素/臭素（付加・脱色）
+・アセチレン + 臭素
+
+【重合】
+・エチレン + 重合触媒(Ziegler) → ポリエチレン
+・スチレン + 重合触媒(Ziegler) → ポリスチレン
+・プロピレン + 重合触媒(Ziegler) → ポリプロピレン
+
+【酸化】
+・エタノール/アセトアルデヒド/メタノール + KMnO4 or K2Cr2O7
+・2-プロパノール + KMnO4 or K2Cr2O7 → ケトン
+・トルエン + KMnO4 → 安息香酸
+
+【金属ナトリウム】
+・アルコール + Na → アルコキシド + H2
+・フェノール + Na → ナトリウムフェノキシド
+
+【アセチレン】
+・アセチレン + 水 + 触媒 → アセトアルデヒド
+
+【基 + 官能基】
+・メチル基 + ヒドロキシ基 → メタノール
+・エチル基 + ヒドロキシ基 → エタノール
+・フェニル基 + ヒドロキシ基 → フェノール
+・フェニル基 + ニトロ基 → ニトロベンゼン
+・フェニル基 + カルボキシ基 → 安息香酸
+・フェニル基 + アミノ基 → アニリン
+
+【触媒】
+濃硫酸 / 重合触媒(Ziegler) / 塩化アルミニウム / 鉄
+→ なし1.5倍 ／ あり2.0倍`;
 
 let gameState = {
   reagents:150, playerHP:200, playerMaxHP:200,
@@ -256,6 +329,7 @@ let gameState = {
 
 let isBattleOver=false, isProcessing=false, botulinumActive=false;
 let pendingIntermediate=null;
+let fromBattleToReaction=false; // バトルから反応一覧を開いたフラグ
 
 function getRank(){
   let r = RANKS[0];
@@ -283,9 +357,26 @@ function switchState(s){
   document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
   if(s==='deckSelection') document.getElementById('deck-select-screen').classList.add('active');
   if(s==='field'){document.getElementById('field-screen').classList.add('active');updateFieldUI();initThreeJS();}
-  if(s==='battle'){document.getElementById('battle-screen').classList.add('active');initLabThreeJS();setupBattle();}
-  if(s==='deckEdit'){document.getElementById('deck-edit-screen').classList.add('active');renderDeckEdit();renderReactionList();}
+  if(s==='battle'){document.getElementById('battle-screen').classList.add('active');}
+  if(s==='deckEdit'){document.getElementById('deck-edit-screen').classList.add('active');renderDeckEdit();}
   if(s==='gacha'){document.getElementById('gacha-screen').classList.add('active');document.getElementById('gacha-reagents').innerText=gameState.reagents;document.getElementById('gacha-rank').innerText=getRank().name;renderGachaList();}
+  if(s==='reactionList'){document.getElementById('reaction-list-screen').classList.add('active');document.getElementById('full-reaction-list').innerText=FULL_REACTION_TEXT;}
+}
+
+function openReactionList(){
+  fromBattleToReaction = true;
+  switchState('reactionList');
+}
+function closeReactionList(){
+  if(fromBattleToReaction){
+    fromBattleToReaction = false;
+    document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+    document.getElementById('battle-screen').classList.add('active');
+    // バトル状態はそのまま継続（setupBattleは呼ばない）
+    updateBattleUI();
+  } else {
+    switchState('field');
+  }
 }
 
 function updateFieldUI(){
@@ -298,9 +389,10 @@ function updateFieldUI(){
 function assignStarterDeck(type){
   gameState.currentDeck=[]; gameState.collection=[];
   let base=[];
-  if(type==='Aromatic') base=[ALL_CARDS[0],ALL_CARDS[0],ALL_CARDS[1],ALL_CARDS[1],ALL_CARDS[8],ALL_CARDS[8],ALL_CARDS[9],ALL_CARDS[6],ALL_CARDS[15],ALL_CARDS[16],ALL_CARDS[24],ALL_CARDS[25]];
-  else if(type==='Polymer') base=[ALL_CARDS[2],ALL_CARDS[2],ALL_CARDS[10],ALL_CARDS[11],ALL_CARDS[14],ALL_CARDS[15],ALL_CARDS[16],ALL_CARDS[3]];
-  else base=[ALL_CARDS[3],ALL_CARDS[3],ALL_CARDS[5],ALL_CARDS[5],ALL_CARDS[7],ALL_CARDS[12],ALL_CARDS[15],ALL_CARDS[16],ALL_CARDS[4]];
+  if(type==='Aromatic') base=[ALL_CARDS.find(c=>c.name==="ベンゼン"),ALL_CARDS.find(c=>c.name==="トルエン"),ALL_CARDS.find(c=>c.name==="濃硝酸"),ALL_CARDS.find(c=>c.name==="濃硫酸"),ALL_CARDS.find(c=>c.name==="フェノール"),ALL_CARDS.find(c=>c.name==="グルコース"),ALL_CARDS.find(c=>c.name==="ニトロ基")];
+  else if(type==='Polymer') base=[ALL_CARDS.find(c=>c.name==="エチレン"),ALL_CARDS.find(c=>c.name==="臭素"),ALL_CARDS.find(c=>c.name==="塩素"),ALL_CARDS.find(c=>c.name==="重合触媒(Ziegler)"),ALL_CARDS.find(c=>c.name==="グルコース"),ALL_CARDS.find(c=>c.name==="エタノール")];
+  else base=[ALL_CARDS.find(c=>c.name==="エタノール"),ALL_CARDS.find(c=>c.name==="酢酸"),ALL_CARDS.find(c=>c.name==="水酸化ナトリウム"),ALL_CARDS.find(c=>c.name==="過マンガン酸カリウム"),ALL_CARDS.find(c=>c.name==="グルコース"),ALL_CARDS.find(c=>c.name==="アセトアルデヒド")];
+  base = base.filter(Boolean);
   for(let i=0;i<40;i++){
     const c={...base[i%base.length],id:Math.random().toString(36).substr(2,9)};
     gameState.currentDeck.push(c); gameState.collection.push(c);
@@ -321,7 +413,6 @@ function renderGachaList(){
   });
   document.getElementById('gacha-list').innerText=html.trim();
 }
-function renderReactionList(){document.getElementById('reaction-list').innerText=REACTION_LIST.map(r=>`・${r.text}`).join("\n");}
 
 function createHumanoidMesh() {
   const group = new THREE.Group();
@@ -381,11 +472,18 @@ function initThreeJS(){
       m.mesh.position.x+=m.vx; m.mesh.position.z+=m.vz;
       if(Math.abs(m.mesh.position.x)>14)m.vx*=-1; if(m.mesh.position.z<-20||m.mesh.position.z>8)m.vz*=-1;
       const dx=playerNode.position.x-m.mesh.position.x, dz=playerNode.position.z-m.mesh.position.z;
-      if(Math.sqrt(dx*dx+dz*dz)<=1){m.isActive=false;scene.remove(m.mesh);gameState.currentMonster=m;switchState('battle');}
+      if(Math.sqrt(dx*dx+dz*dz)<=1){m.isActive=false;scene.remove(m.mesh);gameState.currentMonster=m;startBattle();}
     });
     renderer.render(scene,camera);
   }
   anim(0);
+}
+
+function startBattle(){
+  document.querySelectorAll('.screen').forEach(el=>el.classList.remove('active'));
+  document.getElementById('battle-screen').classList.add('active');
+  initLabThreeJS();
+  setupBattle();
 }
 
 function spawnMonster(){
@@ -503,8 +601,8 @@ function winBattle(msg){
   isBattleOver=true;
   gameState.kills++;
   const rank=getRank();
-  let reward=Math.floor((40+(gameState.currentMonster?.level||1)*20)*(rank.reagentBonus));
-  if(gameState.currentMonster?.isBoss) reward+=80;
+  let reward=Math.floor((55+(gameState.currentMonster?.level||1)*28)*(rank.reagentBonus));
+  if(gameState.currentMonster?.isBoss) reward+=100;
   gameState.reagents+=reward;
   document.getElementById('battle-log').innerText=`${msg}\n試薬 +${reward} ／ 撃破数 ${gameState.kills}`;
   setTimeout(()=>switchState('field'),1700);
@@ -519,35 +617,33 @@ function executePlayerAttack(){
 
   let baseDamage=0, baseHeal=0, quizToSet=null, logMessage="", product=null, appliedEffect=null;
   const n=bSelected.map(c=>c.name);
-  const hasCatalyst=n.includes("濃硫酸")||n.includes("重合触媒(Ziegler)");
+  const hasCatalyst = n.includes("濃硫酸") || n.includes("重合触媒(Ziegler)") || n.includes("塩化アルミニウム") || n.includes("鉄");
+  const catMul = hasCatalyst ? 2.0 : 1.5;
   const bossCond=gameState.currentMonster?.condition||null;
 
-  // ===== 中間物質・連鎖 =====
   if(n.includes("ベンゼン")&&n.includes("ニトロ基")){
     product={name:"ニトロベンゼン",formula:"C6H5NO2",attackPower:70,healPower:0,attribute:"Aromatic",rarity:"SR",color:"淡黄色",odor:"アーモンド様"};
-    baseDamage=70; logMessage="🧪 ベンゼン + ニトロ基 → ニトロベンゼン 生成！";
-    quizToSet={question:"ベンゼンにニトロ基が導入された化合物は？",options:["ニトロベンゼン","アニリン","フェノール","トルエン"],correctIndex:0,explanation:"正解！ニトロベンゼンです。"};
+    baseDamage=Math.floor(70*catMul); logMessage="🧪 ベンゼン + ニトロ基 → ニトロベンゼン";
+    quizToSet={question:"【受験】ベンゼンのニトロ化でニトロ基が置換される反応機構は？",options:["求電子置換","求核置換","付加反応","脱離反応"],correctIndex:0,explanation:"正解！芳香族の求電子置換反応です。"};
   }
   else if(n.includes("ニトロベンゼン")&&(n.includes("還元剤")||n.includes("水素化ホウ素ナトリウム"))){
     product={name:"アニリン",formula:"C6H5NH2",attackPower:65,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色〜褐色",odor:"特異臭"};
-    baseDamage=65; logMessage="🧪 ニトロベンゼンの還元 → アニリン 生成！";
-    quizToSet={question:"ニトロベンゼンを還元すると何になる？",options:["アニリン","フェノール","ベンゼン","トルエン"],correctIndex:0,explanation:"正解！アニリンが生成されます。"};
+    baseDamage=Math.floor(65*catMul); logMessage="🧪 ニトロベンゼン還元 → アニリン";
+    quizToSet={question:"【受験】ニトロベンゼンをスズと塩酸で還元すると？",options:["アニリン","フェノール","ベンゼン","トルエン"],correctIndex:0,explanation:"正解！アニリンが生成されます。"};
   }
   else if(n.includes("アニリン")&&n.includes("ジアゾ化剤")){
     product={name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:95,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"};
-    baseDamage=95; logMessage="🧪 アニリンのジアゾ化 → アゾ化合物 生成！";
-    quizToSet={question:"アニリンをジアゾ化して得られる代表的な化合物は？",options:["アゾベンゼン","ニトロベンゼン","フェノール","安息香酸"],correctIndex:0,explanation:"正解！アゾベンゼンです。"};
+    baseDamage=Math.floor(95*catMul); logMessage="🧪 ジアゾ化 → アゾ化合物";
+    quizToSet={question:"【受験】アニリンのジアゾ化に必要な試薬は？",options:["NaNO2 + HCl","HNO3","H2SO4","NaOH"],correctIndex:0,explanation:"正解！亜硝酸ナトリウムと塩酸です。"};
   }
   else if(n.includes("酢酸")&&n.includes("エタノール")){
-    product={name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:hasCatalyst?90:55,healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"};
-    baseDamage=hasCatalyst?90:55; logMessage="🧪 酢酸 + エタノール → 酢酸エチル 生成！";
-    quizToSet={question:"酢酸とエタノールの反応で生じる化合物は？",options:["酢酸エチル","ジエチルエーテル","アセトン","アセトアルデヒド"],correctIndex:0,explanation:"正解！エステル化で酢酸エチルが生成。"};
+    product={name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:Math.floor(55*catMul),healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"};
+    baseDamage=Math.floor(55*catMul); logMessage="🧪 エステル化 → 酢酸エチル";
+    quizToSet={question:"【受験】エステル化の触媒として最も一般的なのは？",options:["濃硫酸","NaOH","KMnO4","Fe"],correctIndex:0,explanation:"正解！濃硫酸が触媒と脱水剤を兼ねます。"};
   }
-
-  // ===== ボツリヌス・フッ化水素 =====
   else if(bSelected.length===1&&bSelected[0].name==="ボツリヌス毒素"){
     botulinumActive=true; document.getElementById('dot-status').style.display='block';
-    logMessage="☠️ ボツリヌス毒素を散布！ 毎ターン200ダメージ継続！"; baseDamage=0;
+    logMessage="☠️ ボツリヌス毒素！ 毎ターン200継続"; baseDamage=0;
   }
   else if(bSelected.length===1&&bSelected[0].name==="フッ化水素酸"){
     if(Math.random()<.1){
@@ -556,138 +652,78 @@ function executePlayerAttack(){
       setTimeout(()=>{gameState.playerHP=gameState.playerMaxHP;switchState('field');},2000);
       bHand=bHand.filter(c=>!bSelected.some(s=>s.id===c.id)); bSelected=[]; updateBattleUI(); return;
     }
-    baseDamage=Infinity; logMessage="☠️ フッ化水素酸！ ダメージ ∞";
+    baseDamage=Infinity; logMessage="☠️ フッ化水素酸！ ∞";
   }
-
-  // ===== 爆薬 =====
   else if(bSelected.length===1&&(bSelected[0].name==="トリニトロトルエン"||bSelected[0].name==="ピクリン酸")){
-    baseDamage=180; logMessage=`💥 ${bSelected[0].name} 起爆！ 180ダメージ`;
-    quizToSet={question:"トリニトロトルエンの略称は？",options:["TNT","RDX","PETN","HMX"],correctIndex:0,explanation:"正解！TNTです。"};
+    baseDamage=180; logMessage=`💥 ${bSelected[0].name} 起爆！ 180`;
+    quizToSet={question:"【受験】TNTの原料となる芳香族は？",options:["トルエン","ベンゼン","フェノール","アニリン"],correctIndex:0,explanation:"正解！トルエンをニトロ化します。"};
   }
-
-  // ===== けん化 =====
-  else if((n.includes("酢酸")&&n.includes("水酸化ナトリウム"))||(n.includes("酢酸")&&n.includes("エタノール")&&n.includes("水酸化ナトリウム"))){
-    baseDamage=hasCatalyst?420:210; appliedEffect="saponification";
-    quizToSet={question:"けん化で生じるトリオールは？",options:["グリセリン","エチレングリコール","フェノール","メタノール"],correctIndex:0,explanation:"正解！グリセリンが生成されます。"};
+  else if(n.includes("水酸化ナトリウム")&&(n.includes("酢酸")||n.includes("酢酸エチル")||n.includes("オレイン酸"))){
+    baseDamage=Math.floor(210*catMul); appliedEffect="saponification";
+    quizToSet={question:"【受験】けん化で油脂から生じるアルコールは？",options:["グリセリン","エタノール","メタノール","フェノール"],correctIndex:0,explanation:"正解！グリセリンです。"};
   }
-
-  // ===== ニトロ化 =====
   else if(n.includes("ベンゼン")&&n.includes("濃硝酸")){
-    baseDamage=hasCatalyst?360:130;
-    quizToSet={question:"ベンゼンのニトロ化生成物は？",options:["ニトロベンゼン","安息香酸","フェノール","クロロベンゼン"],correctIndex:0,explanation:"正解！ニトロベンゼンです。"};
+    baseDamage=Math.floor(130*catMul);
+    quizToSet={question:"【受験】ベンゼンのニトロ化の反応機構は？",options:["求電子置換","求核置換","ラジカル置換","付加"],correctIndex:0,explanation:"正解！ニトロニウムイオンによる求電子置換です。"};
   }
   else if(n.includes("トルエン")&&n.includes("濃硝酸")){
-    baseDamage=hasCatalyst?440:220;
-    quizToSet={question:"トルエンを激しくニトロ化すると？",options:["トリニトロトルエン(TNT)","ピクリン酸","ニトログリセリン","ペルオキシド"],correctIndex:0,explanation:"正解！TNTが生成されます。"};
+    baseDamage=Math.floor(220*catMul);
+    quizToSet={question:"【受験】トルエンがベンゼンよりニトロ化されやすい理由は？",options:["メチル基の電子供与性","メチル基の電子求引性","立体障害","水素結合"],correctIndex:0,explanation:"正解！メチル基がオルト・パラ配向性を示します。"};
   }
   else if(n.includes("フェノール")&&n.includes("濃硝酸")){
-    baseDamage=hasCatalyst?280:150; logMessage="🧪 フェノールのニトロ化！";
-    quizToSet={question:"フェノールをニトロ化すると何が生成されやすい？",options:["ピクリン酸","ニトロベンゼン","アニリン","トルエン"],correctIndex:0,explanation:"正解！ピクリン酸が生成されやすい。"};
+    baseDamage=Math.floor(150*catMul); logMessage="🧪 フェノールのニトロ化";
+    quizToSet={question:"【受験】フェノールが極めてニトロ化されやすい理由は？",options:["OH基の強い電子供与性","OH基の電子求引性","酸性度","沸点"],correctIndex:0,explanation:"正解！OH基が強く活性化します。"};
   }
-
-  // ===== スルホン化 =====
   else if(n.includes("ベンゼン")&&n.includes("濃硫酸")){
-    baseDamage=150;
-    quizToSet={question:"ベンゼンのスルホン化生成物は？",options:["ベンゼンスルホン酸","フェノール","ニトロベンゼン","トルエン"],correctIndex:0,explanation:"正解！ベンゼンスルホン酸です。"};
+    baseDamage=Math.floor(150*catMul);
+    quizToSet={question:"【受験】ベンゼンのスルホン化で生成する化合物は？",options:["ベンゼンスルホン酸","フェノール","ニトロベンゼン","安息香酸"],correctIndex:0,explanation:"正解！ベンゼンスルホン酸です。"};
   }
-  else if(n.includes("ナフタレン")&&n.includes("濃硫酸")){
-    baseDamage=160; logMessage="🧪 ナフタレンのスルホン化！ 160";
+  else if(n.includes("ベンゼン")&&(n.includes("塩素")||n.includes("臭素"))&&(n.includes("鉄")||n.includes("塩化アルミニウム")||hasCatalyst)){
+    baseDamage=Math.floor(140*catMul); logMessage="🧪 ベンゼンのハロゲン化";
+    quizToSet={question:"【受験】ベンゼンの塩素化に触媒として使われるのは？",options:["Fe または FeCl3","NaOH","KMnO4","白金"],correctIndex:0,explanation:"正解！ルイス酸触媒が必要です。"};
   }
-
-  // ===== ハロゲン付加 =====
   else if(n.includes("エチレン")&&(n.includes("臭素")||n.includes("塩素"))){
-    baseDamage=140;
-    quizToSet={question:"エチレンに臭素が付加すると色はどうなる？",options:["赤褐色が消える","赤褐色のまま","黄色になる","無色のまま"],correctIndex:0,explanation:"正解！二重結合に付加して脱色します。"};
+    baseDamage=Math.floor(140*catMul);
+    quizToSet={question:"【受験】エチレンに臭素水を加えるとどうなる？",options:["赤褐色が消える","色が濃くなる","沈殿が生じる","発光する"],correctIndex:0,explanation:"正解！付加反応で脱色します。"};
   }
-  else if(n.includes("シス-2-ブテン")&&n.includes("臭素")){
-    baseDamage=130; logMessage="🧪 シス-2-ブテンへの臭素付加！ 130";
+  else if(n.includes("アセチレン")&&n.includes("臭素")){
+    baseDamage=Math.floor(160*catMul); logMessage="🧪 アセチレンへの臭素付加";
   }
-  else if(n.includes("トランス-2-ブテン")&&n.includes("臭素")){
-    baseDamage=130; logMessage="🧪 トランス-2-ブテンへの臭素付加！ 130";
-  }
-
-  // ===== 重合 =====
   else if(n.includes("エチレン")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=300;
-    quizToSet={question:"エチレンの付加重合で得られる高分子は？",options:["ポリエチレン(PE)","ポリプロピレン(PP)","PET","ポリスチレン"],correctIndex:0,explanation:"正解！ポリエチレンです。"};
+    baseDamage=Math.floor(300*catMul);
+    quizToSet={question:"【受験】Ziegler-Natta触媒で得られるポリエチレンの特徴は？",options:["高密度・直鎖状","低密度・分岐","環状","三次元網目"],correctIndex:0,explanation:"正解！高密度ポリエチレン(HDPE)が得られます。"};
   }
-  else if(n.includes("ビニル基")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=220; logMessage="🧪 ビニル基の重合！ 220";
+  else if(n.includes("スチレン")&&n.includes("重合触媒(Ziegler)")){
+    baseDamage=Math.floor(250*catMul); logMessage="🧪 スチレンの重合 → ポリスチレン";
   }
-
-  // ===== 酸化 =====
-  else if((n.includes("エタノール")||n.includes("アセトアルデヒド"))&&n.includes("過マンガン酸カリウム")){
-    baseDamage=hasCatalyst?340:170; appliedEffect="oxidation";
-    quizToSet={question:"第一級アルコールを強く酸化すると最終的に何になる？",options:["カルボン酸","ケトン","エーテル","アルケン"],correctIndex:0,explanation:"正解！カルボン酸まで酸化されます。"};
+  else if(n.includes("プロピレン")&&n.includes("重合触媒(Ziegler)")){
+    baseDamage=Math.floor(260*catMul); logMessage="🧪 プロピレンの重合 → ポリプロピレン";
+  }
+  else if((n.includes("エタノール")||n.includes("アセトアルデヒド")||n.includes("メタノール"))&&(n.includes("過マンガン酸カリウム")||n.includes("二クロム酸カリウム"))){
+    baseDamage=Math.floor(170*catMul); appliedEffect="oxidation";
+    quizToSet={question:"【受験】第一級アルコールを酸化すると最終的に何になる？",options:["カルボン酸","ケトン","エーテル","アルケン"],correctIndex:0,explanation:"正解！アルデヒドを経てカルボン酸になります。"};
+  }
+  else if(n.includes("2-プロパノール")&&(n.includes("過マンガン酸カリウム")||n.includes("二クロム酸カリウム"))){
+    baseDamage=Math.floor(160*catMul); logMessage="🧪 第二級アルコールの酸化 → ケトン";
+    quizToSet={question:"【受験】第二級アルコールの酸化生成物は？",options:["ケトン","カルボン酸","アルデヒド","エーテル"],correctIndex:0,explanation:"正解！ケトンが生成されます。"};
   }
   else if(n.includes("トルエン")&&n.includes("過マンガン酸カリウム")){
-    baseDamage=190; logMessage="🧪 トルエンの側鎖酸化 → 安息香酸！ 190";
-    quizToSet={question:"トルエンを酸化すると何になる？",options:["安息香酸","フェノール","ベンゼン","アニリン"],correctIndex:0,explanation:"正解！側鎖が酸化されて安息香酸になります。"};
+    baseDamage=Math.floor(190*catMul); logMessage="🧪 トルエン側鎖酸化 → 安息香酸";
+    quizToSet={question:"【受験】トルエンをKMnO4で酸化すると？",options:["安息香酸","フェノール","ベンゼン","ベンズアルデヒド"],correctIndex:0,explanation:"正解！側鎖が酸化され安息香酸になります。"};
   }
-
-  // ===== 金属ナトリウム =====
-  else if(n.includes("エタノール")&&n.includes("金属ナトリウム")){
-    baseDamage=120; logMessage="🧪 エタノール + Na → ナトリウムエトキシド！ 120";
-    quizToSet={question:"アルコールと金属ナトリウムの反応で発生する気体は？",options:["水素","酸素","二酸化炭素","窒素"],correctIndex:0,explanation:"正解！水素が発生します。"};
+  else if((n.includes("エタノール")||n.includes("メタノール")||n.includes("1-プロパノール"))&&n.includes("金属ナトリウム")){
+    baseDamage=Math.floor(120*catMul); logMessage="🧪 アルコール + Na → アルコキシド + H2";
+    quizToSet={question:"【受験】アルコールと金属Naの反応で発生する気体は？",options:["水素","酸素","二酸化炭素","塩素"],correctIndex:0,explanation:"正解！水素が発生します。"};
   }
   else if(n.includes("フェノール")&&n.includes("金属ナトリウム")){
-    baseDamage=140; logMessage="🧪 フェノール + Na → ナトリウムフェノキシド！ 140";
+    baseDamage=Math.floor(140*catMul); logMessage="🧪 フェノール + Na → ナトリウムフェノキシド";
   }
-  else if((n.includes("o-クレゾール")||n.includes("m-クレゾール")||n.includes("p-クレゾール"))&&n.includes("金属ナトリウム")){
-    baseDamage=135; logMessage="🧪 クレゾール + Na → ナトリウム塩生成！ 135";
-  }
-
-  // ===== 芳香族単体・縮合環 =====
-  else if(bSelected.length===1&&bSelected[0].name==="アントラセン"){
-    baseDamage=120; logMessage="⚗️ アントラセンを投擲！ 120";
-  }
-  else if(bSelected.length===1&&bSelected[0].name==="ナフタレン"){
-    baseDamage=55; logMessage="⚗️ ナフタレンを投擲！ 55";
-  }
-  else if(n.includes("ナフタレン")&&n.includes("濃硝酸")){
-    baseDamage=170; logMessage="🧪 ナフタレンのニトロ化！ 170";
-  }
-  else if(n.includes("アントラセン")&&n.includes("濃硝酸")){
-    baseDamage=200; logMessage="🧪 アントラセンのニトロ化！ 200";
-  }
-
-  // ===== 炭化水素基 + 官能基 =====
-  else if(n.includes("メチル基")&&n.includes("ヒドロキシ基")){baseDamage=50; logMessage="🧪 メタノール生成！ 50";}
-  else if(n.includes("エチル基")&&n.includes("ヒドロキシ基")){baseDamage=60; logMessage="🧪 エタノール生成！ 60";}
-  else if(n.includes("プロピル基")&&n.includes("ヒドロキシ基")){baseDamage=65; logMessage="🧪 プロパノール生成！ 65";}
-  else if(n.includes("イソプロピル基")&&n.includes("ヒドロキシ基")){baseDamage=70; logMessage="🧪 イソプロパノール生成！ 70";}
-  else if(n.includes("ブチル基")&&n.includes("ヒドロキシ基")){baseDamage=75; logMessage="🧪 ブタノール生成！ 75";}
-  else if(n.includes("フェニル基")&&n.includes("ヒドロキシ基")){baseDamage=90; logMessage="🧪 フェノール生成！ 90";}
-  else if(n.includes("ベンジル基")&&n.includes("ヒドロキシ基")){baseDamage=80; logMessage="🧪 ベンジルアルコール生成！ 80";}
-  else if(n.includes("ビニル基")&&n.includes("ヒドロキシ基")){baseDamage=70; logMessage="🧪 ビニルアルコール生成！ 70";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("カルボキシ基")){baseDamage=85; logMessage="🧪 カルボン酸生成！ 85";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("アミノ基")){baseDamage=55; logMessage="🧪 アミン生成！ 55";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("アルデヒド基")){baseDamage=70; logMessage="🧪 アルデヒド生成！ 70";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("ニトロ基")){baseDamage=95; logMessage="🧪 ニトロ化合物生成！ 95";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("スルホン基")){baseDamage=90; logMessage="🧪 スルホン酸生成！ 90";}
-  else if((n.includes("メチル基")||n.includes("エチル基")||n.includes("プロピル基")||n.includes("ブチル基"))&&n.includes("ハロゲン基")){baseDamage=65; logMessage="🧪 ハロゲン化アルキル生成！ 65";}
-  else if(n.includes("フェニル基")&&n.includes("カルボキシ基")){baseDamage=100; logMessage="🧪 安息香酸生成！ 100";}
-  else if(n.includes("フェニル基")&&n.includes("アミノ基")){baseDamage=75; logMessage="🧪 アニリン生成！ 75";}
-  else if(n.includes("フェニル基")&&n.includes("ニトロ基")){baseDamage=110; logMessage="🧪 ニトロベンゼン生成！ 110";}
-  else if(n.includes("フェニル基")&&n.includes("スルホン基")){baseDamage=105; logMessage="🧪 ベンゼンスルホン酸生成！ 105";}
-  else if(n.includes("フェニル基")&&n.includes("ハロゲン基")){baseDamage=80; logMessage="🧪 ハロゲン化ベンゼン生成！ 80";}
-  else if(n.includes("ベンジル基")&&n.includes("カルボキシ基")){baseDamage=95; logMessage="🧪 フェニル酢酸生成！ 95";}
-  else if(n.includes("ベンジル基")&&n.includes("アミノ基")){baseDamage=70; logMessage="🧪 ベンジルアミン生成！ 70";}
-
-  // ===== フェノール類単体 =====
-  else if(bSelected.length===1&&["フェノール","o-クレゾール","m-クレゾール","p-クレゾール","カテコール","レゾルシノール","ヒドロキノン","ピロガロール","フロログルシノール"].includes(bSelected[0].name)){
-    baseDamage=bSelected[0].attackPower; logMessage=`⚗️ ${bSelected[0].name} を投擲！ ${baseDamage}`;
-  }
-
-  // ===== シス-トランス =====
-  else if(n.includes("マレイン酸")&&n.includes("フマル酸")){
-    baseDamage=100; logMessage="🧪 シス-トランス異性体の反応！ 100";
-  }
-  else if(bSelected.length===1&&["マレイン酸","フマル酸","オレイン酸","スチルベン"].includes(bSelected[0].name)){
-    baseDamage=bSelected[0].attackPower; logMessage=`⚗️ ${bSelected[0].name} を投擲！ ${baseDamage}`;
-  }
-
-  // ===== 単体・回復 =====
+  else if(n.includes("メチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(50*catMul); logMessage="🧪 メタノール生成";}
+  else if(n.includes("エチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(60*catMul); logMessage="🧪 エタノール生成";}
+  else if(n.includes("フェニル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(90*catMul); logMessage="🧪 フェノール生成";}
+  else if(n.includes("フェニル基")&&n.includes("ニトロ基")){baseDamage=Math.floor(110*catMul); logMessage="🧪 ニトロベンゼン生成";}
+  else if(n.includes("フェニル基")&&n.includes("カルボキシ基")){baseDamage=Math.floor(100*catMul); logMessage="🧪 安息香酸生成";}
+  else if(n.includes("フェニル基")&&n.includes("アミノ基")){baseDamage=Math.floor(75*catMul); logMessage="🧪 アニリン生成";}
   else if(bSelected.length===1){
     const s=bSelected[0];
     if(s.healPower>0){baseHeal=s.healPower; logMessage=`🧪 ${s.name} 吸収！ +${baseHeal}`;}
@@ -698,19 +734,14 @@ function executePlayerAttack(){
     else logMessage="⚠️ 不活性な組み合わせ";
   }
 
-  // ボス条件
   if(bossCond && baseDamage>0 && baseDamage!==Infinity){
     const attrs=bSelected.map(c=>c.attribute);
     const ok=attrs.includes(bossCond) || (product && product.attribute===bossCond) ||
-             (bossCond==="Ester"&&(n.includes("酢酸")&&n.includes("エタノール"))) ||
-             (bossCond==="Alcohol"&&(n.includes("エタノール")||n.includes("ヒドロキシ基")));
-    if(!ok){
-      baseDamage=0;
-      logMessage+=`\n❌ ボス条件「${bossCond}系のみ」を満たしていないため無効！`;
-    }
+             (bossCond==="Ester"&&n.includes("酢酸")&&n.includes("エタノール")) ||
+             (bossCond==="Alcohol"&&(n.includes("エタノール")||n.includes("ヒドロキシ基")||n.includes("メタノール")));
+    if(!ok){ baseDamage=0; logMessage+=`\n❌ ボス条件「${bossCond}系のみ」を満たさず無効`; }
   }
 
-  // 弱点
   let weaknessBonus=1.0;
   if(gameState.currentMonster?.weakness){
     const attrs=bSelected.map(c=>c.attribute);
@@ -824,7 +855,7 @@ function renderDeckEdit(){
     const div=document.createElement('div'); div.className=`deck-item ${inD>0?'in-deck':''}`;
     div.innerHTML=`<div style="display:flex;gap:6px;align-items:center"><span class="card-rarity rarity-${card.rarity}">${card.rarity}</span><div><div style="font-size:13px;font-weight:bold;color:${inD>0?'#4ade80':'#fff'}">${name} [${inD}/${owned}]</div><div style="font-size:9px;color:#888">${card.formula} | ${val}</div></div></div>
       <div style="display:flex;gap:4px">${inD>0?`<button class="action-btn" style="color:#ef4444" onclick="removeFromDeck('${name}')">➖</button>`:''}
-      <button class="action-btn" style="color:${inD<owned&&gameState.currentDeck.length<40?'#3b82f6':'#555'}" onclick="addToDeck('${name}')" ${inD>=owned||gameState.currentDeck.length>=40?'disabled':''}>➕</button></div>`;
+      <button class="action-btn" style="color:${inD<owned&&gameState.currentDeck.length<50?'#3b82f6':'#555'}" onclick="addToDeck('${name}')" ${inD>=owned||gameState.currentDeck.length>=50?'disabled':''}>➕</button></div>`;
     list.appendChild(div);
   });
   const btn=document.getElementById('deck-done-btn');
@@ -835,7 +866,7 @@ function addToDeck(name){
   const owned=gameState.collection.filter(c=>c.name===name).length;
   const inD=gameState.currentDeck.filter(c=>c.name===name).length;
   const card=gameState.collection.find(c=>c.name===name);
-  if(card&&gameState.currentDeck.length<40&&inD<owned){gameState.currentDeck.push({...card,id:Math.random().toString(36).substr(2,9)});renderDeckEdit();}
+  if(card&&gameState.currentDeck.length<50&&inD<owned){gameState.currentDeck.push({...card,id:Math.random().toString(36).substr(2,9)});renderDeckEdit();}
 }
 function removeFromDeck(name){const i=gameState.currentDeck.findIndex(c=>c.name===name); if(i>=0){gameState.currentDeck.splice(i,1);renderDeckEdit();}}
 function finishDeckEdit(){if(gameState.currentDeck.length<20){alert('最低20枚必要');return;} switchState('field');}
