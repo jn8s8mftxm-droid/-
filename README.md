@@ -3,84 +3,194 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>有機化学バトルワールド - 拡張版</title>
+<title>有機化学バトルフィールド</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;user-select:none;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
-body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-tap-highlight-color:transparent;
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-weight:400}
+body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef7}
 .screen{display:none;width:100%;height:100%;position:absolute;top:0;left:0}
 .active{display:flex;flex-direction:column}
-.glass-btn{background:linear-gradient(135deg,#3b82f6,#9333ea);border:none;color:#fff;padding:10px 16px;font-weight:bold;font-size:14px;border-radius:14px;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.4)}
-.glass-btn:active{transform:scale(.95)}
-.glass-btn:disabled{opacity:.5;cursor:not-allowed}
-#deck-select-screen{background:linear-gradient(to bottom,#1a263f,#000);padding:40px 20px;align-items:center;justify-content:flex-start;gap:20px;text-align:center}
-.select-card{background:linear-gradient(to right,#059669,#0d9488);border-radius:18px;padding:16px;margin-bottom:16px;text-align:left;cursor:pointer;box-shadow:0 4px 8px rgba(0,0,0,.3);width:100%;max-width:400px}
-.select-card.red{background:linear-gradient(to right,#ea580c,#dc2626)}
-.select-card.purple{background:linear-gradient(to right,#9333ea,#2563eb)}
-.badge{background:rgba(255,255,255,.2);font-size:10px;font-weight:bold;padding:2px 6px;border-radius:6px}
+.glass-btn{
+  background:linear-gradient(145deg,rgba(56,189,248,.25),rgba(99,102,241,.35));
+  border:1px solid rgba(148,163,184,.35); color:#f1f5f9;
+  padding:10px 16px; font-weight:400; font-size:13px; border-radius:12px; cursor:pointer;
+  box-shadow:0 4px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter:blur(8px);
+}
+.glass-btn:active{transform:scale(.96)}
+.glass-btn:disabled{opacity:.4;cursor:not-allowed}
+.glass-btn.primary{background:linear-gradient(145deg,#0ea5e9,#6366f1);border-color:rgba(125,211,252,.5)}
+.glass-btn.danger{background:linear-gradient(145deg,#ef4444,#b91c1c);border-color:rgba(252,165,165,.4)}
+.glass-btn.success{background:linear-gradient(145deg,#10b981,#059669);border-color:rgba(110,231,183,.4)}
+.glass-btn.warn{background:linear-gradient(145deg,#f59e0b,#d97706);border-color:rgba(252,211,77,.4)}
+.glass-btn.pink{background:linear-gradient(145deg,#ec4899,#a855f7);border-color:rgba(244,114,182,.4)}
+.glass-btn.slate{background:linear-gradient(145deg,#475569,#334155);border-color:rgba(148,163,184,.3)}
+.glass-btn.orange{background:linear-gradient(145deg,#ea580c,#ef4444);border-color:rgba(253,186,116,.5)}
+
+#deck-select-screen{
+  background:radial-gradient(ellipse at 30% 20%,#1e3a5f 0%,#0b1220 45%,#05080f 100%);
+  padding:36px 20px; align-items:center; justify-content:flex-start; gap:18px; text-align:center;
+}
+#deck-select-screen h2{
+  font-size:22px; letter-spacing:.04em; font-weight:400;
+  background:linear-gradient(90deg,#7dd3fc,#a5b4fc,#c4b5fd);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+}
+.select-card{
+  border-radius:18px; padding:16px 18px; margin-bottom:14px; text-align:left; cursor:pointer;
+  width:100%; max-width:400px; border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 8px 28px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.15);
+}
+.select-card:active{transform:scale(.98)}
+.select-card.purple{background:linear-gradient(135deg,#5b21b6,#1d4ed8)}
+.select-card.red{background:linear-gradient(135deg,#c2410c,#b91c1c)}
+.select-card.green{background:linear-gradient(135deg,#047857,#0f766e)}
+.badge{display:inline-block;background:rgba(255,255,255,.18);font-size:10px;padding:3px 8px;border-radius:999px}
+
 #field-screen{position:relative;width:100%;height:100%}
 #canvas-container{width:100%;height:100%}
-.field-ui{position:absolute;top:0;left:0;width:100%;padding:40px 16px 0;display:flex;justify-content:space-between;pointer-events:none;z-index:5}
+.field-ui{
+  position:absolute; top:0; left:0; width:100%; padding:36px 14px 0;
+  display:flex; justify-content:space-between; pointer-events:none; z-index:5; gap:10px;
+}
 .field-ui *{pointer-events:auto}
-.status-box{background:rgba(0,0,0,.65);padding:10px;border-radius:12px;font-size:13px;font-weight:bold}
-#battle-screen{background:linear-gradient(to bottom,#0f172a,#1e293b);padding:16px 12px 14px;justify-content:space-between}
-.battle-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
-#lab-canvas-container{width:100%;height:160px;border-radius:14px;border:2px solid #06b6d4;overflow:hidden;background:#0284c711;position:relative}
-.battle-log-box{background:rgba(15,23,42,.85);border:1px solid #334155;border-radius:12px;padding:10px;min-height:52px;font-size:12px;text-align:center;display:flex;align-items:center;justify-content:center;white-space:pre-line;margin:6px 0}
-.quiz-box{background:rgba(147,51,234,.4);border:1px solid #a855f7;border-radius:12px;padding:10px;text-align:center;display:flex;flex-direction:column;gap:8px}
+.status-box{
+  background:rgba(8,12,22,.72); padding:12px 14px; border-radius:14px; font-size:13px;
+  border:1px solid rgba(148,163,184,.25); backdrop-filter:blur(12px);
+  box-shadow:0 8px 24px rgba(0,0,0,.35); min-width:150px;
+}
+.field-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:230px}
+.mini-btn{padding:8px 11px;font-size:11px}
+
+#battle-screen{
+  background:radial-gradient(ellipse at 50% 0%,#1e293b 0%,#0f172a 40%,#020617 100%);
+  padding:14px 12px 12px; justify-content:space-between;
+}
+.battle-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+#lab-canvas-container{
+  width:100%; height:158px; border-radius:16px; overflow:hidden; position:relative;
+  border:1px solid rgba(56,189,248,.35);
+  box-shadow:0 0 24px rgba(14,165,233,.15), inset 0 0 40px rgba(14,165,233,.06);
+  background:linear-gradient(180deg,#0c1a2e,#071018);
+}
+.battle-log-box{
+  background:rgba(15,23,42,.88); border:1px solid rgba(71,85,105,.6); border-radius:14px;
+  padding:11px 12px; min-height:54px; font-size:12px; text-align:center;
+  display:flex; align-items:center; justify-content:center; white-space:pre-line; margin:6px 0;
+}
+.quiz-box{
+  background:rgba(88,28,135,.45); border:1px solid rgba(192,132,252,.5); border-radius:14px;
+  padding:12px; text-align:center; display:flex; flex-direction:column; gap:8px;
+}
 .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.quiz-btn{background:rgba(37,99,235,.85);border:none;color:#fff;padding:8px;border-radius:8px;font-size:11px;font-weight:bold;cursor:pointer}
-.hand-container{overflow-x:auto;display:flex;gap:7px;padding:5px 0}
-.card{min-width:84px;width:84px;height:112px;background:#fff;color:#000;border-radius:10px;padding:4px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;box-shadow:0 3px 5px rgba(0,0,0,.3)}
-.card.selected{background:#fde047;box-shadow:0 0 10px #fde047;transform:translateY(-4px)}
-.card-rarity{font-size:8px;font-weight:bold;padding:1px 4px;border-radius:3px;color:#fff;width:fit-content}
-.rarity-SSR{background:#f97316}.rarity-SR{background:#a855f7}.rarity-R{background:#3b82f6}
-.rarity-SSSR{background:linear-gradient(90deg,#ff0000,#ff00ff);animation:rainbow 1.5s linear infinite}
-.card-attr{font-size:8px;color:#666}
-@keyframes rainbow{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(360deg)}}
-#deck-edit-screen{background:#111;padding:36px 14px 10px;height:100%;overflow:hidden}
-.deck-list{flex:1;overflow-y:auto;margin-top:8px;max-height:65vh}
-.deck-item{display:flex;justify-content:space-between;align-items:center;background:#222;padding:7px 9px;margin-bottom:5px;border-radius:8px}
-.deck-item.in-deck{background:rgba(34,197,94,.12)}
-.action-btn{background:none;border:none;font-size:17px;cursor:pointer}
-.info-box{background:rgba(30,30,30,.9);border:1px solid #444;border-radius:10px;padding:9px;margin-top:7px;overflow-y:auto;font-size:11px;line-height:1.45}
-.info-title{font-weight:bold;color:#facc15;margin-bottom:5px;font-size:12px}
-#gacha-screen{background:linear-gradient(to bottom,#1a0d26,#000);padding:28px 14px 18px;align-items:center;gap:11px;overflow-y:auto}
-.gacha-card-view{width:230px;height:170px;border-radius:14px;border:2px solid #a855f7;background:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:10px}
+.quiz-btn{
+  background:linear-gradient(145deg,rgba(37,99,235,.9),rgba(67,56,202,.9));
+  border:1px solid rgba(147,197,253,.35); color:#fff; padding:9px; border-radius:10px;
+  font-size:11px; cursor:pointer;
+}
+.hand-container{overflow-x:auto;display:flex;gap:8px;padding:6px 2px 4px}
+.card{
+  min-width:86px; width:86px; height:116px; border-radius:12px; padding:6px;
+  display:flex; flex-direction:column; justify-content:space-between; cursor:pointer;
+  background:linear-gradient(160deg,#ffffff 0%,#f1f5f9 100%); color:#0f172a;
+  box-shadow:0 6px 16px rgba(0,0,0,.35);
+}
+.card.selected{
+  background:linear-gradient(160deg,#fef08a,#fde047);
+  box-shadow:0 0 0 2px #facc15, 0 8px 20px rgba(250,204,21,.35);
+  transform:translateY(-6px);
+}
+.card-rarity{font-size:8px;padding:2px 5px;border-radius:4px;color:#fff;width:fit-content}
+.rarity-SSR{background:linear-gradient(90deg,#f97316,#ea580c)}
+.rarity-SR{background:linear-gradient(90deg,#a855f7,#7c3aed)}
+.rarity-R{background:linear-gradient(90deg,#3b82f6,#2563eb)}
+.rarity-SSSR{background:linear-gradient(90deg,#ff006e,#8338ec,#3a86ff);animation:rainbow 2s linear infinite;background-size:200% 100%}
+.card-attr{font-size:8px;color:#64748b}
+@keyframes rainbow{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+
+#deck-edit-screen{background:#0a0f1a;padding:32px 14px 10px;height:100%;overflow:hidden}
+.deck-list{flex:1;overflow-y:auto;margin-top:8px;max-height:42vh}
+.deck-item{
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(30,41,59,.85); padding:9px 11px; margin-bottom:6px; border-radius:11px;
+  border:1px solid rgba(71,85,105,.4);
+}
+.deck-item.in-deck{background:rgba(16,185,129,.12); border-color:rgba(52,211,153,.35)}
+.action-btn{background:none;border:none;font-size:17px;cursor:pointer;padding:4px}
+.info-box{
+  background:rgba(15,23,42,.9); border:1px solid rgba(71,85,105,.5); border-radius:12px;
+  padding:10px; margin-top:8px; overflow-y:auto; font-size:11px; line-height:1.5;
+}
+.info-title{color:#fbbf24;margin-bottom:6px;font-size:12px}
+.synth-bar-wrap{background:rgba(30,41,59,.9);border-radius:10px;padding:10px 12px;margin:8px 0;border:1px solid rgba(56,189,248,.25)}
+.synth-bar-bg{height:8px;background:#1e293b;border-radius:999px;overflow:hidden;margin-top:6px}
+.synth-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#22d3ee,#818cf8);transition:width .3s}
+
+#gacha-screen{
+  background:radial-gradient(ellipse at 50% 0%,#2e1065 0%,#0f0520 50%,#05080f 100%);
+  padding:28px 14px 18px; align-items:center; gap:12px; overflow-y:auto;
+}
+.gacha-card-view{
+  width:240px; height:180px; border-radius:16px; border:1px solid rgba(168,85,247,.45);
+  background:linear-gradient(160deg,rgba(88,28,135,.35),rgba(15,23,42,.8));
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding:12px;
+  box-shadow:0 0 32px rgba(168,85,247,.2);
+}
 .battle-actions{display:flex;gap:6px;justify-content:center;margin-top:6px;flex-wrap:wrap}
-.choice-box{background:rgba(15,23,42,.95);border:2px solid #facc15;border-radius:14px;padding:14px;text-align:center;display:none;flex-direction:column;gap:10px;position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);width:85%;max-width:320px;z-index:50}
-#reaction-list-screen,#zukan-screen,#achieve-screen,#history-screen,#update-screen{background:#0f172a;padding:24px 14px 18px;overflow:hidden}
-.scroll-panel{flex:1;overflow-y:auto;background:rgba(30,30,30,.9);border:1px solid #444;border-radius:12px;padding:12px;font-size:12px;line-height:1.55;color:#ddd;margin:8px 0}
-.zukan-item{background:#1e293b;border-radius:10px;padding:10px;margin-bottom:8px;border-left:4px solid #3b82f6}
-.achieve-item{background:#1e293b;border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.achieve-item.done{border-left:4px solid #22c55e}
-.achieve-item.locked{opacity:.5;border-left:4px solid #64748b}
-.longpress-popup{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;background:#0f172a;border:2px solid #38bdf8;border-radius:14px;padding:14px;z-index:100;max-height:60vh;overflow-y:auto}
-.field-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;max-width:220px}
-.mini-btn{padding:7px 10px;font-size:11px}
-.update-item{background:#1e293b;border-radius:10px;padding:10px 12px;margin-bottom:8px;border-left:4px solid #38bdf8}
+.choice-box{
+  background:rgba(15,23,42,.96); border:1px solid rgba(250,204,21,.55); border-radius:16px;
+  padding:16px; text-align:center; display:none; flex-direction:column; gap:10px;
+  position:absolute; left:50%; top:38%; transform:translate(-50%,-50%); width:86%; max-width:320px; z-index:50;
+  box-shadow:0 20px 50px rgba(0,0,0,.55);
+}
+#reaction-list-screen,#zukan-screen,#achieve-screen,#history-screen{
+  background:linear-gradient(180deg,#0f172a,#020617); padding:24px 14px 18px; overflow:hidden;
+}
+.scroll-panel{
+  flex:1; overflow-y:auto; background:rgba(15,23,42,.85); border:1px solid rgba(71,85,105,.45);
+  border-radius:14px; padding:12px; font-size:12px; line-height:1.55; color:#cbd5e1; margin:8px 0;
+}
+.zukan-item{
+  background:rgba(30,41,59,.8); border-radius:12px; padding:11px; margin-bottom:8px;
+  border:1px solid rgba(71,85,105,.35); border-left:3px solid #38bdf8;
+}
+.achieve-item{
+  background:rgba(30,41,59,.8); border-radius:12px; padding:11px; margin-bottom:8px;
+  display:flex; justify-content:space-between; align-items:center; border:1px solid rgba(71,85,105,.35);
+}
+.achieve-item.done{border-left:3px solid #22c55e}
+.achieve-item.locked{opacity:.55;border-left:3px solid #64748b}
+.longpress-popup{
+  display:none; position:fixed; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:88%; max-width:340px; background:rgba(15,23,42,.97); border:1px solid rgba(56,189,248,.5);
+  border-radius:16px; padding:16px; z-index:100; max-height:60vh; overflow-y:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);
+}
 </style>
 </head>
 <body>
 
 <div id="deck-select-screen" class="screen active">
-  <h2>有機化学バトルワールド</h2>
-  <p style="font-size:13px;color:#aaa">初期スターターデッキを選択してください</p>
+  <h2>有機化学バトルフィールド</h2>
+  <p style="font-size:13px;color:#94a3b8">初期スターターデッキを選択してください</p>
   <div style="width:100%;max-width:400px">
     <div class="select-card purple" onclick="assignStarterDeck('Aromatic')">
       <span class="badge">ベンゼン・濃硝酸・回復薬品</span>
-      <h3 style="margin:4px 0">芳香族・置換反応デッキ</h3>
-      <p style="font-size:11px;opacity:.85">ニトロ化・スルホン化で超高火力を狙う専門デッキ！</p>
+      <h3 style="margin:6px 0 4px;font-size:16px;font-weight:400">芳香族・置換反応デッキ</h3>
+      <p style="font-size:11px;opacity:.9;line-height:1.4">ニトロ化・スルホン化で超高火力を狙う専門デッキ！</p>
     </div>
     <div class="select-card red" onclick="assignStarterDeck('Polymer')">
       <span class="badge">エチレン・臭素・回復薬品</span>
-      <h3 style="margin:4px 0">付加・高分子デッキ</h3>
-      <p style="font-size:11px;opacity:.85">ハロゲン付加や付加重合を使うバランス型</p>
+      <h3 style="margin:6px 0 4px;font-size:16px;font-weight:400">付加・高分子デッキ</h3>
+      <p style="font-size:11px;opacity:.9;line-height:1.4">ハロゲン付加や付加重合を使うバランス型</p>
     </div>
-    <div class="select-card" onclick="assignStarterDeck('Redox')">
+    <div class="select-card green" onclick="assignStarterDeck('Redox')">
       <span class="badge">アルコール・酢酸・回復薬品</span>
-      <h3 style="margin:4px 0">酸化・エステル・コントロール</h3>
-      <p style="font-size:11px;opacity:.85">エステル化やけん化反応でテクニカルに勝利！</p>
+      <h3 style="margin:6px 0 4px;font-size:16px;font-weight:400">酸化・エステル・コントロール</h3>
+      <p style="font-size:11px;opacity:.9;line-height:1.4">エステル化やけん化反応でテクニカルに勝利！</p>
     </div>
   </div>
 </div>
@@ -90,19 +200,18 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
   <div class="field-ui">
     <div class="status-box">
       <div>🧪 試薬: <span id="field-reagents">150</span></div>
-      <div style="color:#4ade80">❤️ HP: <span id="field-hp">200</span></div>
-      <div style="color:#facc15;font-size:12px">🎓 <span id="field-rank">初学者</span> (撃破 <span id="field-kills">0</span>)</div>
-      <div id="daily-hint" style="font-size:10px;color:#67e8f9;margin-top:4px"></div>
+      <div style="color:#4ade80;margin-top:3px">❤️ HP: <span id="field-hp">200</span></div>
+      <div style="color:#fbbf24;font-size:12px;margin-top:3px">🎓 <span id="field-rank">初学者</span> · 撃破 <span id="field-kills">0</span></div>
+      <div id="daily-hint" style="font-size:10px;color:#67e8f9;margin-top:6px"></div>
     </div>
     <div class="field-btns">
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#10b981,#059669)" onclick="saveGame()">セーブ</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#6366f1,#4f46e5)" onclick="loadGame()">ロード</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#06b6d4,#3b82f6)" onclick="switchState('deckEdit')">デッキ</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#ec4899,#a855f7)" onclick="switchState('gacha')">ガチャ</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#f59e0b,#d97706)" onclick="switchState('zukan')">図鑑</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#84cc16,#65a30d)" onclick="switchState('achieve')">実績</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#14b8a6,#0d9488)" onclick="startPractice()">練習</button>
-      <button class="glass-btn mini-btn" style="background:linear-gradient(135deg,#64748b,#334155)" onclick="switchState('update')">アップデート</button>
+      <button class="glass-btn mini-btn success" onclick="saveGame()">セーブ</button>
+      <button class="glass-btn mini-btn" style="background:linear-gradient(145deg,#6366f1,#4f46e5)" onclick="loadGame()">ロード</button>
+      <button class="glass-btn mini-btn primary" onclick="switchState('deckEdit')">デッキ</button>
+      <button class="glass-btn mini-btn pink" onclick="switchState('gacha')">ガチャ</button>
+      <button class="glass-btn mini-btn warn" onclick="switchState('zukan')">図鑑</button>
+      <button class="glass-btn mini-btn" style="background:linear-gradient(145deg,#84cc16,#65a30d);border-color:rgba(190,242,100,.35)" onclick="switchState('achieve')">実績</button>
+      <button class="glass-btn mini-btn" style="background:linear-gradient(145deg,#14b8a6,#0d9488)" onclick="startPractice()">練習</button>
     </div>
   </div>
 </div>
@@ -110,131 +219,126 @@ body,html{width:100%;height:100%;overflow:hidden;background:#000;color:#fff}
 <div id="battle-screen" class="screen">
   <div class="battle-header">
     <div>
-      <div style="color:#4ade80;font-weight:bold">🧑 HP: <span id="battle-player-hp">200</span></div>
-      <div style="color:#06b6d4;font-size:11px">📚 山札: <span id="battle-deck-count">0</span></div>
-      <div id="next-bonus" style="font-size:11px;color:#facc15;display:none">次ターン火力UP</div>
-      <div id="dot-status" style="font-size:11px;color:#f87171;display:none">☠️ ボツリヌス毒素 毎ターン200</div>
-      <div id="turn-limit" style="font-size:11px;color:#f472b6;display:none"></div>
+      <div style="color:#4ade80">🧑 HP: <span id="battle-player-hp">200</span></div>
+      <div style="color:#38bdf8;font-size:11px;margin-top:2px">📚 山札: <span id="battle-deck-count">0</span></div>
+      <div id="next-bonus" style="font-size:11px;color:#fbbf24;display:none;margin-top:2px">次ターン火力UP</div>
+      <div id="dot-status" style="font-size:11px;color:#f87171;display:none;margin-top:2px">☠️ ボツリヌス毒素 毎ターン200</div>
+      <div id="turn-limit" style="font-size:11px;color:#f472b6;display:none;margin-top:2px"></div>
     </div>
     <div style="text-align:right">
-      <div style="font-size:12px;color:#aaa">👾 <span id="monster-name">敵</span> Lv.<span id="monster-level">1</span></div>
-      <div style="color:#ef4444;font-weight:bold;font-size:15px"><span id="monster-hp">500</span> / <span id="monster-maxhp">500</span></div>
-      <div id="monster-weak" style="font-size:10px;color:#f97316"></div>
-      <div id="monster-cond" style="font-size:10px;color:#f472b6"></div>
+      <div style="font-size:12px;color:#94a3b8">👾 <span id="monster-name">敵</span> Lv.<span id="monster-level">1</span></div>
+      <div style="color:#f87171;font-size:15px;margin-top:2px"><span id="monster-hp">500</span> / <span id="monster-maxhp">500</span></div>
+      <div id="monster-weak" style="font-size:10px;color:#fb923c;margin-top:2px"></div>
+      <div id="monster-cond" style="font-size:10px;color:#e879f9;margin-top:1px"></div>
     </div>
   </div>
   <div id="lab-canvas-container"></div>
   <div id="quiz-container" class="quiz-box" style="display:none">
-    <div style="font-size:11px;color:#facc15;font-weight:bold">📝 クイズ（正解で1.5倍）</div>
-    <div id="quiz-question" style="font-size:13px;font-weight:bold"></div>
+    <div style="font-size:11px;color:#e9d5ff">📝 クイズ（正解で1.5倍）</div>
+    <div id="quiz-question" style="font-size:13px"></div>
     <div id="quiz-options" class="quiz-options"></div>
   </div>
   <div id="battle-log" class="battle-log-box">バトル開始！</div>
   <div>
-    <div style="font-size:10px;color:#aaa;margin-bottom:2px">手札 (<span id="hand-count">0</span>/7)　※長押しで反応ヒント</div>
+    <div style="font-size:10px;color:#94a3b8;margin-bottom:3px">手札 (<span id="hand-count">0</span>/7)　※長押しで反応ヒント</div>
     <div id="hand-cards" class="hand-container"></div>
   </div>
   <div class="battle-actions">
-    <button id="attack-btn" class="glass-btn" style="background:linear-gradient(135deg,#ea580c,#ef4444);flex:1;padding:10px;font-size:13px" onclick="executePlayerAttack()">化学反応実行</button>
-    <button id="skip-btn" class="glass-btn" style="background:linear-gradient(135deg,#64748b,#475569);width:78px;padding:10px;font-size:12px" onclick="skipTurn()">ターン終了</button>
-    <button id="flee-btn" class="glass-btn" style="background:linear-gradient(135deg,#dc2626,#991b1b);width:70px;padding:10px;font-size:12px" onclick="fleeBattle()">逃げる</button>
-    <button class="glass-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);width:78px;padding:10px;font-size:12px" onclick="openReactionList()">反応一覧</button>
-    <button class="glass-btn" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);width:70px;padding:10px;font-size:12px" onclick="openHistory()">履歴</button>
+    <button id="attack-btn" class="glass-btn orange" style="flex:1;padding:11px;font-size:13px" onclick="executePlayerAttack()">化学反応実行</button>
+    <button id="skip-btn" class="glass-btn slate" style="width:78px;padding:11px;font-size:12px" onclick="skipTurn()">ターン終了</button>
+    <button id="flee-btn" class="glass-btn danger" style="width:70px;padding:11px;font-size:12px" onclick="fleeBattle()">逃げる</button>
+    <button class="glass-btn primary" style="width:78px;padding:11px;font-size:12px" onclick="openReactionList()">反応一覧</button>
+    <button class="glass-btn" style="background:linear-gradient(145deg,#8b5cf6,#6d28d9);width:70px;padding:11px;font-size:12px" onclick="openHistory()">履歴</button>
   </div>
   <div id="choice-box" class="choice-box">
-    <div style="font-weight:bold;color:#facc15" id="choice-title">中間物質が生成された！</div>
+    <div style="color:#fbbf24" id="choice-title">中間物質が生成された！</div>
     <div id="choice-desc" style="font-size:13px"></div>
     <div style="display:flex;gap:10px;justify-content:center">
-      <button class="glass-btn" style="background:linear-gradient(135deg,#ea580c,#ef4444)" onclick="chooseAttack()">攻撃する</button>
-      <button class="glass-btn" style="background:linear-gradient(135deg,#10b981,#059669)" onclick="chooseAddToHand()">手札に加える</button>
+      <button class="glass-btn orange" onclick="chooseAttack()">攻撃する</button>
+      <button class="glass-btn success" onclick="chooseAddToHand()">手札に加える</button>
     </div>
   </div>
 </div>
 
 <div id="reaction-list-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <h3 style="color:#facc15">📖 反応一覧</h3>
-    <button class="glass-btn" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);padding:8px 14px" onclick="closeReactionList()">バトルに戻る</button>
+    <h3 style="color:#fbbf24;font-weight:400">📖 反応一覧</h3>
+    <button class="glass-btn primary" style="padding:8px 14px" onclick="closeReactionList()">戻る</button>
   </div>
   <div id="full-reaction-list" class="scroll-panel"></div>
 </div>
 
 <div id="history-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <h3 style="color:#c4b5fd">📜 バトル履歴</h3>
-    <button class="glass-btn" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);padding:8px 14px" onclick="closeHistory()">戻る</button>
+    <h3 style="color:#c4b5fd;font-weight:400">📜 バトル履歴</h3>
+    <button class="glass-btn" style="background:linear-gradient(145deg,#8b5cf6,#6d28d9);padding:8px 14px" onclick="closeHistory()">戻る</button>
   </div>
   <div id="history-list" class="scroll-panel" style="white-space:pre-line"></div>
 </div>
 
 <div id="zukan-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <h3 style="color:#fbbf24">📘 化合物図鑑 (<span id="zukan-count">0</span>)</h3>
-    <button class="glass-btn" style="background:#333;padding:8px 14px" onclick="switchState('field')">戻る</button>
+    <h3 style="color:#fbbf24;font-weight:400">📘 化合物図鑑 (<span id="zukan-count">0</span>)</h3>
+    <button class="glass-btn slate" style="padding:8px 14px" onclick="switchState('field')">戻る</button>
   </div>
   <div id="zukan-list" class="scroll-panel"></div>
 </div>
 
 <div id="achieve-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
-    <h3 style="color:#a3e635">🏅 実績</h3>
-    <button class="glass-btn" style="background:#333;padding:8px 14px" onclick="switchState('field')">戻る</button>
+    <h3 style="color:#a3e635;font-weight:400">🏅 実績</h3>
+    <button class="glass-btn slate" style="padding:8px 14px" onclick="switchState('field')">戻る</button>
   </div>
   <div id="achieve-list" class="scroll-panel"></div>
 </div>
 
-<!-- アップデート内容画面（追加のみ） -->
-<div id="update-screen" class="screen">
-  <div style="display:flex;justify-content:space-between;align-items:center">
-    <h3 style="color:#94a3b8">📋 アップデート内容</h3>
-    <button class="glass-btn" style="background:#333;padding:8px 14px" onclick="switchState('field')">戻る</button>
-  </div>
-  <div class="scroll-panel">
-    <div class="update-item"><b>1. 図鑑</b><br>入手した化合物を一覧表示。構造式・色・匂い・威力などを確認できます。</div>
-    <div class="update-item"><b>2. 実績</b><br>撃破数・反応成功・収集数などの条件を達成すると試薬を獲得できます。</div>
-    <div class="update-item"><b>3. 練習モード</b><br>敵なしで反応を自由に試せます。「逃げる」でいつでも終了可能です。</div>
-    <div class="update-item"><b>4. ターン制ボス</b><br>ボス戦にターン制限を追加。制限内に倒さないと敗北します。終盤は敵が強化されます。</div>
-    <div class="update-item"><b>5. 日替わり反応</b><br>毎日お題の反応が提示されます。成功すると試薬を獲得できます。</div>
-    <div class="update-item"><b>6. 助教・准教授ランク</b><br>ランクに「助教」「准教授」を追加。昇格時に試薬ボーナスがあります。</div>
-    <div class="update-item"><b>7. 油脂・アセチル化・脱水</b><br>油脂（トリパルミチン等）、アセチル化、脱水反応と関連化合物を追加しました。</div>
-    <div class="update-item"><b>8. バトル履歴</b><br>バトル中に「履歴」ボタンで直近のログを確認できます。</div>
-    <div class="update-item"><b>9. デッキ並べ替え</b><br>デッキ編集画面で名前順・レア順・火力順に並べ替えできます。</div>
-    <div class="update-item"><b>10. 長押し反応ヒント</b><br>手札のカードを長押しすると「このカードでできる反応」を表示します。</div>
-  </div>
-</div>
-
 <div id="deck-edit-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
-    <div><h3>デッキ編集 (<span id="deck-count">0</span>/50)</h3><p style="font-size:11px;color:#888">最低20枚 ／ 最大50枚</p></div>
-    <div style="display:flex;gap:6px">
-      <button class="glass-btn mini-btn" style="background:#475569" onclick="sortDeck('name')">名前順</button>
-      <button class="glass-btn mini-btn" style="background:#475569" onclick="sortDeck('rarity')">レア順</button>
-      <button class="glass-btn mini-btn" style="background:#475569" onclick="sortDeck('power')">火力順</button>
-      <button id="deck-done-btn" class="glass-btn" onclick="finishDeckEdit()">完了</button>
+    <div>
+      <h3 style="font-size:16px;font-weight:400">デッキ編集 (<span id="deck-count">0</span>/50)</h3>
+      <p style="font-size:11px;color:#94a3b8">最低20枚 ／ 最大50枚</p>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('name')">名前順</button>
+      <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('rarity')">レア順</button>
+      <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('power')">火力順</button>
+      <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('attr')">属性順</button>
+      <button id="deck-done-btn" type="button" class="glass-btn success" onclick="finishDeckEdit()">完了</button>
     </div>
   </div>
+  <div class="synth-bar-wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <span style="font-size:12px;color:#67e8f9">合成可能率</span>
+      <span id="synth-rate-text" style="font-size:13px;color:#e2e8f0">—</span>
+    </div>
+    <div class="synth-bar-bg"><div id="synth-rate-bar" class="synth-bar-fill" style="width:0%"></div></div>
+    <div id="synth-hint" style="font-size:10px;color:#94a3b8;margin-top:6px;line-height:1.4"></div>
+  </div>
   <div id="deck-list" class="deck-list"></div>
+  <div class="info-box" style="max-height:28vh">
+    <div class="info-title">📖 反応一覧</div>
+    <div id="deck-reaction-list" style="white-space:pre-line;color:#cbd5e1;font-size:11px"></div>
+  </div>
 </div>
 
 <div id="gacha-screen" class="screen">
-  <h2 style="margin-top:8px">🧪 化合物ガチャ</h2>
-  <p style="color:#06b6d4">試薬: <span id="gacha-reagents">150</span> ／ ランク: <span id="gacha-rank">初学者</span></p>
-  <div id="gacha-result" class="gacha-card-view"><span style="color:#888">ガチャを回すと出現</span></div>
+  <h2 style="margin-top:6px;font-weight:400;background:linear-gradient(90deg,#e879f9,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent">🧪 化合物ガチャ</h2>
+  <p style="color:#7dd3fc">試薬: <span id="gacha-reagents">150</span> ／ ランク: <span id="gacha-rank">初学者</span></p>
+  <div id="gacha-result" class="gacha-card-view"><span style="color:#94a3b8">ガチャを回すと出現</span></div>
   <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
-    <button class="glass-btn" style="background:linear-gradient(135deg,#ec4899,#a855f7);padding:10px 18px" onclick="drawGacha()">ガチャ (100)</button>
-    <button class="glass-btn" style="background:#333;padding:10px 14px" onclick="switchState('field')">戻る</button>
+    <button class="glass-btn pink" style="padding:11px 20px" onclick="drawGacha()">ガチャ (100)</button>
+    <button class="glass-btn slate" style="padding:11px 14px" onclick="switchState('field')">戻る</button>
   </div>
-  <div class="info-box" style="width:100%;max-width:420px;max-height:36vh"><div class="info-title">📋 排出一覧</div><div id="gacha-list" style="white-space:pre-line;color:#ddd"></div></div>
+  <div class="info-box" style="width:100%;max-width:420px;max-height:36vh"><div class="info-title">📋 排出一覧</div><div id="gacha-list" style="white-space:pre-line;color:#cbd5e1"></div></div>
 </div>
 
 <div id="longpress-popup" class="longpress-popup">
-  <div style="font-weight:bold;color:#38bdf8;margin-bottom:8px" id="lp-title">このカードでできる反応</div>
-  <div id="lp-body" style="font-size:12px;line-height:1.5;white-space:pre-line"></div>
-  <button class="glass-btn" style="margin-top:12px;width:100%;background:#334155" onclick="closeLongPress()">閉じる</button>
+  <div style="color:#38bdf8;margin-bottom:8px" id="lp-title">このカードでできる反応</div>
+  <div id="lp-body" style="font-size:12px;line-height:1.55;white-space:pre-line;color:#e2e8f0"></div>
+  <button class="glass-btn slate" style="margin-top:14px;width:100%" onclick="closeLongPress()">閉じる</button>
 </div>
 
 <script>
-/* ===== 以下、前回コードと同一。switchState に update のみ追加 ===== */
 const ALL_CARDS = [
   {name:"メタン",formula:"CH4",attackPower:15,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
   {name:"エタン",formula:"C2H6",attackPower:18,healPower:0,attribute:"Alkane",rarity:"R",color:"無色",odor:"無臭"},
@@ -356,93 +460,123 @@ const ACHIEVEMENTS = [
 ];
 
 const DAILY_QUESTS = [
-  {key:"nitro", label:"ニトロ化を1回成功させる", flag:"nitro"},
-  {key:"sapon", label:"けん化を1回成功させる", flag:"sapon"},
-  {key:"poly", label:"重合を1回成功させる", flag:"poly"},
-  {key:"ester", label:"エステル化を1回成功させる", flag:"ester"},
-  {key:"oxid", label:"酸化反応を1回成功させる", flag:"oxid"},
-  {key:"acetyl", label:"アセチル化を1回成功させる", flag:"acetyl"},
-  {key:"dehyd", label:"脱水反応を1回成功させる", flag:"dehyd"}
+  {key:"nitro", label:"ニトロ化を1回成功させる"},
+  {key:"sapon", label:"けん化を1回成功させる"},
+  {key:"poly", label:"重合を1回成功させる"},
+  {key:"ester", label:"エステル化を1回成功させる"},
+  {key:"oxid", label:"酸化反応を1回成功させる"},
+  {key:"acetyl", label:"アセチル化を1回成功させる"},
+  {key:"dehyd", label:"脱水反応を1回成功させる"}
 ];
 
 const FULL_REACTION_TEXT = `【中間体・連鎖】
-・ベンゼン+ニトロ基→ニトロベンゼン
-・ニトロベンゼン+還元剤/NaBH4→アニリン
-・アニリン+ジアゾ化剤→アゾベンゼン
-・酢酸+エタノール→酢酸エチル
+・ベンゼン + ニトロ基 → ニトロベンゼン
+・ニトロベンゼン + 還元剤 / NaBH4 → アニリン
+・アニリン + ジアゾ化剤 → アゾベンゼン
+・酢酸 + エタノール → 酢酸エチル
 
 【アセチル化】
-・アニリン+無水酢酸→アセトアニリド
-・サリチル酸+無水酢酸→アセチルサリチル酸
+・アニリン + 無水酢酸 → アセトアニリド
+・サリチル酸 + 無水酢酸 → アセチルサリチル酸
 
 【脱水】
-・エタノール+濃硫酸→エチレン
-・1-プロパノール+濃硫酸→プロピレン
+・エタノール + 濃硫酸 → エチレン
+・1-プロパノール + 濃硫酸 → プロピレン
 
 【油脂・けん化】
-・トリパルミチン/トリステアリン/トリオレイン+NaOH
-・酢酸/酢酸エチル/オレイン酸+NaOH
+・トリパルミチン / トリステアリン / トリオレイン + 水酸化ナトリウム → けん化
+・酢酸 / 酢酸エチル / オレイン酸 + 水酸化ナトリウム → けん化
 
 【ニトロ化】
-・ベンゼン/トルエン/フェノール+濃硝酸
-・ナフタレン/アントラセン+濃硝酸
+・ベンゼン / トルエン / フェノール / ナフタレン / アントラセン + 濃硝酸
 
 【スルホン化】
-・ベンゼン/ナフタレン+濃硫酸
+・ベンゼン / ナフタレン + 濃硫酸
 
 【ハロゲン化・付加】
-・ベンゼン+塩素/臭素+触媒
-・エチレン+塩素/臭素
-・アセチレン+臭素
-・シス/トランス-2-ブテン+臭素
+・ベンゼン + 塩素 / 臭素 + 触媒（鉄・AlCl3等）
+・エチレン + 塩素 / 臭素 → 付加（脱色）
+・アセチレン + 臭素 → 付加
+・シス-2-ブテン / トランス-2-ブテン + 臭素 → 付加
 
 【重合】
-・エチレン/スチレン/プロピレン/ビニル基+重合触媒
+・エチレン / スチレン / プロピレン / ビニル基 + 重合触媒(Ziegler)
 
 【酸化】
-・エタノール/メタノール/アセトアルデヒド+KMnO4orK2Cr2O7
-・2-プロパノール→ケトン
-・トルエン+KMnO4→安息香酸
+・エタノール / メタノール / アセトアルデヒド + KMnO4 / K2Cr2O7
+・2-プロパノール + 酸化剤 → ケトン
+・トルエン + KMnO4 → 安息香酸
 
-【金属Na】
-・アルコール/クレゾール+Na→アルコキシド
-・フェノール+Na→フェノキシド
+【金属ナトリウム】
+・エタノール / メタノール / 1-プロパノール + Na → アルコキシド
+・フェノール / クレゾール + Na → フェノキシド等
 
-【基+官能基】
-・各種炭化水素基+ヒドロキシ/カルボキシ/アミノ/アルデヒド/ニトロ/スルホン/ハロゲン基
+【基 + 官能基】
+・メチル基 / エチル基 / プロピル基 / イソプロピル基 / ブチル基 / フェニル基 / ベンジル基 / ビニル基
+　+ ヒドロキシ基 / カルボキシ基 / アミノ基 / アルデヒド基 / ニトロ基 / スルホン基 / ハロゲン基
 
 【特殊】
-・TNT/ピクリン酸→180 ／ HF→∞ ／ ボツリヌス→毎ターン200
-触媒なし1.5倍／あり2倍`;
+・トリニトロトルエン / ピクリン酸 … 180
+・フッ化水素酸 … ∞（1/10で自爆）
+・ボツリヌス毒素 … 毎ターン200継続
+
+【倍率】
+・触媒なし 1.5倍 / 触媒あり 2.0倍
+・弱点 1.5倍 / クイズ正解 1.5倍`;
 
 const CARD_REACTIONS = {
-  "ベンゼン":"・+ニトロ基→ニトロベンゼン\n・+濃硝酸→ニトロ化\n・+濃硫酸→スルホン化\n・+塩素/臭素+触媒→ハロゲン化",
-  "トルエン":"・+濃硝酸→ニトロ化\n・+KMnO4→側鎖酸化→安息香酸",
-  "フェノール":"・+濃硝酸→ニトロ化\n・+金属Na→フェノキシド",
-  "アニリン":"・+ジアゾ化剤→アゾ化合物\n・+無水酢酸→アセトアニリド",
-  "ニトロベンゼン":"・+還元剤/NaBH4→アニリン",
-  "酢酸":"・+エタノール→酢酸エチル\n・+NaOH→けん化",
-  "エタノール":"・+酢酸→エステル化\n・+濃硫酸→脱水→エチレン\n・+Na→アルコキシド\n・+KMnO4→酸化",
-  "エチレン":"・+塩素/臭素→付加\n・+重合触媒→ポリエチレン",
-  "無水酢酸":"・+アニリン→アセトアニリド\n・+サリチル酸→アセチルサリチル酸",
-  "サリチル酸":"・+無水酢酸→アセチルサリチル酸",
-  "トリパルミチン":"・+NaOH→油脂のけん化",
-  "トリステアリン":"・+NaOH→油脂のけん化",
-  "トリオレイン":"・+NaOH→油脂のけん化",
-  "濃硫酸":"・触媒・脱水剤\n・+エタノール→脱水",
-  "水酸化ナトリウム":"・けん化全般",
-  "重合触媒(Ziegler)":"・+エチレン/スチレン/プロピレン→重合",
+  "ベンゼン":"・+ニトロ基 → ニトロベンゼン\n・+濃硝酸 → ニトロ化\n・+濃硫酸 → スルホン化\n・+塩素/臭素+触媒 → ハロゲン化",
+  "トルエン":"・+濃硝酸 → ニトロ化\n・+KMnO4 → 側鎖酸化 → 安息香酸",
+  "フェノール":"・+濃硝酸 → ニトロ化\n・+金属Na → フェノキシド",
+  "アニリン":"・+ジアゾ化剤 → アゾベンゼン\n・+無水酢酸 → アセトアニリド",
+  "ニトロベンゼン":"・+還元剤 / NaBH4 → アニリン",
+  "アゾベンゼン":"・単体投擲で高火力攻撃\n・（これ以上の連鎖反応はなし）",
+  "酢酸":"・+エタノール → 酢酸エチル\n・+NaOH → けん化",
+  "エタノール":"・+酢酸 → エステル化 → 酢酸エチル\n・+濃硫酸 → 脱水 → エチレン\n・+Na → アルコキシド\n・+KMnO4 → 酸化",
+  "酢酸エチル":"・+水酸化ナトリウム → けん化\n・単体投擲も可能（エステル属性）",
+  "エチレン":"・+塩素/臭素 → 付加\n・+重合触媒 → ポリエチレン",
+  "無水酢酸":"・+アニリン → アセトアニリド\n・+サリチル酸 → アセチルサリチル酸",
+  "サリチル酸":"・+無水酢酸 → アセチルサリチル酸",
+  "アセトアニリド":"・単体投擲可能\n・アセチル化生成物",
+  "アセチルサリチル酸":"・単体投擲で高火力（エステル）\n・アスピリン相当の生成物",
+  "トリパルミチン":"・+NaOH → 油脂のけん化",
+  "トリステアリン":"・+NaOH → 油脂のけん化",
+  "トリオレイン":"・+NaOH → 油脂のけん化",
+  "濃硫酸":"・触媒・脱水剤\n・+エタノール → 脱水",
+  "水酸化ナトリウム":"・けん化全般（酢酸エチル・油脂・酢酸など）",
+  "重合触媒(Ziegler)":"・+エチレン/スチレン/プロピレン → 重合",
   "過マンガン酸カリウム":"・アルコール・アルデヒド・トルエンの酸化",
-  "金属ナトリウム":"・+アルコール→アルコキシド\n・+フェノール→フェノキシド",
-  "アセチレン":"・+臭素→付加",
-  "プロピレン":"・+重合触媒→ポリプロピレン",
-  "スチレン":"・+重合触媒→ポリスチレン",
-  "1-プロパノール":"・+濃硫酸→脱水\n・+Na→アルコキシド",
-  "2-プロパノール":"・+酸化剤→ケトン",
-  "メタノール":"・+酸化剤→酸化\n・+Na→アルコキシド",
-  "ナフタレン":"・+濃硝酸→ニトロ化\n・+濃硫酸→スルホン化",
-  "アントラセン":"・+濃硝酸→ニトロ化"
+  "金属ナトリウム":"・+アルコール → アルコキシド\n・+フェノール → フェノキシド",
+  "アセチレン":"・+臭素 → 付加",
+  "プロピレン":"・+重合触媒 → ポリプロピレン",
+  "スチレン":"・+重合触媒 → ポリスチレン",
+  "1-プロパノール":"・+濃硫酸 → 脱水\n・+Na → アルコキシド",
+  "2-プロパノール":"・+酸化剤 → ケトン",
+  "メタノール":"・+酸化剤 → 酸化\n・+Na → アルコキシド",
+  "ナフタレン":"・+濃硝酸 → ニトロ化\n・+濃硫酸 → スルホン化",
+  "アントラセン":"・+濃硝酸 → ニトロ化",
+  "オレイン酸":"・+NaOH → けん化"
 };
+
+const SYNTH_PAIRS = [
+  {a:["ベンゼン"], b:["ニトロ基","濃硝酸","濃硫酸","塩素","臭素"]},
+  {a:["トルエン"], b:["濃硝酸","過マンガン酸カリウム"]},
+  {a:["フェノール"], b:["濃硝酸","金属ナトリウム"]},
+  {a:["アニリン"], b:["ジアゾ化剤","無水酢酸"]},
+  {a:["ニトロベンゼン"], b:["還元剤","水素化ホウ素ナトリウム"]},
+  {a:["酢酸"], b:["エタノール","水酸化ナトリウム"]},
+  {a:["エタノール"], b:["酢酸","濃硫酸","金属ナトリウム","過マンガン酸カリウム","二クロム酸カリウム"]},
+  {a:["エチレン"], b:["塩素","臭素","重合触媒(Ziegler)"]},
+  {a:["スチレン","プロピレン"], b:["重合触媒(Ziegler)"]},
+  {a:["サリチル酸"], b:["無水酢酸"]},
+  {a:["トリパルミチン","トリステアリン","トリオレイン","オレイン酸","酢酸エチル"], b:["水酸化ナトリウム"]},
+  {a:["メタノール","1-プロパノール","2-プロパノール"], b:["過マンガン酸カリウム","二クロム酸カリウム","金属ナトリウム","濃硫酸"]},
+  {a:["メチル基","エチル基","プロピル基","イソプロピル基","ブチル基","フェニル基","ベンジル基","ビニル基"], b:["ヒドロキシ基","カルボキシ基","アミノ基","アルデヒド基","ニトロ基","スルホン基","ハロゲン基"]},
+  {a:["アセチレン","シス-2-ブテン","トランス-2-ブテン"], b:["臭素"]},
+  {a:["ナフタレン","アントラセン"], b:["濃硝酸","濃硫酸"]}
+];
+
+const RARITY_ORDER={SSSR:0,SSR:1,SR:2,R:3};
 
 let gameState = {
   reagents:150, playerHP:200, playerMaxHP:200,
@@ -450,7 +584,8 @@ let gameState = {
   nextDamageBonus:1.0, kills:0,
   flags:{nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false},
   achieved:{}, lastRank:"初学者",
-  dailyDate:"", dailyKey:"", dailyDone:false
+  dailyDate:"", dailyKey:"", dailyDone:false,
+  deckListOrder:[]
 };
 
 let isBattleOver=false, isProcessing=false, botulinumActive=false, isPractice=false;
@@ -514,6 +649,15 @@ function loadGame(){
     Object.assign(gameState,JSON.parse(saved));
     if(!gameState.flags) gameState.flags={};
     if(!gameState.achieved) gameState.achieved={};
+    if(!gameState.deckListOrder) gameState.deckListOrder=[];
+    gameState.collection.forEach(c=>{
+      if(c.name==="アゾベンゼン") c.attackPower=110;
+      if(c.name==="アセチルサリチル酸") c.attackPower=120;
+    });
+    gameState.currentDeck.forEach(c=>{
+      if(c.name==="アゾベンゼン") c.attackPower=110;
+      if(c.name==="アセチルサリチル酸") c.attackPower=120;
+    });
     initDaily(); updateFieldUI(); switchState('field'); alert('ロードしました！');
   }catch(e){alert('ロード失敗');}
 }
@@ -529,7 +673,6 @@ function switchState(s){
   if(s==='zukan'){document.getElementById('zukan-screen').classList.add('active');renderZukan();}
   if(s==='achieve'){document.getElementById('achieve-screen').classList.add('active');renderAchieve();}
   if(s==='history'){document.getElementById('history-screen').classList.add('active');document.getElementById('history-list').innerText=battleHistory.slice(-30).join("\n\n")||"履歴なし";}
-  if(s==='update') document.getElementById('update-screen').classList.add('active');
 }
 function openReactionList(){fromBattleToReaction=true;switchState('reactionList');}
 function closeReactionList(){
@@ -552,7 +695,7 @@ function updateFieldUI(){
 }
 
 function assignStarterDeck(type){
-  gameState.currentDeck=[]; gameState.collection=[];
+  gameState.currentDeck=[]; gameState.collection=[]; gameState.deckListOrder=[];
   let base=[];
   if(type==='Aromatic') base=["ベンゼン","トルエン","濃硝酸","濃硫酸","フェノール","グルコース","ニトロ基"].map(n=>ALL_CARDS.find(c=>c.name===n));
   else if(type==='Polymer') base=["エチレン","臭素","塩素","重合触媒(Ziegler)","グルコース","エタノール"].map(n=>ALL_CARDS.find(c=>c.name===n));
@@ -576,14 +719,14 @@ function renderZukan(){
   const names=[...new Set(gameState.collection.map(c=>c.name))];
   document.getElementById('zukan-count').innerText=names.length+"/"+ALL_CARDS.length;
   const list=document.getElementById('zukan-list'); list.innerHTML="";
-  if(!names.length){list.innerHTML="<div style='color:#888'>まだ登録がありません</div>";return;}
-  names.sort().forEach(name=>{
+  if(!names.length){list.innerHTML="<div style='color:#94a3b8'>まだ登録がありません</div>";return;}
+  names.sort((a,b)=>a.localeCompare(b,'ja')).forEach(name=>{
     const c=ALL_CARDS.find(x=>x.name===name)||gameState.collection.find(x=>x.name===name);
     const div=document.createElement('div'); div.className='zukan-item';
-    div.innerHTML=`<div style="font-weight:bold">${c.name} <span class="card-rarity rarity-${c.rarity}">${c.rarity}</span></div>
+    div.innerHTML=`<div>${c.name} <span class="card-rarity rarity-${c.rarity}">${c.rarity}</span></div>
       <div style="font-size:11px;color:#94a3b8">${c.formula} ／ ${c.attribute}</div>
       <div style="font-size:11px;margin-top:4px">色: ${c.color||"-"} ／ 匂い: ${c.odor||"-"}</div>
-      <div style="font-size:11px;color:#fbbf24">威力:${c.attackPower===Infinity?"∞":c.attackPower} 回復:${c.healPower||0}</div>`;
+      <div style="font-size:11px;color:#fbbf24;margin-top:2px">威力:${c.attackPower===Infinity?"∞":c.attackPower} 回復:${c.healPower||0}</div>`;
     list.appendChild(div);
   });
 }
@@ -592,9 +735,23 @@ function renderAchieve(){
   ACHIEVEMENTS.forEach(a=>{
     const done=!!gameState.achieved[a.id];
     const div=document.createElement('div'); div.className=`achieve-item ${done?'done':'locked'}`;
-    div.innerHTML=`<div><div style="font-weight:bold">${done?'✅':'🔒'} ${a.name}</div><div style="font-size:11px;color:#94a3b8">${a.desc}</div></div><div style="color:#facc15;font-size:12px">+${a.reward}</div>`;
+    div.innerHTML=`<div><div>${done?'✅':'🔒'} ${a.name}</div><div style="font-size:11px;color:#94a3b8">${a.desc}</div></div><div style="color:#fbbf24;font-size:12px">+${a.reward}</div>`;
     list.appendChild(div);
   });
+}
+
+function calcSynthRate(){
+  const names=new Set(gameState.currentDeck.map(c=>c.name));
+  if(names.size===0) return {rate:0, ok:0, total:SYNTH_PAIRS.length, missing:[]};
+  let ok=0; const missing=[];
+  SYNTH_PAIRS.forEach(pair=>{
+    const hasA=pair.a.some(n=>names.has(n));
+    const hasB=pair.b.some(n=>names.has(n));
+    if(hasA && hasB) ok++;
+    else if(hasA && !hasB) missing.push(pair.a.find(n=>names.has(n))+" 側はあるが相手役不足");
+    else if(!hasA && hasB) missing.push(pair.b.find(n=>names.has(n))+" 側はあるが相手役不足");
+  });
+  return {rate:Math.round((ok/SYNTH_PAIRS.length)*100), ok, total:SYNTH_PAIRS.length, missing:missing.slice(0,4)};
 }
 
 function createHumanoidMesh(){
@@ -602,13 +759,13 @@ function createHumanoidMesh(){
   const bodyMat=new THREE.MeshLambertMaterial({color:0x0284c7});
   const skinMat=new THREE.MeshLambertMaterial({color:0xffdbac});
   const legMat=new THREE.MeshLambertMaterial({color:0x1e293b});
-  const head=new THREE.Mesh(new THREE.SphereGeometry(0.25,16,16),skinMat); head.position.y=0.85; group.add(head);
+  const head=new THREE.Mesh(new THREE.SphereGeometry(0.25,20,20),skinMat); head.position.y=0.85; group.add(head);
   const body=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.15,0.6,16),bodyMat); body.position.y=0.45; group.add(body);
-  const armGeo=new THREE.CylinderGeometry(0.06,0.06,0.4,8);
+  const armGeo=new THREE.CylinderGeometry(0.06,0.06,0.4,10);
   const la=new THREE.Mesh(armGeo,bodyMat); la.position.set(-0.28,0.45,0);
   const ra=new THREE.Mesh(armGeo,bodyMat); ra.position.set(0.28,0.45,0);
   group.add(la); group.add(ra);
-  const legGeo=new THREE.CylinderGeometry(0.07,0.07,0.45,8);
+  const legGeo=new THREE.CylinderGeometry(0.07,0.07,0.45,10);
   const ll=new THREE.Mesh(legGeo,legMat); ll.position.set(-0.1,0.15,0);
   const rl=new THREE.Mesh(legGeo,legMat); rl.position.set(0.1,0.15,0);
   group.add(ll); group.add(rl);
@@ -616,8 +773,8 @@ function createHumanoidMesh(){
 }
 function createMoleculeMesh(col){
   const g=new THREE.Group(),m=new THREE.MeshLambertMaterial({color:col}),s=new THREE.MeshLambertMaterial({color:0xffffff});
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(.5,18,18),m));
-  [[.7,.45,0],[-.7,.45,0],[0,-.65,.45],[0,.45,-.65]].forEach(p=>{const a=new THREE.Mesh(new THREE.SphereGeometry(.25,12,12),s);a.position.set(...p);g.add(a);});
+  g.add(new THREE.Mesh(new THREE.SphereGeometry(.5,20,20),m));
+  [[.7,.45,0],[-.7,.45,0],[0,-.65,.45],[0,.45,-.65]].forEach(p=>{const a=new THREE.Mesh(new THREE.SphereGeometry(.25,14,14),s);a.position.set(...p);g.add(a);});
   return g;
 }
 
@@ -625,11 +782,14 @@ let scene,camera,renderer,playerNode,monsters=[],targetPlayerPos={x:0,z:0},isThr
 function initThreeJS(){
   if(isThreeInit) return; isThreeInit=true;
   const cont=document.getElementById('canvas-container');
-  scene=new THREE.Scene(); scene.background=new THREE.Color(0x87ceeb);
+  scene=new THREE.Scene(); scene.background=new THREE.Color(0x87c8f0);
+  scene.fog=new THREE.Fog(0x87c8f0, 28, 60);
   camera=new THREE.PerspectiveCamera(45,innerWidth/innerHeight,.1,1000); camera.position.set(0,12,10); camera.rotation.x=-Math.PI/3.2;
-  renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth,innerHeight); cont.appendChild(renderer.domElement);
-  scene.add(new THREE.DirectionalLight(0xffffff,1.2)); scene.add(new THREE.AmbientLight(0xffffff,.6));
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshBasicMaterial({color:0x4ade80})); floor.rotation.x=-Math.PI/2; scene.add(floor);
+  renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setSize(innerWidth,innerHeight); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); cont.appendChild(renderer.domElement);
+  const sun=new THREE.DirectionalLight(0xfff5e6,1.35); sun.position.set(5,12,8); scene.add(sun);
+  scene.add(new THREE.AmbientLight(0xb8d4ff,.55));
+  scene.add(new THREE.HemisphereLight(0x87ceeb,0x3d8b40,.4));
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshLambertMaterial({color:0x3d9e5a})); floor.rotation.x=-Math.PI/2; scene.add(floor);
   playerNode=createHumanoidMesh(); scene.add(playerNode);
   for(let i=0;i<3;i++) spawnMonster();
   let drag=false,lx=0,ly=0;
@@ -645,7 +805,7 @@ function initThreeJS(){
     const active=document.getElementById('field-screen').classList.contains('active');
     monsters.forEach(m=>{
       if(!m.isActive||!active)return;
-      m.mesh.rotation.y+=.01; m.changeDirTimer--;
+      m.mesh.rotation.y+=.012; m.changeDirTimer--;
       if(m.changeDirTimer<=0){m.vx=(Math.random()-.5)*.08;m.vz=(Math.random()-.5)*.08;m.changeDirTimer=30+Math.random()*60;}
       m.mesh.position.x+=m.vx; m.mesh.position.z+=m.vz;
       if(Math.abs(m.mesh.position.x)>14)m.vx*=-1; if(m.mesh.position.z<-20||m.mesh.position.z>8)m.vz*=-1;
@@ -684,13 +844,15 @@ function spawnMonster(){
 let labScene,labCamera,labRenderer,enemyMesh;
 function initLabThreeJS(){
   const cont=document.getElementById('lab-canvas-container'); cont.innerHTML="";
-  labScene=new THREE.Scene(); labScene.background=new THREE.Color(0x0c1a2e);
+  labScene=new THREE.Scene(); labScene.background=new THREE.Color(0x071018);
   labCamera=new THREE.PerspectiveCamera(50,cont.clientWidth/cont.clientHeight,.1,100); labCamera.position.set(0,1.6,5.2); labCamera.lookAt(0,.7,0);
-  labRenderer=new THREE.WebGLRenderer({antialias:true}); labRenderer.setSize(cont.clientWidth,cont.clientHeight); cont.appendChild(labRenderer.domElement);
-  labScene.add(new THREE.DirectionalLight(0x67e8f9,1.6)); labScene.add(new THREE.AmbientLight(0xffffff,.5));
+  labRenderer=new THREE.WebGLRenderer({antialias:true}); labRenderer.setSize(cont.clientWidth,cont.clientHeight); labRenderer.setPixelRatio(Math.min(devicePixelRatio,2)); cont.appendChild(labRenderer.domElement);
+  const key=new THREE.DirectionalLight(0x67e8f9,1.7); key.position.set(2,3,4); labScene.add(key);
+  labScene.add(new THREE.AmbientLight(0xffffff,.45));
+  const rim=new THREE.DirectionalLight(0xa78bfa,.6); rim.position.set(-3,1,-2); labScene.add(rim);
   const col=gameState.currentMonster?.isBoss?0x7c3aed:0x22d3ee;
-  enemyMesh=createMoleculeMesh(col); enemyMesh.scale.set(1.4,1.4,1.4); enemyMesh.position.set(0,.9,0); labScene.add(enemyMesh);
-  (function anim(){requestAnimationFrame(anim); if(enemyMesh){enemyMesh.rotation.y+=.012; enemyMesh.position.y=.9+Math.sin(Date.now()*.002)*.07;} labRenderer.render(labScene,labCamera);})();
+  enemyMesh=createMoleculeMesh(col); enemyMesh.scale.set(1.45,1.45,1.45); enemyMesh.position.set(0,.9,0); labScene.add(enemyMesh);
+  (function anim(){requestAnimationFrame(anim); if(enemyMesh){enemyMesh.rotation.y+=.014; enemyMesh.position.y=.9+Math.sin(Date.now()*.002)*.08;} labRenderer.render(labScene,labCamera);})();
 }
 
 let bDeck=[],bHand=[],bSelected=[],monsterHP=500,isPlayerTurn=true,activeQuiz=null,pendingDamage=0,pendingHeal=0;
@@ -762,6 +924,12 @@ function startPlayerTurn(first=false){
 
 function drawCard(){if(bHand.length<7&&bDeck.length>0) bHand.push(bDeck.shift());}
 function formatPower(v){return v===Infinity?"∞":v;}
+function powerValue(c){
+  if(c.name==="ボツリヌス毒素") return 200;
+  if(c.attackPower===Infinity) return 99999;
+  if(c.healPower>0) return c.healPower;
+  return c.attackPower||0;
+}
 
 function updateBattleUI(){
   document.getElementById('battle-deck-count').innerText=bDeck.length;
@@ -771,13 +939,19 @@ function updateBattleUI(){
     const sel=bSelected.some(c=>c.id===card.id);
     const div=document.createElement('div'); div.className=`card ${sel?'selected':''}`;
     let pressTimer=null;
-    div.addEventListener('pointerdown',()=>{pressTimer=setTimeout(()=>{showLongPress(card); pressTimer=null;},450);});
-    div.addEventListener('pointerup',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null; toggleSelectCard(card);}});
+    div.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      pressTimer=setTimeout(()=>{showLongPress(card); pressTimer=null;},450);
+    });
+    div.addEventListener('pointerup',()=>{
+      if(pressTimer){clearTimeout(pressTimer);pressTimer=null; toggleSelectCard(card);}
+    });
     div.addEventListener('pointerleave',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
-    let val=card.name==="ボツリヌス毒素"?`<div style="font-size:9px;color:#dc2626;font-weight:bold">継続200</div>`:
-            card.healPower>0?`<div style="font-size:10px;color:#16a34a;font-weight:bold">回復+${card.healPower}</div>`:
-            `<div style="font-size:10px;color:#ef4444;font-weight:bold">威力:${formatPower(card.attackPower)}</div>`;
-    div.innerHTML=`<div class="card-rarity rarity-${card.rarity}">${card.rarity}</div><div style="font-weight:bold;font-size:11px">${card.name}</div><div style="font-size:9px;color:#666">${card.formula}</div><div class="card-attr">${card.attribute}</div>${val}`;
+    div.addEventListener('pointercancel',()=>{if(pressTimer){clearTimeout(pressTimer);pressTimer=null;}});
+    let val=card.name==="ボツリヌス毒素"?`<div style="font-size:9px;color:#dc2626">継続200</div>`:
+            card.healPower>0?`<div style="font-size:10px;color:#16a34a">回復+${card.healPower}</div>`:
+            `<div style="font-size:10px;color:#dc2626">威力:${formatPower(card.attackPower)}</div>`;
+    div.innerHTML=`<div class="card-rarity rarity-${card.rarity}">${card.rarity}</div><div style="font-size:11px;line-height:1.2">${card.name}</div><div style="font-size:9px;color:#64748b">${card.formula}</div><div class="card-attr">${card.attribute}</div>${val}`;
     cont.appendChild(div);
   });
   const can=isPlayerTurn&&!activeQuiz&&!isProcessing&&!isBattleOver;
@@ -788,7 +962,9 @@ function updateBattleUI(){
 
 function showLongPress(card){
   document.getElementById('lp-title').innerText=`${card.name} でできる反応`;
-  document.getElementById('lp-body').innerText=CARD_REACTIONS[card.name]||"特に決まった複合反応はありません（単体投擲・回復は可能）";
+  const body=CARD_REACTIONS[card.name]
+    || (card.healPower>0 ? "回復カード（複合反応なし）" : "単体投擲が可能です");
+  document.getElementById('lp-body').innerText=body;
   document.getElementById('longpress-popup').style.display='block';
 }
 function closeLongPress(){document.getElementById('longpress-popup').style.display='none';}
@@ -848,52 +1024,38 @@ function executePlayerAttack(){
 
   if(n.includes("アニリン")&&n.includes("無水酢酸")){
     product={name:"アセトアニリド",formula:"C6H5NHCOCH3",attackPower:60,healPower:0,attribute:"Aromatic",rarity:"SR",color:"白色",odor:"-"};
-    baseDamage=Math.floor(80*catMul);
-    logMessage=dmgLog("🧪 アニリンのアセチル化 → アセトアニリド 生成！",baseDamage);
-    markFlag("acetyl");
+    baseDamage=Math.floor(80*catMul); logMessage=dmgLog("🧪 アニリンのアセチル化 → アセトアニリド 生成！",baseDamage); markFlag("acetyl");
     quizToSet={question:"アニリンをアセチル化すると？",options:["アセトアニリド","ニトロベンゼン","フェノール","アゾベンゼン"],correctIndex:0,explanation:"正解！アセトアニリドです。"};
   }
   else if(n.includes("サリチル酸")&&n.includes("無水酢酸")){
-    product={name:"アセチルサリチル酸",formula:"C9H8O4",attackPower:70,healPower:0,attribute:"Ester",rarity:"SSR",color:"白色",odor:"-"};
-    baseDamage=Math.floor(90*catMul);
-    logMessage=dmgLog("🧪 サリチル酸のアセチル化 → アセチルサリチル酸！",baseDamage);
-    markFlag("acetyl");
+    product={name:"アセチルサリチル酸",formula:"C9H8O4",attackPower:120,healPower:0,attribute:"Ester",rarity:"SSR",color:"白色",odor:"-"};
+    baseDamage=Math.floor(120*catMul); logMessage=dmgLog("🧪 サリチル酸のアセチル化 → アセチルサリチル酸！",baseDamage); markFlag("acetyl");
   }
   else if(n.includes("エタノール")&&n.includes("濃硫酸")){
-    baseDamage=Math.floor(100*catMul);
-    logMessage=dmgLog("🧪 エタノールの脱水 → エチレン 生成！",baseDamage);
-    markFlag("dehyd");
+    baseDamage=Math.floor(100*catMul); logMessage=dmgLog("🧪 エタノールの脱水 → エチレン 生成！",baseDamage); markFlag("dehyd");
     quizToSet={question:"エタノールを濃硫酸で加熱脱水すると？",options:["エチレン","ジエチルエーテル","アセトアルデヒド","酢酸"],correctIndex:0,explanation:"正解！エチレンが主生成物になります。"};
   }
   else if(n.includes("1-プロパノール")&&n.includes("濃硫酸")){
-    baseDamage=Math.floor(105*catMul);
-    logMessage=dmgLog("🧪 1-プロパノールの脱水 → プロピレン 生成！",baseDamage);
-    markFlag("dehyd");
+    baseDamage=Math.floor(105*catMul); logMessage=dmgLog("🧪 1-プロパノールの脱水 → プロピレン 生成！",baseDamage); markFlag("dehyd");
   }
   else if(n.includes("ベンゼン")&&n.includes("ニトロ基")){
     product={name:"ニトロベンゼン",formula:"C6H5NO2",attackPower:70,healPower:0,attribute:"Aromatic",rarity:"SR",color:"淡黄色",odor:"アーモンド様"};
-    baseDamage=Math.floor(70*catMul);
-    logMessage=dmgLog("🧪 ベンゼン + ニトロ基 → ニトロベンゼン が生成！",baseDamage);
-    markFlag("nitro");
+    baseDamage=Math.floor(70*catMul); logMessage=dmgLog("🧪 ベンゼン + ニトロ基 → ニトロベンゼン が生成！",baseDamage); markFlag("nitro");
     quizToSet={question:"ベンゼンのニトロ化の反応機構は？",options:["求電子置換","求核置換","付加反応","脱離反応"],correctIndex:0,explanation:"正解！求電子置換です。"};
   }
   else if(n.includes("ニトロベンゼン")&&(n.includes("還元剤")||n.includes("水素化ホウ素ナトリウム"))){
     product={name:"アニリン",formula:"C6H5NH2",attackPower:65,healPower:0,attribute:"Aromatic",rarity:"SR",color:"無色〜褐色",odor:"特異臭"};
-    baseDamage=Math.floor(65*catMul);
-    logMessage=dmgLog("🧪 ニトロベンゼンの還元 → アニリン が生成！",baseDamage);
+    baseDamage=Math.floor(65*catMul); logMessage=dmgLog("🧪 ニトロベンゼンの還元 → アニリン が生成！",baseDamage);
     quizToSet={question:"ニトロベンゼンを還元すると？",options:["アニリン","フェノール","ベンゼン","トルエン"],correctIndex:0,explanation:"正解！アニリンです。"};
   }
   else if(n.includes("アニリン")&&n.includes("ジアゾ化剤")){
-    product={name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:95,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"};
-    baseDamage=Math.floor(95*catMul);
-    logMessage=dmgLog("🧪 ジアゾ化 → アゾ化合物 が生成！",baseDamage);
+    product={name:"アゾベンゼン",formula:"C6H5N=NC6H5",attackPower:110,healPower:0,attribute:"Aromatic",rarity:"SSR",color:"橙赤色",odor:"無臭"};
+    baseDamage=Math.floor(110*catMul); logMessage=dmgLog("🧪 ジアゾ化 → アゾベンゼン が生成！",baseDamage);
     quizToSet={question:"アニリンのジアゾ化に必要な試薬は？",options:["NaNO2 + HCl","HNO3","H2SO4","NaOH"],correctIndex:0,explanation:"正解！亜硝酸ナトリウムと塩酸です。"};
   }
   else if(n.includes("酢酸")&&n.includes("エタノール")){
     product={name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:Math.floor(55*catMul),healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"};
-    baseDamage=Math.floor(55*catMul);
-    logMessage=dmgLog("🧪 エステル化 → 酢酸エチル が生成！",baseDamage);
-    markFlag("ester");
+    baseDamage=Math.floor(55*catMul); logMessage=dmgLog("🧪 エステル化 → 酢酸エチル が生成！",baseDamage); markFlag("ester");
     quizToSet={question:"エステル化の触媒として一般的なのは？",options:["濃硫酸","NaOH","KMnO4","Fe"],correctIndex:0,explanation:"正解！濃硫酸です。"};
   }
   else if(bSelected.length===1&&bSelected[0].name==="ボツリヌス毒素"){
@@ -914,15 +1076,11 @@ function executePlayerAttack(){
     quizToSet={question:"TNTの原料となる芳香族は？",options:["トルエン","ベンゼン","フェノール","アニリン"],correctIndex:0,explanation:"正解！トルエンです。"};
   }
   else if(n.includes("水酸化ナトリウム")&&(n.includes("トリパルミチン")||n.includes("トリステアリン")||n.includes("トリオレイン"))){
-    baseDamage=Math.floor(230*catMul); appliedEffect="saponification";
-    logMessage=dmgLog("🧪 油脂のけん化！ セッケンとグリセリンが生成！",baseDamage);
-    markFlag("sapon"); markFlag("fat");
+    baseDamage=Math.floor(230*catMul); appliedEffect="saponification"; logMessage=dmgLog("🧪 油脂のけん化！ セッケンとグリセリンが生成！",baseDamage); markFlag("sapon"); markFlag("fat");
     quizToSet={question:"油脂のけん化で生じるアルコールは？",options:["グリセリン","エタノール","メタノール","フェノール"],correctIndex:0,explanation:"正解！グリセリンです。"};
   }
   else if(n.includes("水酸化ナトリウム")&&(n.includes("酢酸")||n.includes("酢酸エチル")||n.includes("オレイン酸"))){
-    baseDamage=Math.floor(210*catMul); appliedEffect="saponification";
-    logMessage=dmgLog("🧪 けん化反応が進行！",baseDamage);
-    markFlag("sapon");
+    baseDamage=Math.floor(210*catMul); appliedEffect="saponification"; logMessage=dmgLog("🧪 けん化反応が進行！",baseDamage); markFlag("sapon");
   }
   else if(n.includes("ベンゼン")&&n.includes("濃硝酸")){
     baseDamage=Math.floor(130*catMul); logMessage=dmgLog("🧪 ベンゼンのニトロ化が進行！",baseDamage); markFlag("nitro");
@@ -939,9 +1097,7 @@ function executePlayerAttack(){
     baseDamage=Math.floor(150*catMul); logMessage=dmgLog("🧪 ベンゼンのスルホン化 → ベンゼンスルホン酸！",baseDamage);
     quizToSet={question:"ベンゼンのスルホン化生成物は？",options:["ベンゼンスルホン酸","フェノール","ニトロベンゼン","安息香酸"],correctIndex:0,explanation:"正解！ベンゼンスルホン酸です。"};
   }
-  else if(n.includes("ナフタレン")&&n.includes("濃硫酸")){
-    baseDamage=Math.floor(160*catMul); logMessage=dmgLog("🧪 ナフタレンのスルホン化！",baseDamage);
-  }
+  else if(n.includes("ナフタレン")&&n.includes("濃硫酸")){baseDamage=Math.floor(160*catMul); logMessage=dmgLog("🧪 ナフタレンのスルホン化！",baseDamage);}
   else if(n.includes("ベンゼン")&&(n.includes("塩素")||n.includes("臭素"))&&(n.includes("鉄")||n.includes("塩化アルミニウム")||hasCatalyst)){
     baseDamage=Math.floor(140*catMul); logMessage=dmgLog("🧪 ベンゼンのハロゲン化（求電子置換）！",baseDamage);
     quizToSet={question:"ベンゼンの塩素化に使う触媒は？",options:["Fe または FeCl3","NaOH","KMnO4","白金"],correctIndex:0,explanation:"正解！ルイス酸触媒です。"};
@@ -950,28 +1106,16 @@ function executePlayerAttack(){
     baseDamage=Math.floor(140*catMul); logMessage=dmgLog("🧪 エチレンへのハロゲン付加！（脱色）",baseDamage);
     quizToSet={question:"エチレンに臭素水を加えると？",options:["赤褐色が消える","色が濃くなる","沈殿が生じる","発光する"],correctIndex:0,explanation:"正解！付加で脱色します。"};
   }
-  else if(n.includes("アセチレン")&&n.includes("臭素")){
-    baseDamage=Math.floor(160*catMul); logMessage=dmgLog("🧪 アセチレンへの臭素付加！",baseDamage);
-  }
-  else if(n.includes("シス-2-ブテン")&&n.includes("臭素")){
-    baseDamage=Math.floor(130*catMul); logMessage=dmgLog("🧪 シス-2-ブテンへの臭素付加！",baseDamage);
-  }
-  else if(n.includes("トランス-2-ブテン")&&n.includes("臭素")){
-    baseDamage=Math.floor(130*catMul); logMessage=dmgLog("🧪 トランス-2-ブテンへの臭素付加！",baseDamage);
-  }
+  else if(n.includes("アセチレン")&&n.includes("臭素")){baseDamage=Math.floor(160*catMul); logMessage=dmgLog("🧪 アセチレンへの臭素付加！",baseDamage);}
+  else if(n.includes("シス-2-ブテン")&&n.includes("臭素")){baseDamage=Math.floor(130*catMul); logMessage=dmgLog("🧪 シス-2-ブテンへの臭素付加！",baseDamage);}
+  else if(n.includes("トランス-2-ブテン")&&n.includes("臭素")){baseDamage=Math.floor(130*catMul); logMessage=dmgLog("🧪 トランス-2-ブテンへの臭素付加！",baseDamage);}
   else if(n.includes("エチレン")&&n.includes("重合触媒(Ziegler)")){
     baseDamage=Math.floor(300*catMul); logMessage=dmgLog("🧪 エチレンの重合 → ポリエチレン！",baseDamage); markFlag("poly");
     quizToSet={question:"Ziegler触媒で得られるポリエチレンの特徴は？",options:["高密度・直鎖状","低密度・分岐","環状","三次元網目"],correctIndex:0,explanation:"正解！HDPEです。"};
   }
-  else if(n.includes("スチレン")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=Math.floor(250*catMul); logMessage=dmgLog("🧪 スチレンの重合 → ポリスチレン！",baseDamage); markFlag("poly");
-  }
-  else if(n.includes("プロピレン")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=Math.floor(260*catMul); logMessage=dmgLog("🧪 プロピレンの重合 → ポリプロピレン！",baseDamage); markFlag("poly");
-  }
-  else if(n.includes("ビニル基")&&n.includes("重合触媒(Ziegler)")){
-    baseDamage=Math.floor(220*catMul); logMessage=dmgLog("🧪 ビニル基の重合！",baseDamage); markFlag("poly");
-  }
+  else if(n.includes("スチレン")&&n.includes("重合触媒(Ziegler)")){baseDamage=Math.floor(250*catMul); logMessage=dmgLog("🧪 スチレンの重合 → ポリスチレン！",baseDamage); markFlag("poly");}
+  else if(n.includes("プロピレン")&&n.includes("重合触媒(Ziegler)")){baseDamage=Math.floor(260*catMul); logMessage=dmgLog("🧪 プロピレンの重合 → ポリプロピレン！",baseDamage); markFlag("poly");}
+  else if(n.includes("ビニル基")&&n.includes("重合触媒(Ziegler)")){baseDamage=Math.floor(220*catMul); logMessage=dmgLog("🧪 ビニル基の重合！",baseDamage); markFlag("poly");}
   else if((n.includes("エタノール")||n.includes("アセトアルデヒド")||n.includes("メタノール"))&&(n.includes("過マンガン酸カリウム")||n.includes("二クロム酸カリウム"))){
     baseDamage=Math.floor(170*catMul); appliedEffect="oxidation"; logMessage=dmgLog("🧪 酸化反応が進行！",baseDamage); markFlag("oxid");
     quizToSet={question:"第一級アルコールを酸化すると最終的に？",options:["カルボン酸","ケトン","エーテル","アルケン"],correctIndex:0,explanation:"正解！カルボン酸です。"};
@@ -988,24 +1132,12 @@ function executePlayerAttack(){
     baseDamage=Math.floor(120*catMul); logMessage=dmgLog("🧪 アルコール + Na → アルコキシド＆水素発生！",baseDamage);
     quizToSet={question:"アルコールと金属Naの反応で発生する気体は？",options:["水素","酸素","二酸化炭素","塩素"],correctIndex:0,explanation:"正解！水素です。"};
   }
-  else if(n.includes("フェノール")&&n.includes("金属ナトリウム")){
-    baseDamage=Math.floor(140*catMul); logMessage=dmgLog("🧪 フェノール + Na → ナトリウムフェノキシド！",baseDamage);
-  }
-  else if((n.includes("o-クレゾール")||n.includes("m-クレゾール")||n.includes("p-クレゾール"))&&n.includes("金属ナトリウム")){
-    baseDamage=Math.floor(135*catMul); logMessage=dmgLog("🧪 クレゾール + Na → ナトリウム塩！",baseDamage);
-  }
-  else if(bSelected.length===1&&bSelected[0].name==="アントラセン"){
-    baseDamage=120; logMessage=dmgLog("⚗️ アントラセンを投擲！",120);
-  }
-  else if(bSelected.length===1&&bSelected[0].name==="ナフタレン"){
-    baseDamage=55; logMessage=dmgLog("⚗️ ナフタレンを投擲！",55);
-  }
-  else if(n.includes("ナフタレン")&&n.includes("濃硝酸")){
-    baseDamage=Math.floor(170*catMul); logMessage=dmgLog("🧪 ナフタレンのニトロ化！",baseDamage); markFlag("nitro");
-  }
-  else if(n.includes("アントラセン")&&n.includes("濃硝酸")){
-    baseDamage=Math.floor(200*catMul); logMessage=dmgLog("🧪 アントラセンのニトロ化！",baseDamage); markFlag("nitro");
-  }
+  else if(n.includes("フェノール")&&n.includes("金属ナトリウム")){baseDamage=Math.floor(140*catMul); logMessage=dmgLog("🧪 フェノール + Na → ナトリウムフェノキシド！",baseDamage);}
+  else if((n.includes("o-クレゾール")||n.includes("m-クレゾール")||n.includes("p-クレゾール"))&&n.includes("金属ナトリウム")){baseDamage=Math.floor(135*catMul); logMessage=dmgLog("🧪 クレゾール + Na → ナトリウム塩！",baseDamage);}
+  else if(bSelected.length===1&&bSelected[0].name==="アントラセン"){baseDamage=120; logMessage=dmgLog("⚗️ アントラセンを投擲！",120);}
+  else if(bSelected.length===1&&bSelected[0].name==="ナフタレン"){baseDamage=55; logMessage=dmgLog("⚗️ ナフタレンを投擲！",55);}
+  else if(n.includes("ナフタレン")&&n.includes("濃硝酸")){baseDamage=Math.floor(170*catMul); logMessage=dmgLog("🧪 ナフタレンのニトロ化！",baseDamage); markFlag("nitro");}
+  else if(n.includes("アントラセン")&&n.includes("濃硝酸")){baseDamage=Math.floor(200*catMul); logMessage=dmgLog("🧪 アントラセンのニトロ化！",baseDamage); markFlag("nitro");}
   else if(n.includes("メチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(50*catMul); logMessage=dmgLog("🧪 メタノール生成！",baseDamage);}
   else if(n.includes("エチル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(60*catMul); logMessage=dmgLog("🧪 エタノール生成！",baseDamage);}
   else if(n.includes("プロピル基")&&n.includes("ヒドロキシ基")){baseDamage=Math.floor(65*catMul); logMessage=dmgLog("🧪 プロパノール生成！",baseDamage);}
@@ -1088,7 +1220,10 @@ function chooseAddToHand(){
   gameState.collection.push({...pendingIntermediate.card});
   document.getElementById('battle-log').innerText=`${pendingIntermediate.card.name} を手札に加えた！`;
   pushHistory(pendingIntermediate.card.name+"を手札へ");
-  pendingIntermediate=null; updateBattleUI(); setTimeout(endPlayerTurn,1200);
+  pendingIntermediate=null;
+  isProcessing=false;
+  updateBattleUI();
+  setTimeout(endPlayerTurn,1200);
 }
 
 function showQuiz(q){
@@ -1151,34 +1286,71 @@ function endPlayerTurn(){
   },850);
 }
 
+function sortDeck(mode){
+  const names=[...new Set(gameState.collection.map(c=>c.name))];
+  const getRep=name=>gameState.collection.find(c=>c.name===name)||ALL_CARDS.find(c=>c.name===name);
+  names.sort((a,b)=>{
+    const ca=getRep(a), cb=getRep(b);
+    if(!ca||!cb) return 0;
+    let cmp=0;
+    if(mode==='name') cmp=a.localeCompare(b,'ja');
+    else if(mode==='rarity'){
+      cmp=(RARITY_ORDER[ca.rarity]??9)-(RARITY_ORDER[cb.rarity]??9);
+      if(cmp===0) cmp=a.localeCompare(b,'ja');
+    }else if(mode==='power'){
+      cmp=powerValue(cb)-powerValue(ca);
+      if(cmp===0) cmp=a.localeCompare(b,'ja');
+    }else if(mode==='attr'){
+      cmp=(ca.attribute||'').localeCompare(cb.attribute||'','ja');
+      if(cmp===0) cmp=a.localeCompare(b,'ja');
+    }
+    return cmp;
+  });
+  gameState.deckListOrder=names.slice();
+  const rebuilt=[];
+  names.forEach(name=>{
+    gameState.currentDeck.filter(c=>c.name===name).forEach(c=>rebuilt.push(c));
+  });
+  gameState.currentDeck=rebuilt;
+  renderDeckEdit();
+}
+
 function renderDeckEdit(){
   document.getElementById('deck-count').innerText=gameState.currentDeck.length;
+  document.getElementById('deck-reaction-list').innerText=FULL_REACTION_TEXT;
+
+  const syn=calcSynthRate();
+  document.getElementById('synth-rate-text').innerText=`${syn.rate}%（${syn.ok}/${syn.total}系統）`;
+  document.getElementById('synth-rate-bar').style.width=syn.rate+"%";
+  document.getElementById('synth-hint').innerText=syn.missing.length
+    ? "不足例: "+syn.missing.join(" ／ ")
+    : (syn.rate>=60?"反応の組み合わせが充実しています":"官能基と炭化水素基・基質と試薬をバランスよく入れると上がります");
+
+  const allNames=[...new Set(gameState.collection.map(c=>c.name))];
+  let ordered;
+  if(gameState.deckListOrder && gameState.deckListOrder.length){
+    ordered=gameState.deckListOrder.filter(n=>allNames.includes(n));
+    allNames.filter(n=>!ordered.includes(n)).sort((a,b)=>a.localeCompare(b,'ja')).forEach(n=>ordered.push(n));
+  }else{
+    ordered=allNames.sort((a,b)=>a.localeCompare(b,'ja'));
+  }
+
   const list=document.getElementById('deck-list'); list.innerHTML="";
-  [...new Set(gameState.collection.map(c=>c.name))].forEach(name=>{
+  ordered.forEach(name=>{
     const owned=gameState.collection.filter(c=>c.name===name).length;
     const inD=gameState.currentDeck.filter(c=>c.name===name).length;
     const card=gameState.collection.find(c=>c.name===name);
+    if(!card) return;
     const val=card.name==="ボツリヌス毒素"?"継続200":(card.healPower>0?`HEAL+${card.healPower}`:`PWR ${formatPower(card.attackPower)}`);
     const div=document.createElement('div'); div.className=`deck-item ${inD>0?'in-deck':''}`;
-    div.innerHTML=`<div style="display:flex;gap:6px;align-items:center"><span class="card-rarity rarity-${card.rarity}">${card.rarity}</span><div><div style="font-size:13px;font-weight:bold;color:${inD>0?'#4ade80':'#fff'}">${name} [${inD}/${owned}]</div><div style="font-size:9px;color:#888">${card.formula} | ${val}</div></div></div>
-      <div style="display:flex;gap:4px">${inD>0?`<button class="action-btn" style="color:#ef4444" onclick="removeFromDeck('${name}')">➖</button>`:''}
-      <button class="action-btn" style="color:${inD<owned&&gameState.currentDeck.length<50?'#3b82f6':'#555'}" onclick="addToDeck('${name}')" ${inD>=owned||gameState.currentDeck.length>=50?'disabled':''}>➕</button></div>`;
+    div.innerHTML=`<div style="display:flex;gap:7px;align-items:center"><span class="card-rarity rarity-${card.rarity}">${card.rarity}</span><div><div style="font-size:13px;color:${inD>0?'#4ade80':'#e2e8f0'}">${name} [${inD}/${owned}]</div><div style="font-size:9px;color:#94a3b8">${card.formula} · ${val} · ${card.attribute}</div></div></div>
+      <div style="display:flex;gap:4px">${inD>0?`<button class="action-btn" style="color:#f87171" onclick="removeFromDeck('${name}')">➖</button>`:''}
+      <button class="action-btn" style="color:${inD<owned&&gameState.currentDeck.length<50?'#38bdf8':'#475569'}" onclick="addToDeck('${name}')" ${inD>=owned||gameState.currentDeck.length>=50?'disabled':''}>➕</button></div>`;
     list.appendChild(div);
   });
   const btn=document.getElementById('deck-done-btn');
-  if(gameState.currentDeck.length>=20){btn.disabled=false;btn.style.background='linear-gradient(135deg,#10b981,#14b8a6)';}
-  else{btn.disabled=true;btn.style.background='#555';}
-}
-function sortDeck(mode){
-  const rarityOrder={SSSR:0,SSR:1,SR:2,R:3};
-  if(mode==='name') gameState.currentDeck.sort((a,b)=>a.name.localeCompare(b.name,'ja'));
-  else if(mode==='rarity') gameState.currentDeck.sort((a,b)=>(rarityOrder[a.rarity]??9)-(rarityOrder[b.rarity]??9));
-  else if(mode==='power') gameState.currentDeck.sort((a,b)=>{
-    const pa=a.attackPower===Infinity?9999:(a.attackPower||a.healPower||0);
-    const pb=b.attackPower===Infinity?9999:(b.attackPower||b.healPower||0);
-    return pb-pa;
-  });
-  renderDeckEdit();
+  if(gameState.currentDeck.length>=20){btn.disabled=false;btn.style.opacity='1';}
+  else{btn.disabled=true;btn.style.opacity='.45';}
 }
 function addToDeck(name){
   const owned=gameState.collection.filter(c=>c.name===name).length;
@@ -1206,11 +1378,11 @@ function drawGacha(){
   let val=newCard.name==="ボツリヌス毒素"?"継続200/ターン":(newCard.healPower>0?`HEAL+${newCard.healPower}`:`PWR ${formatPower(newCard.attackPower)}`);
   const res=document.getElementById('gacha-result');
   res.innerHTML=`<span class="card-rarity rarity-${newCard.rarity}">${newCard.rarity}</span>
-    <div style="font-size:16px;font-weight:bold;margin:4px 0">${newCard.name}</div>
-    <div style="font-size:11px;color:#ccc">${newCard.formula}</div>
-    <div style="font-size:10px;color:#facc15;margin-top:3px">${val} | ${newCard.attribute}</div>
-    <div style="font-size:10px;color:#94a3b8;margin-top:2px">色: ${newCard.color||"-"} ／ 匂い: ${newCard.odor||"-"}</div>`;
-  res.style.borderColor=newCard.rarity==='SSSR'?'#ff00ff':(newCard.rarity==='SSR'?'#f97316':(newCard.rarity==='SR'?'#a855f7':'#3b82f6'));
+    <div style="font-size:17px;margin:6px 0">${newCard.name}</div>
+    <div style="font-size:11px;color:#cbd5e1">${newCard.formula}</div>
+    <div style="font-size:11px;color:#fbbf24;margin-top:4px">${val} · ${newCard.attribute}</div>
+    <div style="font-size:10px;color:#94a3b8;margin-top:3px">色: ${newCard.color||"-"} ／ 匂い: ${newCard.odor||"-"}</div>`;
+  res.style.borderColor=newCard.rarity==='SSSR'?'#e879f9':(newCard.rarity==='SSR'?'#fb923c':(newCard.rarity==='SR'?'#c084fc':'#60a5fa'));
 }
 
 initDaily();
