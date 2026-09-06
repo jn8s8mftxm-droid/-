@@ -371,7 +371,7 @@ const ALL_CARDS = [
   {name:"安息香酸",formula:"C6H5COOH",attackPower:48,healPower:0,attribute:"Acid",rarity:"SR",color:"白色",odor:"-"},
   {name:"酢酸エチル",formula:"CH3COOC2H5",attackPower:55,healPower:0,attribute:"Ester",rarity:"R",color:"無色",odor:"果実様香気"},
   {name:"サリチル酸",formula:"C6H4(OH)COOH",attackPower:55,healPower:0,attribute:"Acid",rarity:"SR",color:"白色",odor:"-"},
-  {name:"アセチルサリチル酸",formula:"C9H8O4",attackPower:120,healPower:0,attribute:"Ester",rarity:"SSR",color:"白色",odor:"-"},
+  {name:"アセチルサリチル酸",formula:"C9H8O4",attackPower:120,healPower:50,attribute:"Ester",rarity:"SSR",color:"白色",odor:"-"},
   {name:"無水酢酸",formula:"(CH3CO)2O",attackPower:40,healPower:0,attribute:"Reagent",rarity:"SR",color:"無色",odor:"刺激臭"},
   {name:"アセトアニリド",formula:"C6H5NHCOCH3",attackPower:60,healPower:0,attribute:"Aromatic",rarity:"SR",color:"白色",odor:"-"},
   {name:"トリパルミチン",formula:"C51H98O6",attackPower:45,healPower:0,attribute:"Fat",rarity:"SR",color:"白色",odor:"-"},
