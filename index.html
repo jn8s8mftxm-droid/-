@@ -299,6 +299,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
       <p style="font-size:11px;color:#94a3b8">最低20枚 ／ 最大50枚</p>
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="glass-btn mini-btn warn" onclick="recommendDeck()">おすすめ編成</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('name')">名前順</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('rarity')">レア順</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('power')">火力順</button>
@@ -752,6 +753,78 @@ function calcSynthRate(){
     else if(!hasA && hasB) missing.push(pair.b.find(n=>names.has(n))+" 側はあるが相手役不足");
   });
   return {rate:Math.round((ok/SYNTH_PAIRS.length)*100), ok, total:SYNTH_PAIRS.length, missing:missing.slice(0,4)};
+}
+
+/** おすすめ編成：合成ペア優先＋回復・高火力で埋める */
+function recommendDeck(){
+  if(!gameState.collection.length){alert('所持カードがありません');return;}
+  const owned={};
+  gameState.collection.forEach(c=>{owned[c.name]=(owned[c.name]||0)+1;});
+  const used={};
+  const pick=(name)=>{
+    if((used[name]||0)>=(owned[name]||0)) return false;
+    used[name]=(used[name]||0)+1;
+    return true;
+  };
+  const totalUsed=()=>Object.values(used).reduce((s,v)=>s+v,0);
+  const MAX=50;
+
+  // 1) 合成ペアを優先して両側を入れる（複数回可能な分だけ）
+  SYNTH_PAIRS.forEach(pair=>{
+    let guard=0;
+    while(guard++<20 && totalUsed()<MAX){
+      const aCand=pair.a.find(n=>(owned[n]||0)>(used[n]||0));
+      const bCand=pair.b.find(n=>(owned[n]||0)>(used[n]||0) && n!==aCand);
+      if(!aCand||!bCand) break;
+      if(totalUsed()+2>MAX){
+        if(totalUsed()<MAX) pick(aCand);
+        break;
+      }
+      pick(aCand); pick(bCand);
+    }
+  });
+
+  // 2) まだ枠がある → 回復カード優先
+  const heals=gameState.collection
+    .filter(c=>(c.healPower||0)>0)
+    .map(c=>c.name)
+    .filter((n,i,a)=>a.indexOf(n)===i)
+    .sort((a,b)=>{
+      const ca=gameState.collection.find(c=>c.name===a);
+      const cb=gameState.collection.find(c=>c.name===b);
+      return (cb.healPower||0)-(ca.healPower||0);
+    });
+  heals.forEach(name=>{
+    while(totalUsed()<MAX && (used[name]||0)<(owned[name]||0)) pick(name);
+  });
+
+  // 3) 高火力・特殊を優先して残りを埋める
+  const restNames=Object.keys(owned).sort((a,b)=>{
+    const ca=gameState.collection.find(c=>c.name===a)||ALL_CARDS.find(c=>c.name===a);
+    const cb=gameState.collection.find(c=>c.name===b)||ALL_CARDS.find(c=>c.name===b);
+    return powerValue(cb)-powerValue(ca);
+  });
+  restNames.forEach(name=>{
+    while(totalUsed()<MAX && (used[name]||0)<(owned[name]||0)) pick(name);
+  });
+
+  // 4) currentDeck を再構築（所持インスタンスから）
+  const newDeck=[];
+  const pool=[...gameState.collection];
+  Object.keys(used).forEach(name=>{
+    let need=used[name];
+    for(let i=0;i<pool.length && need>0;i++){
+      if(pool[i].name===name){
+        newDeck.push({...pool[i],id:Math.random().toString(36).substr(2,9)});
+        need--;
+      }
+    }
+  });
+  gameState.currentDeck=newDeck;
+  gameState.deckListOrder=Object.keys(used);
+  renderDeckEdit();
+  const syn=calcSynthRate();
+  alert(`おすすめ編成を適用しました\n枚数: ${newDeck.length} ／ 合成可能率: ${syn.rate}%（${syn.ok}/${syn.total}系統）`);
 }
 
 function createHumanoidMesh(){
