@@ -38,15 +38,16 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .quiz-options{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .quiz-btn{background:linear-gradient(145deg,#2563eb,#4338ca);border:none;color:#fff;padding:10px;border-radius:10px;font-size:12px;cursor:pointer;width:100%}
 .hand-container{overflow-x:auto;display:flex;gap:8px;padding:4px 0}
-.card{min-width:84px;width:84px;height:112px;border-radius:12px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:linear-gradient(160deg,#fff,#f1f5f9);color:#0f172a}
+.card{min-width:84px;width:84px;height:118px;border-radius:12px;padding:6px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:linear-gradient(160deg,#fff,#f1f5f9);color:#0f172a}
 .card.selected{background:linear-gradient(160deg,#fef08a,#fde047);box-shadow:0 0 0 2px #facc15;transform:translateY(-5px)}
 .card-rarity{font-size:8px;padding:2px 5px;border-radius:4px;color:#fff;width:fit-content}
 .rarity-SSR{background:#f97316}.rarity-SR{background:#a855f7}.rarity-R{background:#3b82f6}
 .rarity-SSSR{background:linear-gradient(90deg,#ff006e,#8338ec,#3a86ff)}.rarity-ORIGIN{background:linear-gradient(90deg,#14b8a6,#0ea5e9)}
 .card-attr{font-size:8px;color:#64748b}
+.card-dmg{font-size:9px;color:#dc2626;line-height:1.2}.card-heal{font-size:9px;color:#16a34a;line-height:1.2}
 .battle-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:4px}
 .choice-box{display:none;position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);width:86%;max-width:320px;z-index:50;background:rgba(15,23,42,.97);border:1px solid #fbbf24;border-radius:16px;padding:16px;text-align:center;flex-direction:column;gap:10px}
-#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#reaction-list-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen{
+#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#reaction-list-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen,#tree-screen{
   background:linear-gradient(180deg,#0f172a,#020617);padding:24px 12px 12px;overflow:hidden
 }
 .deck-list{flex:1;overflow-y:auto;max-height:32vh;margin-top:6px}
@@ -66,8 +67,8 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .gacha-card-view{width:230px;height:160px;border-radius:14px;border:1px solid rgba(168,85,247,.45);background:rgba(88,28,135,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:12px;margin:8px auto;position:relative;overflow:hidden}
 .gacha-card-view.rolling{animation:gachaShake .12s linear infinite}
 .gacha-card-view.reveal{animation:gachaPop .45s ease-out}
-@keyframes gachaShake{0%{transform:translateX(0) rotate(0)}25%{transform:translateX(-4px) rotate(-2deg)}75%{transform:translateX(4px) rotate(2deg)}100%{transform:translateX(0)}}
-@keyframes gachaPop{0%{transform:scale(.6);opacity:.3;filter:brightness(2)}100%{transform:scale(1);opacity:1;filter:brightness(1)}}
+@keyframes gachaShake{0%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}100%{transform:translateX(0)}}
+@keyframes gachaPop{0%{transform:scale(.6);opacity:.3}100%{transform:scale(1);opacity:1}}
 .longpress-popup,#pool-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;background:rgba(15,23,42,.98);border:1px solid #38bdf8;border-radius:16px;padding:16px;z-index:100;max-height:70vh;overflow-y:auto}
 .filter-row,.row-btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;align-items:center}
 .row-btns .glass-btn{flex:1;min-width:90px}
@@ -81,6 +82,12 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .part-chip{display:inline-block;padding:6px 10px;margin:3px;border-radius:999px;background:rgba(51,65,85,.9);border:1px solid #64748b;font-size:11px;cursor:pointer}
 .part-chip.on{background:rgba(14,165,233,.35);border-color:#38bdf8;color:#e0f2fe}
 .pool-line{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(71,85,105,.4);font-size:12px}
+.tree-node{background:rgba(30,41,59,.9);border-radius:12px;padding:12px;margin-bottom:10px;border-left:4px solid #475569}
+.tree-node.done{border-left-color:#22c55e;background:rgba(16,185,129,.12)}
+.tree-node .tree-title{font-size:13px;color:#e2e8f0;margin-bottom:4px}
+.tree-node .tree-path{font-size:11px;color:#94a3b8;line-height:1.5;white-space:pre-line}
+.tree-node .tree-rew{font-size:11px;color:#fbbf24;margin-top:6px}
+.tree-chain{font-size:10px;color:#67e8f9;margin-top:4px}
 </style>
 </head>
 <body>
@@ -106,6 +113,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
       <div style="color:#67e8f9;font-size:11px;margin-top:2px">🏠 研究室 Lv.<span id="field-lab">1</span></div>
       <div id="daily-hint" style="font-size:10px;color:#a5b4fc;margin-top:5px"></div>
       <div id="zukan-comp-hint" style="font-size:10px;color:#86efac;margin-top:2px"></div>
+      <div id="tree-hint" style="font-size:10px;color:#f9a8d4;margin-top:2px"></div>
     </div>
     <div class="field-btns">
       <button type="button" class="glass-btn mini-btn success" onclick="saveGame()">セーブ</button>
@@ -122,9 +130,10 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
       <button type="button" class="glass-btn pink wide" onclick="menuGo('gacha')">ガチャ</button>
       <button type="button" class="glass-btn slate wide" onclick="menuGo('refine')">精製</button>
       <button type="button" class="glass-btn success wide" onclick="menuGo('synth')">描画パーツ合成</button>
-      <div class="menu-label">図鑑・実績・研究室</div>
+      <div class="menu-label">図鑑・実績・反応ツリー</div>
       <button type="button" class="glass-btn warn wide" onclick="menuGo('zukan')">図鑑（暗記シート）</button>
       <button type="button" class="glass-btn success wide" onclick="menuGo('achieve')">実績</button>
+      <button type="button" class="glass-btn pink wide" onclick="menuGo('tree')">反応ツリー</button>
       <button type="button" class="glass-btn primary wide" onclick="menuGo('lab')">研究室</button>
       <div class="menu-label">学習モード</div>
       <button type="button" class="glass-btn wide" onclick="menuGoQuiz()">クイズ</button>
@@ -216,6 +225,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
     <div id="synth-msg" style="font-size:12px;color:#fbbf24;margin-top:8px"></div>
   </div>
 </div>
+<div id="tree-screen" class="screen">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h3 style="color:#f9a8d4">🌳 反応ツリー (<span id="tree-done">0</span>/<span id="tree-total">0</span>)</h3>
+    <button type="button" class="glass-btn slate" onclick="goBackFromMenu()">戻る</button>
+  </div>
+  <p style="font-size:11px;color:#94a3b8;margin:6px 0">バトルで反応を成功させると解放。解放ごとに試薬が入ります。</p>
+  <div id="tree-list" class="scroll-panel"></div>
+</div>
 <div id="reaction-list-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center"><h3 style="color:#fbbf24">📖 反応一覧</h3><button type="button" class="glass-btn primary" onclick="closeReactionList()">戻る</button></div>
   <div id="full-reaction-list" class="scroll-panel" style="white-space:pre-line"></div>
@@ -249,7 +266,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
     <h3 style="color:#a3e635">🏅 実績 (<span id="achieve-done">0</span>/<span id="achieve-total">0</span>)</h3>
     <button type="button" class="glass-btn slate" onclick="goBackFromMenu()">戻る</button>
   </div>
-  <p style="font-size:11px;color:#94a3b8;margin:4px 0">※すでに条件を満たしている実績は開いた時点で遡って付与されます</p>
+  <p style="font-size:11px;color:#94a3b8;margin:4px 0">条件済み実績は開いた時点で遡って付与されます</p>
   <div id="achieve-list" class="scroll-panel"></div>
 </div>
 <div id="deck-edit-screen" class="screen">
@@ -371,7 +388,6 @@ const ALL_CARDS=[
 {name:"カフェイン",formula:"C8H10N4O2",attackPower:90,healPower:35,attribute:"Aromatic",rarity:"SSR"}
 ];
 
-/* 肩書きはプレイヤーLv基準（研究室と別） */
 const RANK_BY_LEVEL=[
 {name:"初学者",level:1,reagentBonus:1.0,gachaBoost:0,promoteReward:0},
 {name:"高校生",level:5,reagentBonus:1.15,gachaBoost:0.3,promoteReward:40},
@@ -382,22 +398,40 @@ const RANK_BY_LEVEL=[
 {name:"博士",level:55,reagentBonus:2.2,gachaBoost:1.8,promoteReward:150},
 {name:"教授",level:70,reagentBonus:2.5,gachaBoost:2.2,promoteReward:200}
 ];
-/* 次レベルに必要な累計経験（目安） */
-function expToReachLevel(lv){
-  if(lv<=1)return 0;
-  var t=0;
-  for(var i=1;i<lv;i++) t+=20+i*12; /* Lv1→2:32, 上がるほど重い */
-  return t;
-}
+function expToReachLevel(lv){if(lv<=1)return 0;var t=0;for(var i=1;i<lv;i++)t+=20+i*12;return t;}
 const LAB_THRESH=[0,30,70,120,180,250,330,420,520,650];
+
+/* ===== 反応ツリー（レシピ） ===== */
+const REACTION_TREE=[
+{id:"nitro_bz",name:"ニトロ化（ベンゼン）",path:"ベンゼン + 濃硝酸 → ニトロ化",chain:"芳香族",reward:25},
+{id:"nitro_tol",name:"ニトロ化（トルエン）",path:"トルエン + 濃硝酸 → ニトロ化",chain:"芳香族",reward:30},
+{id:"nitro_ph",name:"ニトロ化（フェノール）",path:"フェノール + 濃硝酸",chain:"芳香族",reward:25},
+{id:"nitro_grp",name:"基ニトロ化",path:"ベンゼン + ニトロ基 → ニトロベンゼン",chain:"中間体連鎖",reward:30},
+{id:"reduce_nb",name:"還元（アニリン）",path:"ニトロベンゼン + 還元剤 → アニリン",chain:"中間体連鎖",reward:35},
+{id:"azo",name:"ジアゾ化〜アゾ",path:"アニリン + ジアゾ化剤 → アゾベンゼン",chain:"中間体連鎖",reward:40},
+{id:"acetyl_an",name:"アセチル化（アニリン）",path:"アニリン + 無水酢酸 → アセトアニリド",chain:"アセチル",reward:30},
+{id:"acetyl_sal",name:"アセチル化（サリチル酸）",path:"サリチル酸 + 無水酢酸 → アスピリン",chain:"アセチル",reward:40},
+{id:"ester",name:"エステル化",path:"酢酸 + エタノール → 酢酸エチル",chain:"エステル・けん化",reward:30},
+{id:"sapon",name:"けん化",path:"酢酸エチル/酸 + NaOH",chain:"エステル・けん化",reward:30},
+{id:"sapon_fat",name:"油脂けん化",path:"トリグリセリド + NaOH",chain:"エステル・けん化",reward:35},
+{id:"dehyd",name:"脱水",path:"エタノール + 濃硫酸 → エチレン系",chain:"脱水",reward:30},
+{id:"add_et",name:"付加（エチレン）",path:"エチレン + ハロゲン",chain:"付加・重合",reward:25},
+{id:"poly",name:"重合",path:"オレフィン + Ziegler触媒",chain:"付加・重合",reward:40},
+{id:"oxid",name:"酸化",path:"アルコール + KMnO4 等",chain:"酸化",reward:30},
+{id:"side_ox",name:"側鎖酸化",path:"トルエン + KMnO4",chain:"酸化",reward:35},
+{id:"sulf",name:"スルホン化",path:"ベンゼン/ナフタレン + 濃硫酸",chain:"芳香族",reward:25},
+{id:"halo",name:"芳香族ハロゲン化",path:"ベンゼン + ハロゲン + 触媒",chain:"芳香族",reward:30},
+{id:"na_alc",name:"アルコキシド生成",path:"アルコール + 金属Na",chain:"金属Na",reward:25},
+{id:"na_ph",name:"フェノキシド生成",path:"フェノール + 金属Na",chain:"金属Na",reward:25},
+{id:"fg_oh",name:"基＋OH",path:"炭化水素基 + ヒドロキシ基",chain:"官能基",reward:20},
+{id:"fg_no2",name:"基＋NO2",path:"フェニル基 + ニトロ基",chain:"官能基",reward:25}
+];
 
 const ACHIEVEMENTS=[
 {id:"first_win",name:"初勝利",desc:"初めて敵を倒す",reward:30,check:function(s){return s.kills>=1}},
-{id:"kills_5",name:"実験5回",desc:"5体撃破",reward:25,check:function(s){return s.kills>=5}},
-{id:"kills_10",name:"撃破10",desc:"10体倒す",reward:50,check:function(s){return s.kills>=10}},
-{id:"kills_25",name:"撃破25",desc:"25体倒す",reward:70,check:function(s){return s.kills>=25}},
-{id:"kills_50",name:"撃破50",desc:"50体倒す",reward:120,check:function(s){return s.kills>=50}},
-{id:"kills_100",name:"撃破100",desc:"100体倒す",reward:200,check:function(s){return s.kills>=100}},
+{id:"kills_30",name:"撃破30",desc:"30体倒す",reward:60,check:function(s){return s.kills>=30}},
+{id:"kills_80",name:"撃破80",desc:"80体倒す",reward:120,check:function(s){return s.kills>=80}},
+{id:"kills_150",name:"撃破150",desc:"150体倒す",reward:200,check:function(s){return s.kills>=150}},
 {id:"nitro",name:"ニトロ化",desc:"ニトロ化成功",reward:40,check:function(s){return s.flags.nitro}},
 {id:"sapon",name:"けん化",desc:"けん化成功",reward:40,check:function(s){return s.flags.sapon}},
 {id:"poly",name:"重合",desc:"重合成功",reward:40,check:function(s){return s.flags.poly}},
@@ -406,38 +440,38 @@ const ACHIEVEMENTS=[
 {id:"ester",name:"エステル化",desc:"エステル化成功",reward:40,check:function(s){return s.flags.ester}},
 {id:"oxid",name:"酸化反応",desc:"酸化成功",reward:40,check:function(s){return s.flags.oxid}},
 {id:"fat",name:"油脂の化学",desc:"油脂けん化",reward:45,check:function(s){return s.flags.fat}},
-{id:"combo3",name:"3連鎖",desc:"コンボ3",reward:50,check:function(s){return s.flags.combo3}},
 {id:"combo5",name:"5連鎖マスター",desc:"コンボ5以上",reward:80,check:function(s){return s.flags.combo5}},
+{id:"combo8",name:"8連鎖伝説",desc:"1バトルでコンボ8",reward:150,check:function(s){return s.flags.combo8}},
 {id:"boss",name:"ボス討伐",desc:"ボスを倒す",reward:80,check:function(s){return s.flags.boss}},
-{id:"boss3",name:"ボスハンター",desc:"ボス3体",reward:100,check:function(s){return (s.flags.bossKills||0)>=3}},
-{id:"refine1",name:"初精製",desc:"1回精製",reward:40,check:function(s){return s.flags.refined}},
+{id:"boss5",name:"ボスハンター",desc:"ボス5体",reward:150,check:function(s){return (s.flags.bossKills||0)>=5}},
+{id:"no_cat_boss",name:"無触媒主義",desc:"触媒なしでボス撃破",reward:120,check:function(s){return s.flags.noCatBoss}},
+{id:"save_boss",name:"節約実験",desc:"大ダメ試薬消費なしでボス撃破",reward:100,check:function(s){return s.flags.saveBoss}},
+{id:"mid_chain",name:"中間体職人",desc:"手札中間体から再反応成功",reward:90,check:function(s){return (s.flags.midReact||0)>=3}},
+{id:"tree_10",name:"反応樹10",desc:"反応ツリー10種解放",reward:80,check:function(s){return treeDoneCount(s)>=10}},
+{id:"tree_all",name:"反応樹コンプ",desc:"反応ツリー全解放",reward:200,check:function(s){return treeDoneCount(s)>=REACTION_TREE.length}},
+{id:"hard_only",name:"強敵志向",desc:"赤敵+ボスのみで撃破20",reward:100,check:function(s){return (s.flags.hardKills||0)>=20}},
+{id:"mono_attr",name:"単色属性勝利",desc:"同一属性カードだけで勝利",reward:90,check:function(s){return s.flags.monoWin}},
+{id:"origin_deck",name:"フルオリジン",desc:"オリジナル3枚以上入デッキで勝利",reward:100,check:function(s){return s.flags.originWin}},
 {id:"refine5",name:"精製職人",desc:"精製5回",reward:70,check:function(s){return (s.flags.refineCount||0)>=5}},
-{id:"collect_10",name:"図鑑10",desc:"図鑑10種",reward:30,check:function(s){return uniqCount(s)>=10}},
-{id:"collect_20",name:"収集家",desc:"図鑑20種",reward:60,check:function(s){return uniqCount(s)>=20}},
 {id:"collect_40",name:"大図鑑",desc:"図鑑40種",reward:120,check:function(s){return uniqCount(s)>=40}},
-{id:"collect_all",name:"コンプリート手前",desc:"図鑑60種",reward:200,check:function(s){return uniqCount(s)>=60}},
-{id:"gacha10",name:"ガチャ10回",desc:"ガチャ10回",reward:40,check:function(s){return (s.flags.gachaCount||0)>=10}},
+{id:"collect_60",name:"図鑑60",desc:"図鑑60種",reward:200,check:function(s){return uniqCount(s)>=60}},
 {id:"gacha50",name:"ガチャ中毒",desc:"ガチャ50回",reward:100,check:function(s){return (s.flags.gachaCount||0)>=50}},
+{id:"gacha150",name:"ガチャ狂",desc:"ガチャ150回",reward:180,check:function(s){return (s.flags.gachaCount||0)>=150}},
 {id:"ssr_get",name:"SSR入手",desc:"SSR所持",reward:50,check:function(s){return (s.collection||[]).some(function(c){return c.rarity==='SSR'})}},
 {id:"sssr_get",name:"SSSR入手",desc:"SSSR所持",reward:100,check:function(s){return (s.collection||[]).some(function(c){return c.rarity==='SSSR'})}},
 {id:"origin1",name:"オリジネイター",desc:"オリジナル作成",reward:60,check:function(s){return s.flags.origin}},
 {id:"origin3",name:"発明家",desc:"オリジナル3枚",reward:90,check:function(s){return (s.flags.originCount||0)>=3}},
-{id:"memo10",name:"暗記10",desc:"暗記10回",reward:40,check:function(s){return (s.flags.memoCount||0)>=10}},
-{id:"daily3",name:"日替わり3回",desc:"日替わり累計3",reward:50,check:function(s){return (s.flags.dailyTotal||0)>=3}},
-/* 肩書き実績＝現在のプレイヤーレベルで遡及可能 */
+{id:"memo20",name:"暗記マスター",desc:"暗記答え表示20回",reward:80,check:function(s){return (s.flags.memoCount||0)>=20}},
+{id:"daily5",name:"日替わり5",desc:"日替わり累計5",reward:70,check:function(s){return (s.flags.dailyTotal||0)>=5}},
 {id:"rank_hs",name:"高校進学",desc:"肩書き：高校生以上",reward:30,check:function(s){return (s.playerLevel||1)>=5}},
 {id:"rank_uni",name:"大学進学",desc:"肩書き：大学生以上",reward:50,check:function(s){return (s.playerLevel||1)>=12}},
 {id:"rank_doc",name:"博士号",desc:"肩書き：博士以上",reward:120,check:function(s){return (s.playerLevel||1)>=55}},
-{id:"plv_10",name:"レベル10",desc:"プレイヤーLv10",reward:40,check:function(s){return (s.playerLevel||1)>=10}},
-{id:"plv_30",name:"レベル30",desc:"プレイヤーLv30",reward:80,check:function(s){return (s.playerLevel||1)>=30}},
-{id:"lab3",name:"研究室Lv3",desc:"研究室レベル3",reward:40,check:function(s){return (s.labLevel||1)>=3}},
+{id:"plv_20",name:"レベル20",desc:"プレイヤーLv20",reward:60,check:function(s){return (s.playerLevel||1)>=20}},
+{id:"plv_40",name:"レベル40",desc:"プレイヤーLv40",reward:100,check:function(s){return (s.playerLevel||1)>=40}},
 {id:"lab5",name:"研究室Lv5",desc:"研究室レベル5",reward:80,check:function(s){return (s.labLevel||1)>=5}},
-{id:"heal_use",name:"応急処置",desc:"回復使用",reward:25,check:function(s){return s.flags.healed}},
-{id:"hf_survive",name:"HFサバイバー",desc:"HF使用経験",reward:60,check:function(s){return s.flags.hfUsed}},
-{id:"deck50",name:"フルデッキ",desc:"デッキ50枚",reward:40,check:function(s){return (s.currentDeck||[]).length>=50}},
-{id:"rich",name:"試薬長者",desc:"試薬500以上",reward:50,check:function(s){return (s.reagents||0)>=500}},
-{id:"quiz5",name:"クイズ5正解",desc:"クイズ累計5",reward:35,check:function(s){return (s.flags.quizOk||0)>=5}},
-{id:"iso5",name:"異性体5",desc:"異性体累計5",reward:35,check:function(s){return (s.flags.isoOk||0)>=5}}
+{id:"quiz10",name:"クイズ10",desc:"クイズ累計10正解",reward:50,check:function(s){return (s.flags.quizOk||0)>=10}},
+{id:"iso10",name:"異性体10",desc:"異性体累計10正解",reward:50,check:function(s){return (s.flags.isoOk||0)>=10}},
+{id:"rich",name:"試薬長者",desc:"試薬800以上",reward:80,check:function(s){return (s.reagents||0)>=800}}
 ];
 
 const DAILY_QUESTS=[{key:"nitro",label:"ニトロ化を1回"},{key:"sapon",label:"けん化を1回"},{key:"poly",label:"重合を1回"},{key:"ester",label:"エステル化を1回"},{key:"oxid",label:"酸化を1回"},{key:"acetyl",label:"アセチル化を1回"},{key:"dehyd",label:"脱水を1回"}];
@@ -447,32 +481,40 @@ const SYNTH_PAIRS=[{a:["ベンゼン"],b:["ニトロ基","濃硝酸","濃硫酸"
 const QUIZ_BANK=[{q:"ベンゼンのニトロ化生成物は？",opts:["ニトロベンゼン","フェノール","トルエン","アニリン"],ok:0,ex:"ニトロベンゼンです。"},{q:"エステル化の触媒は？",opts:["濃硫酸","NaOH","KMnO4","Fe"],ok:0,ex:"濃硫酸です。"},{q:"第一級アルコール酸化の最終物は？",opts:["カルボン酸","ケトン","エーテル","アルケン"],ok:0,ex:"カルボン酸です。"},{q:"第二級アルコールの酸化は？",opts:["ケトン","カルボン酸","アルデヒド","エーテル"],ok:0,ex:"ケトンです。"},{q:"油脂のけん化で出るアルコールは？",opts:["グリセリン","エタノール","メタノール","フェノール"],ok:0,ex:"グリセリンです。"},{q:"エタノールを濃硫酸で脱水すると？",opts:["エチレン","酢酸","アセトン","メタン"],ok:0,ex:"エチレンです。"},{q:"ニトロベンゼンを還元すると？",opts:["アニリン","フェノール","ベンゼン","トルエン"],ok:0,ex:"アニリンです。"},{q:"トルエンをKMnO4酸化すると？",opts:["安息香酸","フェノール","ベンゼン","ベンズアルデヒド"],ok:0,ex:"安息香酸です。"}];
 const ISOMER_BANK=[{q:"マレイン酸の幾何異性体は？",opts:["フマル酸","コハク酸","シュウ酸","安息香酸"],ok:0,ex:"フマル酸です。"},{q:"cis-2-ブテンの異性体は？",opts:["trans-2-ブテン","1-ブテン","イソブテン","ブタン"],ok:0,ex:"シス/トランスです。"},{q:"フェノールのパラ位メチル体は？",opts:["p-クレゾール","o-クレゾール","m-クレゾール","キシレン"],ok:0,ex:"p-クレゾールです。"},{q:"オレイン酸の二重結合は主に？",opts:["シス","トランス","両方","なし"],ok:0,ex:"ほぼシスです。"},{q:"隣同士の置換は？",opts:["オルト","メタ","パラ","なし"],ok:0,ex:"オルトです。"},{q:"1,4-位の置換は？",opts:["パラ","オルト","メタ","ジェミナル"],ok:0,ex:"パラです。"}];
 const RARITY_ORDER={SSSR:0,SSR:1,SR:2,R:3,ORIGIN:2};
-
 const GACHA_TYPES=[
-{id:"normal",name:"通常ガチャ",cost:100,desc:"全カード。R多め",rates:function(b){return{SSSR:0.1+b*0.15,SSR:2.9+b,SR:15+b*2,R:100};},pool:function(){return ALL_CARDS.slice();}},
-{id:"cheap",name:"練習ガチャ",cost:40,desc:"R・SRのみ",rates:function(){return{SR:25,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return c.rarity==='R'||c.rarity==='SR';});}},
-{id:"aromatic",name:"芳香族ガチャ",cost:120,desc:"芳香族中心",rates:function(b){return{SSR:5+b,SR:30,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Aromatic','Phenol','Reagent','FunctionalGroup'].indexOf(c.attribute)>=0;});}},
-{id:"alcohol",name:"アルコール・酸ガチャ",cost:110,desc:"酸・アルコ・エステル",rates:function(b){return{SSR:4+b,SR:28,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Alcohol','Acid','Ester','Oxidant','Aldehyde','Ketone','Base'].indexOf(c.attribute)>=0;});}},
-{id:"poly",name:"重合・付加ガチャ",cost:130,desc:"オレフィン・触媒",rates:function(b){return{SSR:8+b,SR:35,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Alkenyl','Alkynyl','Halogen','Catalyst','Hydrocarbon'].indexOf(c.attribute)>=0;});}},
-{id:"heal",name:"回復特化ガチャ",cost:90,desc:"回復持ち",rates:function(){return{SSR:15,SR:40,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return (c.healPower||0)>0;});}},
-{id:"premium",name:"SSR・SSSR確定",cost:1000,desc:"SSR93% / SSSR7%",rates:function(){return{SSSR:7,SSR:100};},pool:function(){return ALL_CARDS.filter(function(c){return c.rarity==='SSR'||c.rarity==='SSSR';});}}
+{id:"normal",name:"通常ガチャ",cost:100,desc:"全カード",rates:function(b){return{SSSR:0.1+b*0.15,SSR:2.9+b,SR:15+b*2,R:100};},pool:function(){return ALL_CARDS.slice();}},
+{id:"cheap",name:"練習ガチャ",cost:40,desc:"R・SR",rates:function(){return{SR:25,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return c.rarity==='R'||c.rarity==='SR';});}},
+{id:"aromatic",name:"芳香族ガチャ",cost:120,desc:"芳香族",rates:function(b){return{SSR:5+b,SR:30,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Aromatic','Phenol','Reagent','FunctionalGroup'].indexOf(c.attribute)>=0;});}},
+{id:"alcohol",name:"アルコール・酸ガチャ",cost:110,desc:"酸・アルコ",rates:function(b){return{SSR:4+b,SR:28,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Alcohol','Acid','Ester','Oxidant','Aldehyde','Ketone','Base'].indexOf(c.attribute)>=0;});}},
+{id:"poly",name:"重合・付加ガチャ",cost:130,desc:"オレフィン",rates:function(b){return{SSR:8+b,SR:35,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return ['Alkenyl','Alkynyl','Halogen','Catalyst','Hydrocarbon'].indexOf(c.attribute)>=0;});}},
+{id:"heal",name:"回復特化ガチャ",cost:90,desc:"回復",rates:function(){return{SSR:15,SR:40,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return (c.healPower||0)>0;});}},
+{id:"premium",name:"SSR・SSSR確定",cost:1000,desc:"SSR93%/SSSR7%",rates:function(){return{SSSR:7,SSR:100};},pool:function(){return ALL_CARDS.filter(function(c){return c.rarity==='SSR'||c.rarity==='SSSR';});}}
 ];
-
 const PART_SKELETON=[{id:"Me",label:"メチル骨格",formula:"CH3-",atk:20,attr:"Alkane"},{id:"Et",label:"エチル骨格",formula:"C2H5-",atk:25,attr:"Alkane"},{id:"Ph",label:"フェニル骨格",formula:"C6H5-",atk:40,attr:"Aromatic"},{id:"Vi",label:"ビニル骨格",formula:"CH2=CH-",atk:35,attr:"Alkenyl"},{id:"Bz",label:"ベンゼン核",formula:"C6H6核",atk:30,attr:"Aromatic"},{id:"Nap",label:"ナフタレン核",formula:"C10H8核",atk:50,attr:"Aromatic"}];
 const PART_FUNC=[{id:"OH",label:"-OH",formula:"OH",atk:10,heal:0,attr:"Alcohol"},{id:"COOH",label:"-COOH",formula:"COOH",atk:20,heal:0,attr:"Acid"},{id:"NH2",label:"-NH2",formula:"NH2",atk:15,heal:0,attr:"Aromatic"},{id:"NO2",label:"-NO2",formula:"NO2",atk:25,heal:0,attr:"Aromatic"},{id:"OMe",label:"-OCH3",formula:"OCH3",atk:12,heal:5,attr:"Ether"},{id:"Ac",label:"アセチル",formula:"COCH3",atk:18,heal:0,attr:"Ester"},{id:"Heal",label:"栄養基",formula:"Nut",atk:0,heal:40,attr:"Nutrient"}];
 
 function uniqCount(s){var set={},n=0;(s.collection||[]).forEach(function(c){var k=baseName(c.name);if(!set[k]){set[k]=1;n++;}});return n;}
+function treeDoneCount(s){var n=0;REACTION_TREE.forEach(function(r){if(s.recipes&&s.recipes[r.id])n++;});return n;}
 function baseName(n){return String(n||'').replace(/^精製/,'');}
 function fmt(v){return v===Infinity?'∞':v;}
 function powerValue(c){if(!c)return 0;if(baseName(c.name)==='ボツリヌス毒素')return 200;if(c.attackPower===Infinity)return 99999;return (c.attackPower||0)+(c.healPower||0);}
 function uid(){return Math.random().toString(36).slice(2,11);}
 function todayStr(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();}
+function cardPowerText(card){
+  if(baseName(card.name)==='ボツリヌス毒素')return '<div class="card-dmg">毎ターン200ダメージ</div>';
+  var h='';
+  if(card.attackPower===Infinity)h+='<div class="card-dmg">∞ダメージ</div>';
+  else if((card.attackPower||0)>0)h+='<div class="card-dmg">'+card.attackPower+'ダメージ</div>';
+  if((card.healPower||0)>0)h+='<div class="card-heal">'+card.healPower+'回復</div>';
+  if(!h)h='<div class="card-dmg">0ダメージ</div>';
+  return h;
+}
 
 var gameState={
   reagents:150,playerHP:200,playerMaxHP:200,collection:[],currentDeck:[],
   kills:0,playerLevel:1,playerExp:0,lastRank:'初学者',
-  flags:{nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false,combo3:false,combo5:false,refined:false,refineCount:0,gachaCount:0,origin:false,originCount:0,memoCount:0,dailyTotal:0,bossKills:0,healed:false,hfUsed:false,quizOk:0,isoOk:0},
-  achieved:{},dailyDate:'',dailyKey:'',dailyDone:false,deckListOrder:[],
+  flags:{nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false,combo3:false,combo5:false,combo8:false,refined:false,refineCount:0,gachaCount:0,origin:false,originCount:0,memoCount:0,dailyTotal:0,bossKills:0,healed:false,hfUsed:false,quizOk:0,isoOk:0,noCatBoss:false,saveBoss:false,midReact:0,hardKills:0,monoWin:false,originWin:false},
+  achieved:{},recipes:{},dailyDate:'',dailyKey:'',dailyDone:false,deckListOrder:[],
   deckSlots:[{name:'',cards:[]},{name:'',cards:[]},{name:'',cards:[]}],
   labLevel:1,labExp:0,labFreeDate:'',zukanRewards:{r30:false,r60:false,r90:false},lastReplay:[],nextDamageBonus:1.0
 };
@@ -480,21 +522,13 @@ var gameState={
 var returnToMenu=false,menuOpen=false,isBattleOver=false,isProcessing=false,botulinumActive=false,isPractice=false,gachaBusy=false;
 var pendingIntermediate=null,fromBattleToReaction=false,fromBattleToHistory=false;
 var battleHistory=[],battleTurnCount=0,bossTurnLimit=0,comboCount=0,zukanFilter='all';
+var battleUsedCatalyst=false,battleBigSpend=false,battleAttrsUsed={},battleOriginCount=0,battleFromMid=false;
 var qoScore=0,qoTotal=0,isoScore=0,isoStreak=0;
 var bDeck=[],bHand=[],bSelected=[],monsterHP=500,isPlayerTurn=true;
 var memoList=[],memoIdx=0,memoShow=false,selSkeleton=null,selFuncs={};
 
-function openFieldMenu(){
-  menuOpen=true;
-  var m=document.getElementById('field-menu');
-  if(m)m.style.display='flex';
-}
-function closeFieldMenu(clearFlag){
-  menuOpen=false;
-  var m=document.getElementById('field-menu');
-  if(m)m.style.display='none';
-  if(clearFlag)returnToMenu=false;
-}
+function openFieldMenu(){menuOpen=true;var m=document.getElementById('field-menu');if(m)m.style.display='flex';}
+function closeFieldMenu(clearFlag){menuOpen=false;var m=document.getElementById('field-menu');if(m)m.style.display='none';if(clearFlag)returnToMenu=false;}
 function menuGo(s){returnToMenu=true;closeFieldMenu(false);switchState(s);}
 function menuGoQuiz(){returnToMenu=true;closeFieldMenu(false);startQuizOnly();}
 function menuGoIsomer(){returnToMenu=true;closeFieldMenu(false);startIsomerMode();}
@@ -502,72 +536,36 @@ function goBackFromMenu(){switchState('field');if(returnToMenu)openFieldMenu();}
 
 function initDaily(){var t=todayStr();if(gameState.dailyDate!==t){gameState.dailyDate=t;gameState.dailyKey=DAILY_QUESTS[Math.floor(Math.random()*DAILY_QUESTS.length)].key;gameState.dailyDone=false;}}
 function getDailyLabel(){var q=DAILY_QUESTS.find(function(x){return x.key===gameState.dailyKey;});return q?q.label:'—';}
-function getRank(){
-  var r=RANK_BY_LEVEL[0], lv=gameState.playerLevel||1;
-  for(var i=0;i<RANK_BY_LEVEL.length;i++){if(lv>=RANK_BY_LEVEL[i].level)r=RANK_BY_LEVEL[i];}
-  return r;
-}
-function checkRankUp(){
-  var r=getRank();
-  if(r.name!==gameState.lastRank){
-    if(r.promoteReward>0){gameState.reagents+=r.promoteReward;alert('肩書きアップ！ '+gameState.lastRank+' → '+r.name+'\n試薬 +'+r.promoteReward);}
-    gameState.lastRank=r.name;
-  }
-}
-/** 戦闘経験（研究室とは別） */
-function addPlayerExp(n){
-  if(n<=0)return;
-  gameState.playerExp+=n;
-  var leveled=false;
-  while(true){
-    var need=expToReachLevel(gameState.playerLevel+1);
-    if(gameState.playerExp>=need){gameState.playerLevel++;leveled=true;}
-    else break;
-  }
-  if(leveled){
-    checkRankUp();
-    setTimeout(function(){alert('プレイヤーレベルアップ！ Lv.'+gameState.playerLevel+'\n肩書き: '+getRank().name);},200);
-  }
-  checkAchievements(true);
-}
-function enemyExpReward(m){
-  if(!m)return 5;
-  if(m.isBoss)return 55+Math.floor(Math.random()*15);
-  if(m.level>=3)return 22;
-  if(m.level===2)return 14;
-  return 7; /* 緑は少ない */
-}
+function getRank(){var r=RANK_BY_LEVEL[0],lv=gameState.playerLevel||1;for(var i=0;i<RANK_BY_LEVEL.length;i++){if(lv>=RANK_BY_LEVEL[i].level)r=RANK_BY_LEVEL[i];}return r;}
+function checkRankUp(){var r=getRank();if(r.name!==gameState.lastRank){if(r.promoteReward>0){gameState.reagents+=r.promoteReward;alert('肩書きアップ！ '+gameState.lastRank+' → '+r.name+'\n試薬 +'+r.promoteReward);}gameState.lastRank=r.name;}}
+function addPlayerExp(n){if(n<=0)return;gameState.playerExp+=n;var leveled=false;while(true){var need=expToReachLevel(gameState.playerLevel+1);if(gameState.playerExp>=need){gameState.playerLevel++;leveled=true;}else break;}if(leveled){checkRankUp();setTimeout(function(){alert('プレイヤーレベルアップ！ Lv.'+gameState.playerLevel);},200);}checkAchievements(true);}
+function enemyExpReward(m){if(!m)return 5;if(m.isBoss)return 55+Math.floor(Math.random()*15);if(m.level>=3)return 22;if(m.level===2)return 14;return 7;}
 function addLabExp(n){gameState.labExp+=n;while(gameState.labLevel<LAB_THRESH.length&&gameState.labExp>=(LAB_THRESH[gameState.labLevel]||99999)){gameState.labLevel++;var bonus=20+gameState.labLevel*5;gameState.reagents+=bonus;(function(lv,b){setTimeout(function(){alert('研究室 Lv.'+lv+'\n試薬 +'+b);},200);})(gameState.labLevel,bonus);}}
 function checkZukanRewards(){var n=uniqCount(gameState),pct=Math.floor(n/ALL_CARDS.length*100);if(pct>=30&&!gameState.zukanRewards.r30){gameState.zukanRewards.r30=true;gameState.reagents+=40;setTimeout(function(){alert('図鑑30% 試薬+40');},200);}if(pct>=60&&!gameState.zukanRewards.r60){gameState.zukanRewards.r60=true;gameState.reagents+=80;setTimeout(function(){alert('図鑑60% 試薬+80');},200);}if(pct>=90&&!gameState.zukanRewards.r90){gameState.zukanRewards.r90=true;gameState.reagents+=150;setTimeout(function(){alert('図鑑90% 試薬+150');},200);}}
 
-/** silent=true ならまとめて後で通知せず付与のみ（ロード時） */
+function unlockRecipe(id){
+  if(!id||(gameState.recipes&&gameState.recipes[id]))return;
+  if(!gameState.recipes)gameState.recipes={};
+  var rec=REACTION_TREE.find(function(r){return r.id===id;});
+  if(!rec)return;
+  gameState.recipes[id]=true;
+  gameState.reagents+=rec.reward;
+  setTimeout(function(){alert('反応ツリー解放: '+rec.name+'\n試薬 +'+rec.reward);},300);
+  checkAchievements();
+}
+
 function checkAchievements(silent){
   var gained=[];
   for(var i=0;i<ACHIEVEMENTS.length;i++){
     var a=ACHIEVEMENTS[i];
     if(gameState.achieved[a.id])continue;
-    if(a.check(gameState)){
-      gameState.achieved[a.id]=true;
-      gameState.reagents+=a.reward;
-      gained.push(a.name+'(+'+a.reward+')');
-    }
+    if(a.check(gameState)){gameState.achieved[a.id]=true;gameState.reagents+=a.reward;gained.push(a.name+'(+'+a.reward+')');}
   }
   checkZukanRewards();
-  if(gained.length&&!silent){
-    setTimeout(function(){alert('実績達成！\n'+gained.join('\n'));},250);
-  }else if(gained.length&&silent){
-    /* ロード時など：一度だけまとめて */
-    if(!checkAchievements._batch){
-      checkAchievements._batch=gained.slice();
-      setTimeout(function(){
-        if(checkAchievements._batch&&checkAchievements._batch.length){
-          alert('未受け取り実績を遡って付与しました\n'+checkAchievements._batch.join('\n'));
-        }
-        checkAchievements._batch=null;
-      },400);
-    }else{
-      checkAchievements._batch=checkAchievements._batch.concat(gained);
-    }
+  if(gained.length&&!silent)setTimeout(function(){alert('実績達成！\n'+gained.join('\n'));},250);
+  else if(gained.length&&silent){
+    if(!checkAchievements._batch){checkAchievements._batch=gained.slice();setTimeout(function(){if(checkAchievements._batch&&checkAchievements._batch.length)alert('未受け取り実績を遡って付与\n'+checkAchievements._batch.join('\n'));checkAchievements._batch=null;},400);}
+    else checkAchievements._batch=checkAchievements._batch.concat(gained);
   }
 }
 function markFlag(f){gameState.flags[f]=true;if(!gameState.dailyDone&&gameState.dailyKey===f){gameState.dailyDone=true;gameState.flags.dailyTotal=(gameState.flags.dailyTotal||0)+1;gameState.reagents+=50;setTimeout(function(){alert('日替わりクリア 試薬+50');},200);}checkAchievements();}
@@ -579,35 +577,21 @@ function loadGame(){
     var data=JSON.parse(raw);
     gameState.reagents=data.reagents||150;gameState.playerHP=data.playerHP||200;gameState.playerMaxHP=data.playerMaxHP||200;
     gameState.collection=data.collection||[];gameState.currentDeck=data.currentDeck||[];gameState.kills=data.kills||0;
-    /* 旧セーブ互換：playerLevelが無い場合は撃破数から推定しない（新規レベル1+経験0）。経験だけ救済しない */
-    gameState.playerLevel=data.playerLevel||1;
-    gameState.playerExp=data.playerExp||0;
-    gameState.lastRank=data.lastRank||'初学者';
-    gameState.flags=Object.assign({nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false,combo3:false,combo5:false,refined:false,refineCount:0,gachaCount:0,origin:false,originCount:0,memoCount:0,dailyTotal:0,bossKills:0,healed:false,hfUsed:false,quizOk:0,isoOk:0},data.flags||{});
-    gameState.achieved=data.achieved||{};gameState.dailyDate=data.dailyDate||'';gameState.dailyKey=data.dailyKey||'';gameState.dailyDone=!!data.dailyDone;
+    gameState.playerLevel=data.playerLevel||1;gameState.playerExp=data.playerExp||0;gameState.lastRank=data.lastRank||'初学者';
+    gameState.flags=Object.assign({nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false,combo3:false,combo5:false,combo8:false,refined:false,refineCount:0,gachaCount:0,origin:false,originCount:0,memoCount:0,dailyTotal:0,bossKills:0,healed:false,hfUsed:false,quizOk:0,isoOk:0,noCatBoss:false,saveBoss:false,midReact:0,hardKills:0,monoWin:false,originWin:false},data.flags||{});
+    gameState.achieved=data.achieved||{};gameState.recipes=data.recipes||{};
+    gameState.dailyDate=data.dailyDate||'';gameState.dailyKey=data.dailyKey||'';gameState.dailyDone=!!data.dailyDone;
     gameState.deckListOrder=data.deckListOrder||[];gameState.labLevel=data.labLevel||1;gameState.labExp=data.labExp||0;gameState.labFreeDate=data.labFreeDate||'';
     gameState.zukanRewards=Object.assign({r30:false,r60:false,r90:false},data.zukanRewards||{});gameState.lastReplay=data.lastReplay||[];gameState.nextDamageBonus=1.0;
     if(data.deckSlots&&data.deckSlots[0]&&data.deckSlots[0].cards)gameState.deckSlots=data.deckSlots;
     else gameState.deckSlots=[{name:'',cards:[]},{name:'',cards:[]},{name:'',cards:[]}];
-    /* 旧セーブで肩書きが進んでいた人向け：lastRankから最低レベルを補完 */
-    migrateRankFromLegacy(data);
-    returnToMenu=false;initDaily();
-    checkAchievements(true); /* 遡及付与 */
-    updateFieldUI();switchState('field');alert('ロードしました');
+    migrateRankFromLegacy(data);returnToMenu=false;initDaily();checkAchievements(true);updateFieldUI();switchState('field');alert('ロードしました');
   }catch(e){alert('ロード失敗');}
 }
-function migrateRankFromLegacy(data){
-  /* 旧: killsベースの肩書き名が残っている場合、対応Lv未満なら底上げ */
-  var name=gameState.lastRank;
-  var need={高校生:5,大学生:12,大学院生:20,助教:30,准教授:42,博士:55,教授:70};
-  if(need[name]&&gameState.playerLevel<need[name]){
-    gameState.playerLevel=need[name];
-    gameState.playerExp=Math.max(gameState.playerExp, expToReachLevel(gameState.playerLevel));
-  }
-}
+function migrateRankFromLegacy(data){var name=gameState.lastRank;var need={高校生:5,大学生:12,大学院生:20,助教:30,准教授:42,博士:55,教授:70};if(need[name]&&gameState.playerLevel<need[name]){gameState.playerLevel=need[name];gameState.playerExp=Math.max(gameState.playerExp,expToReachLevel(gameState.playerLevel));}}
 
 function switchState(s){
-  var ids=['deck-select-screen','field-screen','battle-screen','deck-edit-screen','gacha-screen','zukan-screen','achieve-screen','reaction-list-screen','history-screen','quiz-only-screen','isomer-screen','lab-screen','refine-screen','synth-screen'];
+  var ids=['deck-select-screen','field-screen','battle-screen','deck-edit-screen','gacha-screen','zukan-screen','achieve-screen','reaction-list-screen','history-screen','quiz-only-screen','isomer-screen','lab-screen','refine-screen','synth-screen','tree-screen'];
   for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el)el.classList.remove('active');}
   if(s!=='field')closeFieldMenu(false);
   if(s==='deckSelection')document.getElementById('deck-select-screen').classList.add('active');
@@ -618,6 +602,7 @@ function switchState(s){
   if(s==='reactionList'){document.getElementById('reaction-list-screen').classList.add('active');document.getElementById('full-reaction-list').innerText=FULL_REACTION_TEXT;}
   if(s==='zukan'){document.getElementById('zukan-screen').classList.add('active');exitMemoMode();renderZukan();}
   if(s==='achieve'){document.getElementById('achieve-screen').classList.add('active');checkAchievements(true);renderAchieve();}
+  if(s==='tree'){document.getElementById('tree-screen').classList.add('active');renderTree();}
   if(s==='history'){document.getElementById('history-screen').classList.add('active');document.getElementById('history-list').innerText=battleHistory.slice(-40).join('\n\n')||'履歴なし';}
   if(s==='quizOnly')document.getElementById('quiz-only-screen').classList.add('active');
   if(s==='isomer')document.getElementById('isomer-screen').classList.add('active');
@@ -644,11 +629,29 @@ function updateFieldUI(){
   document.getElementById('daily-hint').innerText=gameState.dailyDone?'📅 日替わり達成済':'📅 今日: '+getDailyLabel();
   var n=uniqCount(gameState),pct=Math.floor(n/ALL_CARDS.length*100);
   document.getElementById('zukan-comp-hint').innerText='図鑑 '+n+'/'+ALL_CARDS.length+'（'+pct+'%）';
+  document.getElementById('tree-hint').innerText='反応ツリー '+treeDoneCount(gameState)+'/'+REACTION_TREE.length;
+}
+
+function renderTree(){
+  document.getElementById('tree-done').innerText=treeDoneCount(gameState);
+  document.getElementById('tree-total').innerText=REACTION_TREE.length;
+  var list=document.getElementById('tree-list');list.innerHTML='';
+  var chains={};
+  REACTION_TREE.forEach(function(r){if(!chains[r.chain])chains[r.chain]=[];chains[r.chain].push(r);});
+  Object.keys(chains).forEach(function(ch){
+    var h=document.createElement('div');h.style.cssText='color:#f9a8d4;font-size:13px;margin:10px 0 6px';h.innerText='▸ '+ch;list.appendChild(h);
+    chains[ch].forEach(function(r){
+      var done=!!(gameState.recipes&&gameState.recipes[r.id]);
+      var div=document.createElement('div');div.className='tree-node'+(done?' done':'');
+      div.innerHTML='<div class="tree-title">'+(done?'✅ ':'🔒 ')+r.name+'</div><div class="tree-path">'+r.path+'</div><div class="tree-rew">'+(done?'解放済':'未解放')+' · 報酬 試薬'+r.reward+'</div>';
+      list.appendChild(div);
+    });
+  });
 }
 
 function assignStarterDeck(type){
   gameState.currentDeck=[];gameState.collection=[];gameState.deckListOrder=[];returnToMenu=false;
-  gameState.playerLevel=1;gameState.playerExp=0;gameState.lastRank='初学者';
+  gameState.playerLevel=1;gameState.playerExp=0;gameState.lastRank='初学者';gameState.recipes={};
   var names=type==='Aromatic'?['ベンゼン','トルエン','濃硝酸','濃硫酸','フェノール','グルコース','ニトロ基']:type==='Polymer'?['エチレン','臭素','塩素','重合触媒(Ziegler)','グルコース','エタノール']:['エタノール','酢酸','水酸化ナトリウム','過マンガン酸カリウム','グルコース','アセトアルデヒド'];
   var base=[];for(var i=0;i<names.length;i++){var c=ALL_CARDS.find(function(x){return x.name===names[i];});if(c)base.push(c);}
   for(var j=0;j<40;j++){var src=base[j%base.length];gameState.currentDeck.push(Object.assign({},src,{id:uid()}));gameState.collection.push(Object.assign({},src,{id:uid()}));}
@@ -659,16 +662,13 @@ function finishDeckEdit(){if(gameState.currentDeck.length<20){alert('最低20枚
 function renderGachaTypes(){
   var box=document.getElementById('gacha-types');box.innerHTML='';
   GACHA_TYPES.forEach(function(g){
-    var pool=g.pool();
-    var byR={};pool.forEach(function(c){byR[c.rarity]=(byR[c.rarity]||0)+1;});
+    var pool=g.pool(),byR={};pool.forEach(function(c){byR[c.rarity]=(byR[c.rarity]||0)+1;});
     var poolText=Object.keys(byR).map(function(r){return r+':'+byR[r]+'種';}).join(' / ');
     var div=document.createElement('div');div.className='gacha-type-card';
     div.innerHTML='<h4>'+g.name+'（試薬 '+g.cost+'）</h4><p>'+g.desc+'</p><p style="color:#67e8f9">内訳: '+poolText+'</p>';
     var row=document.createElement('div');row.className='gacha-actions';
-    var listBtn=document.createElement('button');listBtn.type='button';listBtn.className='glass-btn slate';listBtn.innerText='一覧';
-    listBtn.onclick=function(){showPoolModal(g);};
-    var pullBtn=document.createElement('button');pullBtn.type='button';pullBtn.className='glass-btn pink';pullBtn.innerText='引く（'+g.cost+'）';
-    pullBtn.onclick=function(){drawGachaType(g.id);};
+    var listBtn=document.createElement('button');listBtn.type='button';listBtn.className='glass-btn slate';listBtn.innerText='一覧';listBtn.onclick=function(){showPoolModal(g);};
+    var pullBtn=document.createElement('button');pullBtn.type='button';pullBtn.className='glass-btn pink';pullBtn.innerText='引く（'+g.cost+'）';pullBtn.onclick=function(){drawGachaType(g.id);};
     row.appendChild(listBtn);row.appendChild(pullBtn);div.appendChild(row);box.appendChild(div);
   });
 }
@@ -677,65 +677,51 @@ function showPoolModal(g){
   document.getElementById('pool-title').innerText=g.name+' 排出一覧';
   var html='';
   pool.forEach(function(c){
-    var p=c.name==='ボツリヌス毒素'?'DoT200':(c.attackPower===Infinity?'∞':String(c.attackPower));
-    if((c.healPower||0)>0)p+=' / 回'+c.healPower;
+    var p=c.name==='ボツリヌス毒素'?'毎ターン200ダメージ':(c.attackPower===Infinity?'∞ダメージ':(c.attackPower||0)+'ダメージ');
+    if((c.healPower||0)>0)p+=' / '+c.healPower+'回復';
     html+='<div class="pool-line"><span><span class="card-rarity rarity-'+c.rarity+'">'+c.rarity+'</span> '+c.name+'</span><span style="color:#fbbf24">'+p+'</span></div>';
   });
-  document.getElementById('pool-body').innerHTML=html;
-  document.getElementById('pool-modal').style.display='block';
+  document.getElementById('pool-body').innerHTML=html;document.getElementById('pool-modal').style.display='block';
 }
 function closePoolModal(){document.getElementById('pool-modal').style.display='none';}
-
 function drawGachaType(id){
   if(gachaBusy)return;
   var g=GACHA_TYPES.find(function(x){return x.id===id;});if(!g)return;
-  if(gameState.reagents<g.cost){alert('試薬不足（必要'+g.cost+'）');return;}
-  gameState.reagents-=g.cost;
-  document.getElementById('gacha-reagents').innerText=gameState.reagents;
-  gachaBusy=true;
-  var res=document.getElementById('gacha-result');
+  if(gameState.reagents<g.cost){alert('試薬不足');return;}
+  gameState.reagents-=g.cost;document.getElementById('gacha-reagents').innerText=gameState.reagents;
+  gachaBusy=true;var res=document.getElementById('gacha-result');
   res.classList.remove('reveal');res.classList.add('rolling');
   res.innerHTML='<div style="font-size:14px;color:#e879f9">合成中…</div><div style="font-size:28px;margin-top:8px">⚗️</div>';
-  var ticks=0,maxTicks=12;
-  var iv=setInterval(function(){
-    ticks++;
-    var flash=g.pool()[Math.floor(Math.random()*g.pool().length)];
+  var ticks=0;var iv=setInterval(function(){
+    ticks++;var flash=g.pool()[Math.floor(Math.random()*g.pool().length)];
     res.innerHTML='<div style="font-size:11px;opacity:.7">'+g.name+'</div><div style="font-size:15px;margin-top:8px">'+flash.name+'</div>';
-    if(ticks>=maxTicks){
-      clearInterval(iv);
-      res.classList.remove('rolling');
-      finishGachaPull(g,res);
-    }
+    if(ticks>=12){clearInterval(iv);res.classList.remove('rolling');finishGachaPull(g,res);}
   },80);
 }
 function finishGachaPull(g,res){
-  var boost=getRank().gachaBoost;
-  var rates=g.rates(boost);
-  var rand=Math.random()*100,rarity='R',order=['SSSR','SSR','SR','R'];
+  var boost=getRank().gachaBoost,rates=g.rates(boost),rand=Math.random()*100,rarity='R',order=['SSSR','SSR','SR','R'];
   for(var i=0;i<order.length;i++){if(rates[order[i]]==null)continue;if(rand<rates[order[i]]){rarity=order[i];break;}}
   var pool=g.pool().filter(function(c){return c.rarity===rarity;});if(!pool.length)pool=g.pool();
   var pulled=pool[Math.floor(Math.random()*pool.length)];
-  var newCard=Object.assign({},pulled,{id:uid()});
-  gameState.collection.push(newCard);
-  gameState.flags.gachaCount=(gameState.flags.gachaCount||0)+1;
-  saveGame(true);checkAchievements();
-  var val;if(newCard.name==='ボツリヌス毒素')val='DoT200';else if(newCard.attackPower===Infinity)val='∞';
-  else if((newCard.attackPower||0)>0&&(newCard.healPower||0)>0)val='攻'+fmt(newCard.attackPower)+'/回'+newCard.healPower;
-  else if(newCard.healPower>0)val='HEAL+'+newCard.healPower;else val='PWR '+fmt(newCard.attackPower);
+  var newCard=Object.assign({},pulled,{id:uid()});gameState.collection.push(newCard);
+  gameState.flags.gachaCount=(gameState.flags.gachaCount||0)+1;saveGame(true);checkAchievements();
+  var val;if(newCard.name==='ボツリヌス毒素')val='毎ターン200ダメージ';else if(newCard.attackPower===Infinity)val='∞ダメージ';
+  else if((newCard.attackPower||0)>0&&(newCard.healPower||0)>0)val=newCard.attackPower+'ダメージ / '+newCard.healPower+'回復';
+  else if(newCard.healPower>0)val=newCard.healPower+'回復';else val=(newCard.attackPower||0)+'ダメージ';
   res.classList.add('reveal');
   res.innerHTML='<div style="font-size:11px;color:#94a3b8">'+g.name+'</div><span class="card-rarity rarity-'+newCard.rarity+'">'+newCard.rarity+'</span><div style="font-size:18px;margin:8px 0">'+newCard.name+'</div><div style="font-size:11px;color:#cbd5e1">'+newCard.formula+'</div><div style="font-size:12px;color:#fbbf24;margin-top:6px">'+val+'</div>';
   gachaBusy=false;
 }
 
 function renderSynthParts(){document.getElementById('synth-reagents').innerText=gameState.reagents;var sk=document.getElementById('part-skeleton');sk.innerHTML='';PART_SKELETON.forEach(function(p){var sp=document.createElement('span');sp.className='part-chip'+(selSkeleton&&selSkeleton.id===p.id?' on':'');sp.innerText=p.label;sp.onclick=function(){selSkeleton=p;renderSynthParts();};sk.appendChild(sp);});var fn=document.getElementById('part-func');fn.innerHTML='';PART_FUNC.forEach(function(p){var sp=document.createElement('span');sp.className='part-chip'+(selFuncs[p.id]?' on':'');sp.innerText=p.label;sp.onclick=function(){if(selFuncs[p.id])delete selFuncs[p.id];else selFuncs[p.id]=p;renderSynthParts();};fn.appendChild(sp);});updateSynthPreview();}
-function updateSynthPreview(){if(!selSkeleton){document.getElementById('synth-preview').innerText='骨格を選んでください';return;}var atk=selSkeleton.atk,heal=0,parts=[selSkeleton.formula],attr=selSkeleton.attr;Object.keys(selFuncs).forEach(function(k){var p=selFuncs[k];atk+=p.atk;heal+=p.heal;parts.push(p.formula);if(p.attr)attr=p.attr;});document.getElementById('synth-preview').innerHTML='式: '+parts.join(' + ')+'<br>攻'+atk+' / 回'+heal+' / '+attr;}
+function updateSynthPreview(){if(!selSkeleton){document.getElementById('synth-preview').innerText='骨格を選んでください';return;}var atk=selSkeleton.atk,heal=0,parts=[selSkeleton.formula],attr=selSkeleton.attr;Object.keys(selFuncs).forEach(function(k){var p=selFuncs[k];atk+=p.atk;heal+=p.heal;parts.push(p.formula);if(p.attr)attr=p.attr;});document.getElementById('synth-preview').innerHTML='式: '+parts.join(' + ')+'<br>'+atk+'ダメージ / '+heal+'回復 / '+attr;}
 function createOriginalCard(){if(!selSkeleton){alert('骨格を選んで');return;}if(gameState.reagents<100){alert('試薬100必要');return;}gameState.reagents-=100;var atk=selSkeleton.atk,heal=0,fparts=[selSkeleton.formula],attr=selSkeleton.attr;Object.keys(selFuncs).forEach(function(k){var p=selFuncs[k];atk+=p.atk;heal+=p.heal;fparts.push(p.formula);if(p.attr)attr=p.attr;});var custom=document.getElementById('orig-name').value.trim();var name=custom||('オリジン・'+selSkeleton.label);var card={name:name,formula:fparts.join('-'),attackPower:atk,healPower:heal,attribute:attr,rarity:'ORIGIN',id:uid(),origin:true};gameState.collection.push(card);gameState.flags.origin=true;gameState.flags.originCount=(gameState.flags.originCount||0)+1;checkAchievements();saveGame(true);document.getElementById('synth-msg').innerText='作成: '+name;document.getElementById('synth-reagents').innerText=gameState.reagents;document.getElementById('orig-name').value='';selSkeleton=null;selFuncs={};renderSynthParts();}
 
 function setZukanFilter(f){zukanFilter=f;renderZukan();}
 function getZukanNames(){var names=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;names.push(c.name);}});return names.filter(function(name){var c=gameState.collection.find(function(x){return x.name===name;})||ALL_CARDS.find(function(x){return x.name===baseName(name);});if(!c)return false;if(zukanFilter==='all')return true;if(['SSSR','SSR','SR','R','ORIGIN'].indexOf(zukanFilter)>=0)return c.rarity===zukanFilter;return true;}).sort(function(a,b){return a.localeCompare(b,'ja');});}
-function renderZukan(){var names=getZukanNames();document.getElementById('zukan-count').innerText=names.length;var list=document.getElementById('zukan-list');list.innerHTML='';list.style.display='block';document.getElementById('memo-panel').style.display='none';if(!names.length){list.innerHTML='<div style="color:#94a3b8">該当なし</div>';return;}names.forEach(function(name){var c=gameState.collection.find(function(x){return x.name===name;})||ALL_CARDS.find(function(x){return x.name===baseName(name);});var div=document.createElement('div');div.className='zukan-item';div.innerHTML='<div>'+name+' <span class="card-rarity rarity-'+c.rarity+'">'+c.rarity+'</span></div><div style="margin-top:6px;font-size:12px">【暗記】分子式: <b>'+(c.formula||'-')+'</b></div><div style="font-size:12px;color:#94a3b8">属性: '+c.attribute+'　威力: '+fmt(c.attackPower)+'　回復: '+(c.healPower||0)+'</div>'+(CARD_REACTIONS[baseName(name)]?'<div style="font-size:11px;color:#a5b4fc;margin-top:4px">反応: '+CARD_REACTIONS[baseName(name)]+'</div>':'');list.appendChild(div);});}
+function renderZukan(){var names=getZukanNames();document.getElementById('zukan-count').innerText=names.length;var list=document.getElementById('zukan-list');list.innerHTML='';list.style.display='block';document.getElementById('memo-panel').style.display='none';if(!names.length){list.innerHTML='<div style="color:#94a3b8">該当なし</div>';return;}names.forEach(function(name){var c=gameState.collection.find(function(x){return x.name===name;})||ALL_CARDS.find(function(x){return x.name===baseName(name);});var div=document.createElement('div');div.className='zukan-item';div.innerHTML='<div>'+name+' <span class="card-rarity rarity-'+c.rarity+'">'+c.rarity+'</span></div><div style="margin-top:6px;font-size:12px">分子式: <b>'+(c.formula||'-')+'</b></div><div style="font-size:12px;color:#94a3b8">'+fmt(c.attackPower)+'ダメージ / '+(c.healPower||0)+'回復 · '+c.attribute+'</div>'+(CARD_REACTIONS[baseName(name)]?'<div style="font-size:11px;color:#a5b4fc;margin-top:4px">'+CARD_REACTIONS[baseName(name)]+'</div>':'');list.appendChild(div);});}
 function startMemoMode(){memoList=getZukanNames();if(!memoList.length){alert('空');return;}memoIdx=0;memoShow=false;document.getElementById('zukan-list').style.display='none';document.getElementById('memo-panel').style.display='block';showMemoCard();}
-function showMemoCard(){var name=memoList[memoIdx];var c=gameState.collection.find(function(x){return x.name===name;})||ALL_CARDS.find(function(x){return x.name===baseName(name);});document.getElementById('memo-q').innerText=name;var ans='分子式: '+(c.formula||'-')+'\n属性: '+c.attribute+'\n攻撃: '+fmt(c.attackPower)+' / 回復: '+(c.healPower||0)+'\nレア: '+c.rarity;if(CARD_REACTIONS[baseName(name)])ans+='\n\n'+CARD_REACTIONS[baseName(name)];var a=document.getElementById('memo-a');a.innerText=ans;a.className=memoShow?'':'memo-hidden';}
+function showMemoCard(){var name=memoList[memoIdx];var c=gameState.collection.find(function(x){return x.name===name;})||ALL_CARDS.find(function(x){return x.name===baseName(name);});document.getElementById('memo-q').innerText=name;var ans='分子式: '+(c.formula||'-')+'\n'+fmt(c.attackPower)+'ダメージ / '+(c.healPower||0)+'回復\n'+c.rarity;if(CARD_REACTIONS[baseName(name)])ans+='\n'+CARD_REACTIONS[baseName(name)];var a=document.getElementById('memo-a');a.innerText=ans;a.className=memoShow?'':'memo-hidden';}
 function toggleMemoAnswer(){memoShow=!memoShow;document.getElementById('memo-a').className=memoShow?'':'memo-hidden';if(memoShow){gameState.flags.memoCount=(gameState.flags.memoCount||0)+1;checkAchievements();}}
 function nextMemoCard(){memoIdx=(memoIdx+1)%memoList.length;memoShow=false;showMemoCard();}
 function exitMemoMode(){document.getElementById('memo-panel').style.display='none';renderZukan();}
@@ -770,32 +756,15 @@ function initThreeJS(){
   var floor=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshLambertMaterial({color:0x3d9e5a}));floor.rotation.x=-Math.PI/2;scene.add(floor);
   playerNode=createHumanoidMesh();scene.add(playerNode);for(var i=0;i<3;i++)spawnMonster();
   var drag=false,lx=0,ly=0;
-  window.addEventListener('pointerdown',function(e){
-    if(menuOpen)return;
-    if(!document.getElementById('field-screen').classList.contains('active'))return;
-    drag=true;lx=e.clientX;ly=e.clientY;
-  });
-  window.addEventListener('pointermove',function(e){
-    if(menuOpen||!drag)return;
-    if(!document.getElementById('field-screen').classList.contains('active'))return;
-    targetPlayerPos.x=Math.max(-12,Math.min(12,targetPlayerPos.x+(e.clientX-lx)*0.04));
-    targetPlayerPos.z=Math.max(-18,Math.min(8,targetPlayerPos.z+(e.clientY-ly)*0.04));
-    lx=e.clientX;ly=e.clientY;
-  });
+  window.addEventListener('pointerdown',function(e){if(menuOpen)return;if(!document.getElementById('field-screen').classList.contains('active'))return;drag=true;lx=e.clientX;ly=e.clientY;});
+  window.addEventListener('pointermove',function(e){if(menuOpen||!drag)return;if(!document.getElementById('field-screen').classList.contains('active'))return;targetPlayerPos.x=Math.max(-12,Math.min(12,targetPlayerPos.x+(e.clientX-lx)*0.04));targetPlayerPos.z=Math.max(-18,Math.min(8,targetPlayerPos.z+(e.clientY-ly)*0.04));lx=e.clientX;ly=e.clientY;});
   window.addEventListener('pointerup',function(){drag=false;});
-  /* メニュー上のスクロールがフィールドに伝播しない */
   var menuEl=document.getElementById('field-menu');
-  if(menuEl){
-    menuEl.addEventListener('pointerdown',function(e){e.stopPropagation();},{passive:false});
-    menuEl.addEventListener('pointermove',function(e){e.stopPropagation();},{passive:false});
-    menuEl.addEventListener('touchmove',function(e){e.stopPropagation();},{passive:false});
-    menuEl.addEventListener('wheel',function(e){e.stopPropagation();},{passive:false});
-  }
+  if(menuEl){menuEl.addEventListener('pointerdown',function(e){e.stopPropagation();},{passive:false});menuEl.addEventListener('pointermove',function(e){e.stopPropagation();},{passive:false});menuEl.addEventListener('touchmove',function(e){e.stopPropagation();},{passive:false});menuEl.addEventListener('wheel',function(e){e.stopPropagation();},{passive:false});}
   function anim(t){
     requestAnimationFrame(anim);
     if(t-lastSpawnTime>5000){if(monsters.filter(function(m){return m.isActive;}).length<6)spawnMonster();lastSpawnTime=t;}
-    playerNode.position.x+=(targetPlayerPos.x-playerNode.position.x)*0.15;
-    playerNode.position.z+=(targetPlayerPos.z-playerNode.position.z)*0.15;
+    playerNode.position.x+=(targetPlayerPos.x-playerNode.position.x)*0.15;playerNode.position.z+=(targetPlayerPos.z-playerNode.position.z)*0.15;
     camera.position.x=playerNode.position.x;camera.position.z=playerNode.position.z+10;
     var active=document.getElementById('field-screen').classList.contains('active')&&!menuOpen;
     monsters.forEach(function(m){
@@ -812,34 +781,66 @@ function initThreeJS(){
   anim(0);
 }
 function spawnMonster(){
-  var isBoss=Math.random()<0.12,level,colorHex,hp,atk,name,weakness,condition=null,turnLimit=0,expGive;
-  if(isBoss){
-    level=5;colorHex=0x7c3aed;hp=900+Math.floor(Math.random()*200);atk=28+Math.floor(Math.random()*10);turnLimit=8+Math.floor(Math.random()*5);expGive=60;
+  var isBoss=Math.random()<0.12,level,colorHex,hp,atk,name,weakness,condition=null,turnLimit=0;
+  if(isBoss){level=5;colorHex=0x7c3aed;hp=900+Math.floor(Math.random()*200);atk=28+Math.floor(Math.random()*10);turnLimit=8+Math.floor(Math.random()*5);
     var bosses=[{name:'超高分子ラジカル塊',weakness:['Aromatic','Explosive'],condition:'Aromatic'},{name:'濃縮フリーラジカル核',weakness:['Acid','Oxidant'],condition:'Alcohol'},{name:'芳香族クラスター体',weakness:['Halogen','Reagent'],condition:'Ester'}];
     var b=bosses[Math.floor(Math.random()*bosses.length)];name='【BOSS】'+b.name;weakness=b.weakness;condition=b.condition;
-  }else{
-    level=1+Math.floor(Math.random()*3);
-    colorHex=level===1?0x22c55e:(level===2?0xf97316:0xef4444);
-    hp=450+level*30;atk=12+level*8;
-    name=['アルキル変異体','環状高分子体','フリーラジカル塊'][level-1];
-    expGive=level===1?7:(level===2?14:22);
-    var pool=['Aromatic','Alkenyl','Acid','Alcohol','Halogen','Oxidant','Phenol','Explosive'];weakness=[pool[Math.floor(Math.random()*pool.length)]];
-  }
+  }else{level=1+Math.floor(Math.random()*3);colorHex=level===1?0x22c55e:(level===2?0xf97316:0xef4444);hp=450+level*30;atk=12+level*8;name=['アルキル変異体','環状高分子体','フリーラジカル塊'][level-1];
+    var pool=['Aromatic','Alkenyl','Acid','Alcohol','Halogen','Oxidant','Phenol','Explosive'];weakness=[pool[Math.floor(Math.random()*pool.length)]];}
   var mesh=createMoleculeMesh(colorHex);mesh.position.set((Math.random()-0.5)*18,0.5,-Math.random()*12-2);scene.add(mesh);
-  monsters.push({name:name,level:level,hp:hp,maxHP:hp,attackPower:atk,mesh:mesh,isActive:true,weakness:weakness,isBoss:isBoss,condition:condition,turnLimit:turnLimit,expGive:expGive,vx:0,vz:0,changeDirTimer:0});
+  monsters.push({name:name,level:level,hp:hp,maxHP:hp,attackPower:atk,mesh:mesh,isActive:true,weakness:weakness,isBoss:isBoss,condition:condition,turnLimit:turnLimit,vx:0,vz:0,changeDirTimer:0});
 }
 
 var labScene,labCamera,labRenderer,enemyMesh;
 function initLabThreeJS(){var cont=document.getElementById('lab-canvas-container');cont.innerHTML='';labScene=new THREE.Scene();labScene.background=new THREE.Color(0x071018);labCamera=new THREE.PerspectiveCamera(50,cont.clientWidth/Math.max(1,cont.clientHeight),0.1,100);labCamera.position.set(0,1.6,5.2);labCamera.lookAt(0,0.7,0);labRenderer=new THREE.WebGLRenderer({antialias:true});labRenderer.setSize(cont.clientWidth,cont.clientHeight);cont.appendChild(labRenderer.domElement);labScene.add(new THREE.DirectionalLight(0x67e8f9,1.5));labScene.add(new THREE.AmbientLight(0xffffff,0.45));var col=(gameState.currentMonster&&gameState.currentMonster.isBoss)?0x7c3aed:0x22d3ee;enemyMesh=createMoleculeMesh(col);enemyMesh.scale.set(1.4,1.4,1.4);enemyMesh.position.set(0,0.9,0);labScene.add(enemyMesh);(function anim(){requestAnimationFrame(anim);if(enemyMesh){enemyMesh.rotation.y+=0.014;enemyMesh.position.y=0.9+Math.sin(Date.now()*0.002)*0.08;}if(labRenderer&&labScene&&labCamera)labRenderer.render(labScene,labCamera);})();}
 
 function startBattle(practice){isPractice=!!practice;returnToMenu=false;document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});document.getElementById('battle-screen').classList.add('active');if(!isPractice)initLabThreeJS();else document.getElementById('lab-canvas-container').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#67e8f9">練習</div>';setupBattle();}
-function startPractice(){gameState.currentMonster={name:'練習ダミー',level:1,hp:9999,maxHP:9999,attackPower:0,weakness:[],isBoss:false,condition:null,turnLimit:0,expGive:0};startBattle(true);}
-function setupBattle(){isBattleOver=false;isProcessing=false;botulinumActive=false;gameState.nextDamageBonus=1.0;pendingIntermediate=null;battleHistory=[];battleTurnCount=0;comboCount=0;bossTurnLimit=(gameState.currentMonster&&gameState.currentMonster.turnLimit)||0;if(!isPractice)gameState.playerHP=gameState.playerMaxHP;document.getElementById('next-bonus').style.display='none';document.getElementById('dot-status').style.display='none';document.getElementById('choice-box').style.display='none';document.getElementById('combo-status').innerText='🔗 コンボ: 0';var tl=document.getElementById('turn-limit');if(bossTurnLimit>0){tl.style.display='block';tl.innerText='⏱ 残り'+bossTurnLimit;}else tl.style.display='none';bDeck=gameState.currentDeck.map(function(c){return Object.assign({},c);}).sort(function(){return Math.random()-0.5;});bHand=[];bSelected=[];monsterHP=gameState.currentMonster.hp;document.getElementById('monster-name').innerText=gameState.currentMonster.name;document.getElementById('monster-level').innerText=gameState.currentMonster.level;document.getElementById('monster-maxhp').innerText=gameState.currentMonster.maxHP;document.getElementById('monster-hp').innerText=monsterHP;document.getElementById('battle-player-hp').innerText=gameState.playerHP;document.getElementById('monster-exp').innerText='経験+'+enemyExpReward(gameState.currentMonster);var weak=gameState.currentMonster.weakness||[];document.getElementById('monster-weak').innerText=weak.length?'弱点: '+weak.join(','):'';document.getElementById('monster-cond').innerText=gameState.currentMonster.condition?'条件: '+gameState.currentMonster.condition:'';for(var i=0;i<5;i++)drawCard();startPlayerTurn(true);}
+function startPractice(){gameState.currentMonster={name:'練習ダミー',level:1,hp:9999,maxHP:9999,attackPower:0,weakness:[],isBoss:false,condition:null,turnLimit:0};startBattle(true);}
+function setupBattle(){
+  isBattleOver=false;isProcessing=false;botulinumActive=false;gameState.nextDamageBonus=1.0;pendingIntermediate=null;battleHistory=[];battleTurnCount=0;comboCount=0;
+  battleUsedCatalyst=false;battleBigSpend=false;battleAttrsUsed={};battleOriginCount=0;battleFromMid=false;
+  bossTurnLimit=(gameState.currentMonster&&gameState.currentMonster.turnLimit)||0;
+  if(!isPractice)gameState.playerHP=gameState.playerMaxHP;
+  document.getElementById('next-bonus').style.display='none';document.getElementById('dot-status').style.display='none';document.getElementById('choice-box').style.display='none';
+  document.getElementById('combo-status').innerText='🔗 コンボ: 0';
+  var tl=document.getElementById('turn-limit');if(bossTurnLimit>0){tl.style.display='block';tl.innerText='⏱ 残り'+bossTurnLimit;}else tl.style.display='none';
+  bDeck=gameState.currentDeck.map(function(c){return Object.assign({},c);}).sort(function(){return Math.random()-0.5;});
+  bHand=[];bSelected=[];monsterHP=gameState.currentMonster.hp;
+  document.getElementById('monster-name').innerText=gameState.currentMonster.name;
+  document.getElementById('monster-level').innerText=gameState.currentMonster.level;
+  document.getElementById('monster-maxhp').innerText=gameState.currentMonster.maxHP;
+  document.getElementById('monster-hp').innerText=monsterHP;
+  document.getElementById('battle-player-hp').innerText=gameState.playerHP;
+  document.getElementById('monster-exp').innerText='経験+'+enemyExpReward(gameState.currentMonster);
+  var weak=gameState.currentMonster.weakness||[];
+  document.getElementById('monster-weak').innerText=weak.length?'弱点: '+weak.join(','):'';
+  document.getElementById('monster-cond').innerText=gameState.currentMonster.condition?'条件: '+gameState.currentMonster.condition:'';
+  for(var i=0;i<5;i++)drawCard();startPlayerTurn(true);
+}
 function pushHistory(msg){battleHistory.push(msg);if(battleHistory.length>50)battleHistory.shift();}
 function finalizeReplay(){gameState.lastReplay=battleHistory.slice();}
 function startPlayerTurn(first){if(isBattleOver)return;isPlayerTurn=true;isProcessing=false;if(!first)battleTurnCount++;if(bossTurnLimit>0&&!isPractice){var left=bossTurnLimit-battleTurnCount;document.getElementById('turn-limit').innerText='⏱ 残り'+Math.max(0,left);if(left<=0){isBattleOver=true;document.getElementById('battle-log').innerText='ターン切れ';finalizeReplay();setTimeout(function(){gameState.playerHP=gameState.playerMaxHP;switchState('field');},1600);return;}}if(botulinumActive&&monsterHP>0&&!isPractice){monsterHP-=200;document.getElementById('monster-hp').innerText=Math.max(0,monsterHP);if(monsterHP<=0){winBattle('毒素');return;}}if(!first)drawCard();document.getElementById('battle-log').innerText=first?(isPractice?'練習':'カード選択'):'あなたのターン';updateBattleUI();}
 function drawCard(){if(bHand.length<7&&bDeck.length>0)bHand.push(bDeck.shift());}
-function updateBattleUI(){document.getElementById('battle-deck-count').innerText=bDeck.length;document.getElementById('hand-count').innerText=bHand.length;document.getElementById('combo-status').innerText='🔗 コンボ: '+comboCount;var cont=document.getElementById('hand-cards');cont.innerHTML='';bHand.forEach(function(card){var sel=bSelected.some(function(c){return c.id===card.id;});var div=document.createElement('div');div.className='card'+(sel?' selected':'');var timer=null;div.addEventListener('pointerdown',function(e){e.preventDefault();timer=setTimeout(function(){showLongPress(card);timer=null;},450);});div.addEventListener('pointerup',function(){if(timer){clearTimeout(timer);timer=null;toggleSelectCard(card);}});div.addEventListener('pointerleave',function(){if(timer){clearTimeout(timer);timer=null;}});var val='';if(baseName(card.name)==='ボツリヌス毒素')val='<div style="font-size:9px;color:#dc2626">DoT200</div>';else if((card.attackPower||0)>0&&(card.healPower||0)>0)val='<div style="font-size:9px;color:#dc2626">攻'+fmt(card.attackPower)+'</div><div style="font-size:9px;color:#16a34a">回'+card.healPower+'</div>';else if(card.healPower>0)val='<div style="font-size:10px;color:#16a34a">+'+card.healPower+'</div>';else val='<div style="font-size:10px;color:#dc2626">'+fmt(card.attackPower)+'</div>';div.innerHTML='<div class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</div><div style="font-size:11px">'+card.name+'</div><div style="font-size:9px;color:#64748b">'+(card.formula||'')+'</div><div class="card-attr">'+card.attribute+'</div>'+val;cont.appendChild(div);});var can=isPlayerTurn&&!isProcessing&&!isBattleOver;document.getElementById('attack-btn').disabled=!(can&&bSelected.length>0);document.getElementById('skip-btn').disabled=!can;document.getElementById('flee-btn').disabled=!can;}
+function updateBattleUI(){
+  document.getElementById('battle-deck-count').innerText=bDeck.length;
+  document.getElementById('hand-count').innerText=bHand.length;
+  document.getElementById('combo-status').innerText='🔗 コンボ: '+comboCount;
+  var cont=document.getElementById('hand-cards');cont.innerHTML='';
+  bHand.forEach(function(card){
+    var sel=bSelected.some(function(c){return c.id===card.id;});
+    var div=document.createElement('div');div.className='card'+(sel?' selected':'');
+    var timer=null;
+    div.addEventListener('pointerdown',function(e){e.preventDefault();timer=setTimeout(function(){showLongPress(card);timer=null;},450);});
+    div.addEventListener('pointerup',function(){if(timer){clearTimeout(timer);timer=null;toggleSelectCard(card);}});
+    div.addEventListener('pointerleave',function(){if(timer){clearTimeout(timer);timer=null;}});
+    div.innerHTML='<div class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</div><div style="font-size:11px">'+card.name+'</div><div style="font-size:9px;color:#64748b">'+(card.formula||'')+'</div><div class="card-attr">'+card.attribute+'</div>'+cardPowerText(card);
+    cont.appendChild(div);
+  });
+  var can=isPlayerTurn&&!isProcessing&&!isBattleOver;
+  document.getElementById('attack-btn').disabled=!(can&&bSelected.length>0);
+  document.getElementById('skip-btn').disabled=!can;
+  document.getElementById('flee-btn').disabled=!can;
+}
 function showLongPress(card){document.getElementById('lp-title').innerText=card.name;var bn=baseName(card.name),body=CARD_REACTIONS[bn]||(card.healPower>0?'回復':'単体');if(String(card.name).indexOf('精製')===0)body+='\n（精製・反応可）';document.getElementById('lp-body').innerText=body;document.getElementById('longpress-popup').style.display='block';}
 function closeLongPress(){document.getElementById('longpress-popup').style.display='none';}
 function toggleSelectCard(card){if(!isPlayerTurn||isBattleOver||isProcessing)return;var idx=bSelected.findIndex(function(c){return c.id===card.id;});if(idx>=0)bSelected.splice(idx,1);else bSelected.push(card);updateBattleUI();}
@@ -849,15 +850,24 @@ function winBattle(msg){
   isBattleOver=true;finalizeReplay();
   if(isPractice){document.getElementById('battle-log').innerText='練習終了';setTimeout(function(){switchState('field');},1100);return;}
   gameState.kills++;
-  var px=enemyExpReward(gameState.currentMonster);
-  addPlayerExp(px);
-  addLabExp(gameState.currentMonster.isBoss?15:5+comboCount);
-  if(gameState.currentMonster.isBoss){gameState.flags.boss=true;gameState.flags.bossKills=(gameState.flags.bossKills||0)+1;}
-  if(comboCount>=3)gameState.flags.combo3=true;if(comboCount>=5)gameState.flags.combo5=true;
+  var m=gameState.currentMonster;
+  if(m&&(m.isBoss||m.level>=3))gameState.flags.hardKills=(gameState.flags.hardKills||0)+1;
+  if(m&&m.isBoss){
+    gameState.flags.boss=true;gameState.flags.bossKills=(gameState.flags.bossKills||0)+1;
+    if(!battleUsedCatalyst)gameState.flags.noCatBoss=true;
+    if(!battleBigSpend)gameState.flags.saveBoss=true;
+  }
+  var attrKeys=Object.keys(battleAttrsUsed);
+  if(attrKeys.length===1)gameState.flags.monoWin=true;
+  if(battleOriginCount>=3)gameState.flags.originWin=true;
+  if(comboCount>=8)gameState.flags.combo8=true;
+  if(comboCount>=5)gameState.flags.combo5=true;
+  if(comboCount>=3)gameState.flags.combo3=true;
+  var px=enemyExpReward(m);addPlayerExp(px);addLabExp(m&&m.isBoss?15:5+comboCount);
   checkRankUp();checkAchievements();
   var rank=getRank(),labBonus=1+(gameState.labLevel>=4?0.1:0)+(gameState.labLevel>=2?0.05:0);
-  var reward=Math.floor((55+gameState.currentMonster.level*28)*rank.reagentBonus*labBonus);
-  if(gameState.currentMonster.isBoss)reward+=100;if(comboCount>=2&&gameState.labLevel>=5)reward+=10*comboCount;
+  var reward=Math.floor((55+(m?m.level:1)*28)*rank.reagentBonus*labBonus);
+  if(m&&m.isBoss)reward+=100;if(comboCount>=2&&gameState.labLevel>=5)reward+=10*comboCount;
   gameState.reagents+=reward;
   document.getElementById('battle-log').innerText=msg+'\n試薬 +'+reward+'\n経験 +'+px;
   setTimeout(function(){switchState('field');},1600);
@@ -867,79 +877,89 @@ function has(n,name){return n.indexOf(name)>=0;}
 function executePlayerAttack(){
   if(isBattleOver||!isPlayerTurn||isProcessing||!bSelected.length)return;
   isProcessing=true;document.getElementById('attack-btn').disabled=true;document.getElementById('skip-btn').disabled=true;document.getElementById('flee-btn').disabled=true;
-  var baseDamage=0,baseHeal=0,logMessage='',product=null,appliedEffect=null,isReaction=false;
+  var baseDamage=0,baseHeal=0,logMessage='',product=null,appliedEffect=null,isReaction=false,recipeId=null;
   var n=bSelected.map(function(c){return baseName(c.name);}),unique=[];n.forEach(function(x){if(unique.indexOf(x)<0)unique.push(x);});
   var hasCat=has(n,'濃硫酸')||has(n,'重合触媒(Ziegler)')||has(n,'塩化アルミニウム')||has(n,'鉄');
+  if(hasCat)battleUsedCatalyst=true;
+  bSelected.forEach(function(c){battleAttrsUsed[c.attribute]=1;if(c.rarity==='ORIGIN'||c.origin)battleOriginCount++;if(c._fromMid)battleFromMid=true;});
   var catMul=hasCat?2.0:1.5,bossCond=gameState.currentMonster&&gameState.currentMonster.condition;
   function dmgLog(t,d){return t+'\n相手に '+(d===Infinity?'∞':d)+' ダメージ！';}
-  if(has(n,'アニリン')&&has(n,'無水酢酸')){product={name:'アセトアニリド',formula:'C6H5NHCOCH3',attackPower:60,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(80*catMul);logMessage=dmgLog('アセチル化',baseDamage);markFlag('acetyl');isReaction=true;}
-  else if(has(n,'サリチル酸')&&has(n,'無水酢酸')){product={name:'アセチルサリチル酸',formula:'C9H8O4',attackPower:120,healPower:0,attribute:'Ester',rarity:'SSR'};baseDamage=Math.floor(120*catMul);logMessage=dmgLog('アセチル化',baseDamage);markFlag('acetyl');isReaction=true;}
-  else if(has(n,'エタノール')&&has(n,'濃硫酸')){baseDamage=Math.floor(100*catMul);logMessage=dmgLog('脱水',baseDamage);markFlag('dehyd');isReaction=true;}
-  else if(has(n,'1-プロパノール')&&has(n,'濃硫酸')){baseDamage=Math.floor(105*catMul);logMessage=dmgLog('脱水',baseDamage);markFlag('dehyd');isReaction=true;}
-  else if(has(n,'ベンゼン')&&has(n,'ニトロ基')){product={name:'ニトロベンゼン',formula:'C6H5NO2',attackPower:70,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(70*catMul);logMessage=dmgLog('ニトロベンゼン',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'ニトロベンゼン')&&(has(n,'還元剤')||has(n,'水素化ホウ素ナトリウム'))){product={name:'アニリン',formula:'C6H5NH2',attackPower:65,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(65*catMul);logMessage=dmgLog('還元',baseDamage);isReaction=true;}
-  else if(has(n,'アニリン')&&has(n,'ジアゾ化剤')){product={name:'アゾベンゼン',formula:'C6H5N=NC6H5',attackPower:110,healPower:0,attribute:'Aromatic',rarity:'SSR'};baseDamage=Math.floor(110*catMul);logMessage=dmgLog('アゾ',baseDamage);isReaction=true;}
-  else if(has(n,'酢酸')&&has(n,'エタノール')){product={name:'酢酸エチル',formula:'CH3COOC2H5',attackPower:Math.floor(55*catMul),healPower:0,attribute:'Ester',rarity:'R'};baseDamage=Math.floor(55*catMul);logMessage=dmgLog('エステル化',baseDamage);markFlag('ester');isReaction=true;}
+
+  if(has(n,'アニリン')&&has(n,'無水酢酸')){product={name:'アセトアニリド',formula:'C6H5NHCOCH3',attackPower:60,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(80*catMul);logMessage=dmgLog('アセチル化',baseDamage);markFlag('acetyl');isReaction=true;recipeId='acetyl_an';}
+  else if(has(n,'サリチル酸')&&has(n,'無水酢酸')){product={name:'アセチルサリチル酸',formula:'C9H8O4',attackPower:120,healPower:0,attribute:'Ester',rarity:'SSR'};baseDamage=Math.floor(120*catMul);logMessage=dmgLog('アセチル化',baseDamage);markFlag('acetyl');isReaction=true;recipeId='acetyl_sal';}
+  else if(has(n,'エタノール')&&has(n,'濃硫酸')){baseDamage=Math.floor(100*catMul);logMessage=dmgLog('脱水',baseDamage);markFlag('dehyd');isReaction=true;recipeId='dehyd';}
+  else if(has(n,'1-プロパノール')&&has(n,'濃硫酸')){baseDamage=Math.floor(105*catMul);logMessage=dmgLog('脱水',baseDamage);markFlag('dehyd');isReaction=true;recipeId='dehyd';}
+  else if(has(n,'ベンゼン')&&has(n,'ニトロ基')){product={name:'ニトロベンゼン',formula:'C6H5NO2',attackPower:70,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(70*catMul);logMessage=dmgLog('ニトロベンゼン',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_grp';}
+  else if(has(n,'ニトロベンゼン')&&(has(n,'還元剤')||has(n,'水素化ホウ素ナトリウム'))){product={name:'アニリン',formula:'C6H5NH2',attackPower:65,healPower:0,attribute:'Aromatic',rarity:'SR'};baseDamage=Math.floor(65*catMul);logMessage=dmgLog('還元',baseDamage);isReaction=true;recipeId='reduce_nb';}
+  else if(has(n,'アニリン')&&has(n,'ジアゾ化剤')){product={name:'アゾベンゼン',formula:'C6H5N=NC6H5',attackPower:110,healPower:0,attribute:'Aromatic',rarity:'SSR'};baseDamage=Math.floor(110*catMul);logMessage=dmgLog('アゾ',baseDamage);isReaction=true;recipeId='azo';}
+  else if(has(n,'酢酸')&&has(n,'エタノール')){product={name:'酢酸エチル',formula:'CH3COOC2H5',attackPower:Math.floor(55*catMul),healPower:0,attribute:'Ester',rarity:'R'};baseDamage=Math.floor(55*catMul);logMessage=dmgLog('エステル化',baseDamage);markFlag('ester');isReaction=true;recipeId='ester';}
   else if(bSelected.length===1&&baseName(bSelected[0].name)==='ボツリヌス毒素'){botulinumActive=true;document.getElementById('dot-status').style.display='block';logMessage='毒素';baseDamage=0;}
   else if(bSelected.length===1&&baseName(bSelected[0].name)==='フッ化水素酸'){gameState.flags.hfUsed=true;if(Math.random()<0.1){isBattleOver=true;document.getElementById('battle-log').innerText='HF自爆 試薬-25';gameState.reagents=Math.max(0,gameState.reagents-25);finalizeReplay();bHand=bHand.filter(function(c){return !bSelected.some(function(s){return s.id===c.id;});});bSelected=[];updateBattleUI();setTimeout(function(){gameState.playerHP=gameState.playerMaxHP;switchState('field');},1800);return;}baseDamage=Infinity;logMessage=dmgLog('HF',Infinity);checkAchievements();}
   else if(bSelected.length===1&&(baseName(bSelected[0].name)==='トリニトロトルエン'||baseName(bSelected[0].name)==='ピクリン酸')){baseDamage=bSelected[0].attackPower||180;logMessage=dmgLog(bSelected[0].name,baseDamage);}
-  else if(has(n,'水酸化ナトリウム')&&(has(n,'トリパルミチン')||has(n,'トリステアリン')||has(n,'トリオレイン'))){baseDamage=Math.floor(230*catMul);appliedEffect='sapon';logMessage=dmgLog('油脂けん化',baseDamage);markFlag('sapon');markFlag('fat');isReaction=true;}
-  else if(has(n,'水酸化ナトリウム')&&(has(n,'酢酸')||has(n,'酢酸エチル')||has(n,'オレイン酸'))){baseDamage=Math.floor(210*catMul);appliedEffect='sapon';logMessage=dmgLog('けん化',baseDamage);markFlag('sapon');isReaction=true;}
-  else if(has(n,'ベンゼン')&&has(n,'濃硝酸')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'トルエン')&&has(n,'濃硝酸')){baseDamage=Math.floor(220*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'フェノール')&&has(n,'濃硝酸')){baseDamage=Math.floor(150*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'ベンゼン')&&has(n,'濃硫酸')){baseDamage=Math.floor(150*catMul);logMessage=dmgLog('スルホン化',baseDamage);isReaction=true;}
-  else if(has(n,'ナフタレン')&&has(n,'濃硫酸')){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('スルホン化',baseDamage);isReaction=true;}
-  else if(has(n,'ベンゼン')&&(has(n,'塩素')||has(n,'臭素'))&&(has(n,'鉄')||has(n,'塩化アルミニウム')||hasCat)){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('ハロゲン化',baseDamage);isReaction=true;}
-  else if(has(n,'エチレン')&&(has(n,'臭素')||has(n,'塩素'))){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;}
-  else if(has(n,'アセチレン')&&has(n,'臭素')){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;}
-  else if(has(n,'シス-2-ブテン')&&has(n,'臭素')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;}
-  else if(has(n,'トランス-2-ブテン')&&has(n,'臭素')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;}
-  else if(has(n,'エチレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(300*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;}
-  else if(has(n,'スチレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(250*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;}
-  else if(has(n,'プロピレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(260*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;}
-  else if(has(n,'ビニル基')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(220*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;}
-  else if((has(n,'エタノール')||has(n,'アセトアルデヒド')||has(n,'メタノール'))&&(has(n,'過マンガン酸カリウム')||has(n,'二クロム酸カリウム'))){baseDamage=Math.floor(170*catMul);appliedEffect='oxid';logMessage=dmgLog('酸化',baseDamage);markFlag('oxid');isReaction=true;}
-  else if(has(n,'2-プロパノール')&&(has(n,'過マンガン酸カリウム')||has(n,'二クロム酸カリウム'))){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('酸化',baseDamage);markFlag('oxid');isReaction=true;}
-  else if(has(n,'トルエン')&&has(n,'過マンガン酸カリウム')){baseDamage=Math.floor(190*catMul);logMessage=dmgLog('側鎖酸化',baseDamage);markFlag('oxid');isReaction=true;}
-  else if((has(n,'エタノール')||has(n,'メタノール')||has(n,'1-プロパノール'))&&has(n,'金属ナトリウム')){baseDamage=Math.floor(120*catMul);logMessage=dmgLog('アルコキシド',baseDamage);isReaction=true;}
-  else if(has(n,'フェノール')&&has(n,'金属ナトリウム')){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('フェノキシド',baseDamage);isReaction=true;}
-  else if(has(n,'ナフタレン')&&has(n,'濃硝酸')){baseDamage=Math.floor(170*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'アントラセン')&&has(n,'濃硝酸')){baseDamage=Math.floor(200*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;}
-  else if(has(n,'メチル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(50*catMul);logMessage=dmgLog('メタノール生成',baseDamage);isReaction=true;}
-  else if(has(n,'エチル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(60*catMul);logMessage=dmgLog('エタノール生成',baseDamage);isReaction=true;}
-  else if(has(n,'フェニル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(90*catMul);logMessage=dmgLog('フェノール生成',baseDamage);isReaction=true;}
-  else if(has(n,'フェニル基')&&has(n,'ニトロ基')){baseDamage=Math.floor(110*catMul);logMessage=dmgLog('ニトロベンゼン生成',baseDamage);isReaction=true;}
-  else if(has(n,'フェニル基')&&has(n,'カルボキシ基')){baseDamage=Math.floor(100*catMul);logMessage=dmgLog('安息香酸生成',baseDamage);isReaction=true;}
+  else if(has(n,'水酸化ナトリウム')&&(has(n,'トリパルミチン')||has(n,'トリステアリン')||has(n,'トリオレイン'))){baseDamage=Math.floor(230*catMul);appliedEffect='sapon';logMessage=dmgLog('油脂けん化',baseDamage);markFlag('sapon');markFlag('fat');isReaction=true;recipeId='sapon_fat';}
+  else if(has(n,'水酸化ナトリウム')&&(has(n,'酢酸')||has(n,'酢酸エチル')||has(n,'オレイン酸'))){baseDamage=Math.floor(210*catMul);appliedEffect='sapon';logMessage=dmgLog('けん化',baseDamage);markFlag('sapon');isReaction=true;recipeId='sapon';}
+  else if(has(n,'ベンゼン')&&has(n,'濃硝酸')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_bz';}
+  else if(has(n,'トルエン')&&has(n,'濃硝酸')){baseDamage=Math.floor(220*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_tol';}
+  else if(has(n,'フェノール')&&has(n,'濃硝酸')){baseDamage=Math.floor(150*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_ph';}
+  else if(has(n,'ベンゼン')&&has(n,'濃硫酸')){baseDamage=Math.floor(150*catMul);logMessage=dmgLog('スルホン化',baseDamage);isReaction=true;recipeId='sulf';}
+  else if(has(n,'ナフタレン')&&has(n,'濃硫酸')){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('スルホン化',baseDamage);isReaction=true;recipeId='sulf';}
+  else if(has(n,'ベンゼン')&&(has(n,'塩素')||has(n,'臭素'))&&(has(n,'鉄')||has(n,'塩化アルミニウム')||hasCat)){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('ハロゲン化',baseDamage);isReaction=true;recipeId='halo';}
+  else if(has(n,'エチレン')&&(has(n,'臭素')||has(n,'塩素'))){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;recipeId='add_et';}
+  else if(has(n,'アセチレン')&&has(n,'臭素')){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;recipeId='add_et';}
+  else if(has(n,'シス-2-ブテン')&&has(n,'臭素')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;recipeId='add_et';}
+  else if(has(n,'トランス-2-ブテン')&&has(n,'臭素')){baseDamage=Math.floor(130*catMul);logMessage=dmgLog('付加',baseDamage);isReaction=true;recipeId='add_et';}
+  else if(has(n,'エチレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(300*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;recipeId='poly';}
+  else if(has(n,'スチレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(250*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;recipeId='poly';}
+  else if(has(n,'プロピレン')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(260*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;recipeId='poly';}
+  else if(has(n,'ビニル基')&&has(n,'重合触媒(Ziegler)')){baseDamage=Math.floor(220*catMul);logMessage=dmgLog('重合',baseDamage);markFlag('poly');isReaction=true;recipeId='poly';}
+  else if((has(n,'エタノール')||has(n,'アセトアルデヒド')||has(n,'メタノール'))&&(has(n,'過マンガン酸カリウム')||has(n,'二クロム酸カリウム'))){baseDamage=Math.floor(170*catMul);appliedEffect='oxid';logMessage=dmgLog('酸化',baseDamage);markFlag('oxid');isReaction=true;recipeId='oxid';}
+  else if(has(n,'2-プロパノール')&&(has(n,'過マンガン酸カリウム')||has(n,'二クロム酸カリウム'))){baseDamage=Math.floor(160*catMul);logMessage=dmgLog('酸化',baseDamage);markFlag('oxid');isReaction=true;recipeId='oxid';}
+  else if(has(n,'トルエン')&&has(n,'過マンガン酸カリウム')){baseDamage=Math.floor(190*catMul);logMessage=dmgLog('側鎖酸化',baseDamage);markFlag('oxid');isReaction=true;recipeId='side_ox';}
+  else if((has(n,'エタノール')||has(n,'メタノール')||has(n,'1-プロパノール'))&&has(n,'金属ナトリウム')){baseDamage=Math.floor(120*catMul);logMessage=dmgLog('アルコキシド',baseDamage);isReaction=true;recipeId='na_alc';}
+  else if(has(n,'フェノール')&&has(n,'金属ナトリウム')){baseDamage=Math.floor(140*catMul);logMessage=dmgLog('フェノキシド',baseDamage);isReaction=true;recipeId='na_ph';}
+  else if(has(n,'ナフタレン')&&has(n,'濃硝酸')){baseDamage=Math.floor(170*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_bz';}
+  else if(has(n,'アントラセン')&&has(n,'濃硝酸')){baseDamage=Math.floor(200*catMul);logMessage=dmgLog('ニトロ化',baseDamage);markFlag('nitro');isReaction=true;recipeId='nitro_bz';}
+  else if(has(n,'メチル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(50*catMul);logMessage=dmgLog('メタノール生成',baseDamage);isReaction=true;recipeId='fg_oh';}
+  else if(has(n,'エチル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(60*catMul);logMessage=dmgLog('エタノール生成',baseDamage);isReaction=true;recipeId='fg_oh';}
+  else if(has(n,'フェニル基')&&has(n,'ヒドロキシ基')){baseDamage=Math.floor(90*catMul);logMessage=dmgLog('フェノール生成',baseDamage);isReaction=true;recipeId='fg_oh';}
+  else if(has(n,'フェニル基')&&has(n,'ニトロ基')){baseDamage=Math.floor(110*catMul);logMessage=dmgLog('ニトロベンゼン生成',baseDamage);isReaction=true;recipeId='fg_no2';}
+  else if(has(n,'フェニル基')&&has(n,'カルボキシ基')){baseDamage=Math.floor(100*catMul);logMessage=dmgLog('安息香酸生成',baseDamage);isReaction=true;recipeId='fg_oh';}
   else if(unique.length===1){
     var s=bSelected[0],cnt=bSelected.length;
     if(baseName(s.name)==='ボツリヌス毒素'){botulinumActive=true;document.getElementById('dot-status').style.display='block';logMessage='毒素';baseDamage=0;}
     else if(baseName(s.name)==='フッ化水素酸'){baseDamage=Infinity;logMessage=dmgLog('HF',Infinity);}
     else{baseDamage=s.attackPower===Infinity?Infinity:(s.attackPower||0)*cnt;baseHeal=(s.healPower||0)*cnt;if(baseHeal>0)gameState.flags.healed=true;
-      if(baseDamage>0&&baseHeal>0)logMessage=s.name+'×'+cnt+'\nダメージ '+fmt(baseDamage)+'\n回復 '+baseHeal;
-      else if(baseHeal>0)logMessage=s.name+'×'+cnt+'\n回復 '+baseHeal;
+      if(baseDamage>0&&baseHeal>0)logMessage=s.name+'×'+cnt+'\n'+fmt(baseDamage)+'ダメージ\n'+baseHeal+'回復';
+      else if(baseHeal>0)logMessage=s.name+'×'+cnt+'\n'+baseHeal+'回復';
       else logMessage=s.name+'×'+cnt+' 投擲\n相手に '+fmt(baseDamage)+' ダメージ！';}
   }
-  else if(bSelected.length===1){var s1=bSelected[0];baseDamage=s1.attackPower||0;baseHeal=s1.healPower||0;if(baseHeal>0)gameState.flags.healed=true;if(baseDamage>0&&baseHeal>0)logMessage=s1.name+'\nダメージ '+fmt(baseDamage)+'\n回復 '+baseHeal;else if(baseHeal>0)logMessage=s1.name+'\n回復 '+baseHeal;else logMessage=s1.name+' を投擲！\n相手に '+fmt(baseDamage)+' ダメージ！';}
-  else{var healSum=bSelected.reduce(function(a,c){return a+(c.healPower||0);},0);var atkSum=bSelected.reduce(function(a,c){return a+(c.attackPower===Infinity?0:(c.attackPower||0));},0);if(healSum>0&&atkSum===0){baseHeal=healSum;gameState.flags.healed=true;logMessage='複合回復 +'+healSum;}else{comboCount=0;logMessage='不活性\n'+getReactionHint(bSelected);}}
-  if(isReaction){comboCount++;if(comboCount>=3)gameState.flags.combo3=true;if(comboCount>=5)gameState.flags.combo5=true;var comboMul=1+Math.min(comboCount,8)*0.05;if(baseDamage!==Infinity&&baseDamage>0)baseDamage=Math.floor(baseDamage*comboMul);logMessage+='\n🔗 コンボ×'+comboCount;}
+  else if(bSelected.length===1){var s1=bSelected[0];baseDamage=s1.attackPower||0;baseHeal=s1.healPower||0;if(baseHeal>0)gameState.flags.healed=true;if(baseDamage>0&&baseHeal>0)logMessage=s1.name+'\n'+fmt(baseDamage)+'ダメージ\n'+baseHeal+'回復';else if(baseHeal>0)logMessage=s1.name+'\n'+baseHeal+'回復';else logMessage=s1.name+' を投擲！\n相手に '+fmt(baseDamage)+' ダメージ！';}
+  else{var healSum=bSelected.reduce(function(a,c){return a+(c.healPower||0);},0);var atkSum=bSelected.reduce(function(a,c){return a+(c.attackPower===Infinity?0:(c.attackPower||0));},0);if(healSum>0&&atkSum===0){baseHeal=healSum;gameState.flags.healed=true;logMessage='複合回復 '+healSum+'回復';}else{comboCount=0;logMessage='不活性\n'+getReactionHint(bSelected);}}
+
+  if(isReaction){
+    comboCount++;
+    if(battleFromMid){gameState.flags.midReact=(gameState.flags.midReact||0)+1;battleFromMid=false;}
+    if(recipeId)unlockRecipe(recipeId);
+    var comboMul=1+Math.min(comboCount,8)*0.05;if(baseDamage!==Infinity&&baseDamage>0)baseDamage=Math.floor(baseDamage*comboMul);logMessage+='\n🔗 コンボ×'+comboCount;
+  }
   if(bossCond&&baseDamage>0&&baseDamage!==Infinity&&!isPractice){var attrs=bSelected.map(function(c){return c.attribute;});var ok=attrs.indexOf(bossCond)>=0||(product&&product.attribute===bossCond);if(bossCond==='Ester'&&has(n,'酢酸')&&has(n,'エタノール'))ok=true;if(bossCond==='Alcohol'&&(has(n,'エタノール')||has(n,'メタノール')||has(n,'ヒドロキシ基')))ok=true;if(!ok){baseDamage=0;logMessage+='\nボス条件未達';}}
   var weakMul=1;if(gameState.currentMonster&&gameState.currentMonster.weakness){var attrs2=bSelected.map(function(c){return c.attribute;});if(attrs2.some(function(a){return gameState.currentMonster.weakness.indexOf(a)>=0;}))weakMul=1.5;}
   var finalD=baseDamage;if(finalD!==Infinity&&finalD>0)finalD=Math.floor(finalD*gameState.nextDamageBonus*weakMul);
   if(appliedEffect==='oxid'){gameState.nextDamageBonus=1.3;document.getElementById('next-bonus').style.display='block';document.getElementById('next-bonus').innerText='次ターン+30%';}
   else if(appliedEffect==='sapon'){gameState.nextDamageBonus=1.2;document.getElementById('next-bonus').style.display='block';document.getElementById('next-bonus').innerText='次ターン+20%';}
   else if(baseDamage>0||baseHeal>0){gameState.nextDamageBonus=1.0;document.getElementById('next-bonus').style.display='none';}
+
   bHand=bHand.filter(function(c){return !bSelected.some(function(s){return s.id===c.id;});});bSelected=[];
-  if(product){pendingIntermediate={card:Object.assign({},product,{id:uid()}),damage:finalD,heal:baseHeal,msg:logMessage,weak:weakMul>1};document.getElementById('choice-title').innerText=product.name+' 生成';document.getElementById('choice-desc').innerText='攻撃力 '+product.attackPower;document.getElementById('choice-box').style.display='flex';updateBattleUI();return;}
+  if(product){pendingIntermediate={card:Object.assign({},product,{id:uid(),_fromMid:true}),damage:finalD,heal:baseHeal,msg:logMessage,weak:weakMul>1};document.getElementById('choice-title').innerText=product.name+' 生成';document.getElementById('choice-desc').innerText=product.attackPower+'ダメージ';document.getElementById('choice-box').style.display='flex';updateBattleUI();return;}
   applyEffectAndEndTurn(finalD,baseHeal,logMessage,weakMul>1);
 }
 function chooseAttack(){document.getElementById('choice-box').style.display='none';if(!pendingIntermediate)return;var p=pendingIntermediate;applyEffectAndEndTurn(p.damage,p.heal,p.msg+(p.weak?'\n弱点！':''),p.weak);pendingIntermediate=null;}
 function chooseAddToHand(){document.getElementById('choice-box').style.display='none';if(!pendingIntermediate)return;if(bHand.length<7)bHand.push(pendingIntermediate.card);gameState.collection.push(Object.assign({},pendingIntermediate.card));document.getElementById('battle-log').innerText=pendingIntermediate.card.name+' を手札に';pendingIntermediate=null;isProcessing=false;updateBattleUI();setTimeout(endPlayerTurn,1100);}
-function applyEffectAndEndTurn(damage,heal,message,isWeak){if(isBattleOver)return;if(damage===Infinity||damage>=400){if(gameState.reagents>=25){gameState.reagents-=25;message+='\n試薬25消費';}else if(damage!==Infinity){damage=Math.floor(damage*0.5);message+='\n半減';}}if(isWeak)message+='\n弱点！';if(damage===Infinity)monsterHP=0;else if(damage>0)monsterHP-=damage;if(heal>0){gameState.playerHP=Math.min(gameState.playerMaxHP,gameState.playerHP+heal);document.getElementById('battle-player-hp').innerText=gameState.playerHP;}document.getElementById('monster-hp').innerText=Math.max(0,monsterHP);document.getElementById('battle-log').innerText=message;pushHistory(message);if(monsterHP<=0)winBattle(isPractice?'練習クリア':'敵を分解！');else setTimeout(endPlayerTurn,1400);}
+function applyEffectAndEndTurn(damage,heal,message,isWeak){if(isBattleOver)return;if(damage===Infinity||damage>=400){if(gameState.reagents>=25){gameState.reagents-=25;battleBigSpend=true;message+='\n試薬25消費';}else if(damage!==Infinity){damage=Math.floor(damage*0.5);message+='\n半減';}}if(isWeak)message+='\n弱点！';if(damage===Infinity)monsterHP=0;else if(damage>0)monsterHP-=damage;if(heal>0){gameState.playerHP=Math.min(gameState.playerMaxHP,gameState.playerHP+heal);document.getElementById('battle-player-hp').innerText=gameState.playerHP;}document.getElementById('monster-hp').innerText=Math.max(0,monsterHP);document.getElementById('battle-log').innerText=message;pushHistory(message);if(monsterHP<=0)winBattle(isPractice?'練習クリア':'敵を分解！');else setTimeout(endPlayerTurn,1400);}
 function endPlayerTurn(){if(isBattleOver)return;if(isPractice){startPlayerTurn(false);return;}isPlayerTurn=false;isProcessing=true;document.getElementById('battle-log').innerText='敵の攻撃…';updateBattleUI();setTimeout(function(){if(isBattleOver)return;if(monsterHP>0){var atk=gameState.currentMonster.attackPower||15;if(bossTurnLimit>0&&battleTurnCount>=bossTurnLimit-2)atk=Math.floor(atk*1.5);gameState.playerHP-=atk;document.getElementById('battle-player-hp').innerText=Math.max(0,gameState.playerHP);document.getElementById('battle-log').innerText='敵の攻撃\nあなたに '+atk+' ダメージ！';if(gameState.playerHP<=0){isBattleOver=true;gameState.playerHP=0;gameState.reagents=Math.max(0,gameState.reagents-25);document.getElementById('battle-log').innerText='敗北 試薬-25';finalizeReplay();setTimeout(function(){gameState.playerHP=gameState.playerMaxHP;switchState('field');},1400);return;}setTimeout(function(){if(!isBattleOver)startPlayerTurn(false);},1100);}else if(!isBattleOver)startPlayerTurn(false);},800);}
 
 function sortDeck(mode){var names=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;names.push(c.name);}});function rep(name){return gameState.collection.find(function(c){return c.name===name;})||ALL_CARDS.find(function(c){return c.name===baseName(name);});}names.sort(function(a,b){var ca=rep(a),cb=rep(b);if(!ca||!cb)return 0;if(mode==='name')return a.localeCompare(b,'ja');if(mode==='rarity'){var d=(RARITY_ORDER[ca.rarity]||9)-(RARITY_ORDER[cb.rarity]||9);return d||a.localeCompare(b,'ja');}if(mode==='power'){var d2=powerValue(cb)-powerValue(ca);return d2||a.localeCompare(b,'ja');}return a.localeCompare(b,'ja');});gameState.deckListOrder=names.slice();var rebuilt=[];names.forEach(function(name){gameState.currentDeck.filter(function(c){return c.name===name;}).forEach(function(c){rebuilt.push(c);});});gameState.currentDeck=rebuilt;renderDeckEdit();}
-function renderDeckEdit(){document.getElementById('deck-count').innerText=gameState.currentDeck.length;document.getElementById('deck-reaction-list').innerText=FULL_REACTION_TEXT;for(var i=0;i<3;i++){var inp=document.getElementById('preset-name-'+i);if(inp&&gameState.deckSlots[i])inp.value=gameState.deckSlots[i].name||'';}document.getElementById('preset-labels').innerText=[0,1,2].map(function(i){var s=gameState.deckSlots[i];return(s&&s.cards&&s.cards.length)?('S'+(i+1)+':'+(s.name||'無題')+'('+s.cards.length+')'):('S'+(i+1)+':空');}).join(' / ');var syn=calcSynthRate();document.getElementById('synth-rate-text').innerText=syn.rate+'% 回復'+syn.healCount;document.getElementById('synth-rate-bar').style.width=syn.rate+'%';document.getElementById('synth-hint').innerText=syn.missing.length?'不足: '+syn.missing.join(' / '):'';var allNames=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;allNames.push(c.name);}});var ordered;if(gameState.deckListOrder&&gameState.deckListOrder.length){ordered=gameState.deckListOrder.filter(function(n){return seen[n];});allNames.filter(function(n){return ordered.indexOf(n)<0;}).sort(function(a,b){return a.localeCompare(b,'ja');}).forEach(function(n){ordered.push(n);});}else ordered=allNames.sort(function(a,b){return a.localeCompare(b,'ja');});var list=document.getElementById('deck-list');list.innerHTML='';ordered.forEach(function(name){var owned=gameState.collection.filter(function(c){return c.name===name;}).length;var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;var card=gameState.collection.find(function(c){return c.name===name;});if(!card)return;var val;if(baseName(name)==='ボツリヌス毒素')val='DoT200';else if((card.attackPower||0)>0&&(card.healPower||0)>0)val='攻'+fmt(card.attackPower)+'/回'+card.healPower;else if(card.healPower>0)val='HEAL+'+card.healPower;else val='PWR '+fmt(card.attackPower);var div=document.createElement('div');div.className='deck-item'+(inD>0?' in-deck':'');var left=document.createElement('div');left.innerHTML='<span class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</span> <span style="color:'+(inD>0?'#4ade80':'#e2e8f0')+'">'+name+' ['+inD+'/'+owned+']</span><div style="font-size:9px;color:#94a3b8">'+val+'</div>';var right=document.createElement('div');if(inD>0){var rm=document.createElement('button');rm.type='button';rm.className='action-btn';rm.style.color='#f87171';rm.innerText='➖';rm.onclick=function(){removeFromDeck(name);};right.appendChild(rm);}var add=document.createElement('button');add.type='button';add.className='action-btn';add.style.color=(inD<owned&&gameState.currentDeck.length<50)?'#38bdf8':'#475569';add.innerText='➕';add.disabled=!(inD<owned&&gameState.currentDeck.length<50);add.onclick=function(){addToDeck(name);};right.appendChild(add);div.appendChild(left);div.appendChild(right);list.appendChild(div);});var btn=document.getElementById('deck-done-btn');btn.disabled=gameState.currentDeck.length<20;btn.style.opacity=gameState.currentDeck.length>=20?'1':'0.45';}
+function renderDeckEdit(){document.getElementById('deck-count').innerText=gameState.currentDeck.length;document.getElementById('deck-reaction-list').innerText=FULL_REACTION_TEXT;for(var i=0;i<3;i++){var inp=document.getElementById('preset-name-'+i);if(inp&&gameState.deckSlots[i])inp.value=gameState.deckSlots[i].name||'';}document.getElementById('preset-labels').innerText=[0,1,2].map(function(i){var s=gameState.deckSlots[i];return(s&&s.cards&&s.cards.length)?('S'+(i+1)+':'+(s.name||'無題')+'('+s.cards.length+')'):('S'+(i+1)+':空');}).join(' / ');var syn=calcSynthRate();document.getElementById('synth-rate-text').innerText=syn.rate+'% 回復'+syn.healCount;document.getElementById('synth-rate-bar').style.width=syn.rate+'%';document.getElementById('synth-hint').innerText=syn.missing.length?'不足: '+syn.missing.join(' / '):'';var allNames=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;allNames.push(c.name);}});var ordered;if(gameState.deckListOrder&&gameState.deckListOrder.length){ordered=gameState.deckListOrder.filter(function(n){return seen[n];});allNames.filter(function(n){return ordered.indexOf(n)<0;}).sort(function(a,b){return a.localeCompare(b,'ja');}).forEach(function(n){ordered.push(n);});}else ordered=allNames.sort(function(a,b){return a.localeCompare(b,'ja');});var list=document.getElementById('deck-list');list.innerHTML='';ordered.forEach(function(name){var owned=gameState.collection.filter(function(c){return c.name===name;}).length;var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;var card=gameState.collection.find(function(c){return c.name===name;});if(!card)return;var val;if(baseName(name)==='ボツリヌス毒素')val='毎ターン200ダメージ';else if((card.attackPower||0)>0&&(card.healPower||0)>0)val=fmt(card.attackPower)+'ダメージ/'+card.healPower+'回復';else if(card.healPower>0)val=card.healPower+'回復';else val=fmt(card.attackPower)+'ダメージ';var div=document.createElement('div');div.className='deck-item'+(inD>0?' in-deck':'');var left=document.createElement('div');left.innerHTML='<span class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</span> <span style="color:'+(inD>0?'#4ade80':'#e2e8f0')+'">'+name+' ['+inD+'/'+owned+']</span><div style="font-size:9px;color:#94a3b8">'+val+'</div>';var right=document.createElement('div');if(inD>0){var rm=document.createElement('button');rm.type='button';rm.className='action-btn';rm.style.color='#f87171';rm.innerText='➖';rm.onclick=function(){removeFromDeck(name);};right.appendChild(rm);}var add=document.createElement('button');add.type='button';add.className='action-btn';add.style.color=(inD<owned&&gameState.currentDeck.length<50)?'#38bdf8':'#475569';add.innerText='➕';add.disabled=!(inD<owned&&gameState.currentDeck.length<50);add.onclick=function(){addToDeck(name);};right.appendChild(add);div.appendChild(left);div.appendChild(right);list.appendChild(div);});var btn=document.getElementById('deck-done-btn');btn.disabled=gameState.currentDeck.length<20;btn.style.opacity=gameState.currentDeck.length>=20?'1':'0.45';}
 function addToDeck(name){var owned=gameState.collection.filter(function(c){return c.name===name;}).length;var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;var card=gameState.collection.find(function(c){return c.name===name;});if(card&&gameState.currentDeck.length<50&&inD<owned){gameState.currentDeck.push(Object.assign({},card,{id:uid()}));renderDeckEdit();}}
 function removeFromDeck(name){var i=gameState.currentDeck.findIndex(function(c){return c.name===name;});if(i>=0){gameState.currentDeck.splice(i,1);renderDeckEdit();}}
 
