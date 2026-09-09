@@ -47,7 +47,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .card-dmg{font-size:9px;color:#dc2626;line-height:1.2}.card-heal{font-size:9px;color:#16a34a;line-height:1.2}
 .battle-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:4px}
 .choice-box{display:none;position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);width:86%;max-width:320px;z-index:50;background:rgba(15,23,42,.97);border:1px solid #fbbf24;border-radius:16px;padding:16px;text-align:center;flex-direction:column;gap:10px}
-#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#reaction-list-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen,#tree-screen{
+#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen,#tree-screen{
   background:linear-gradient(180deg,#0f172a,#020617);padding:24px 12px 12px;overflow:hidden
 }
 .deck-list{flex:1;overflow-y:auto;max-height:32vh;margin-top:6px}
@@ -84,7 +84,6 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .tree-node .tree-title{font-size:13px;color:#e2e8f0;margin-bottom:4px}
 .tree-node .tree-path{font-size:11px;color:#94a3b8;line-height:1.5}
 .tree-node .tree-rew{font-size:11px;color:#fbbf24;margin-top:6px}
-/* 分子ビルダー */
 .atom-palette{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
 .atom-btn{width:48px;height:48px;border-radius:50%;border:2px solid #64748b;background:#1e293b;color:#fff;font-size:13px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
 .atom-btn small{font-size:9px;opacity:.75;font-weight:400}
@@ -220,14 +219,13 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
   <div id="refine-list" class="scroll-panel"></div>
 </div>
 
-<!-- 分子ビルダー -->
 <div id="synth-screen" class="screen">
   <div style="display:flex;justify-content:space-between;align-items:center">
     <h3 style="color:#2dd4bf">🧬 分子ビルダー</h3>
     <button type="button" class="glass-btn slate" onclick="goBackFromMenu()">戻る</button>
   </div>
-  <p class="mol-hint">原子・官能基を置いて、余っている手（結合）同士をつなぐ。Cは最大4本、Oは2本…</p>
-  <p style="font-size:12px;color:#94a3b8">試薬 <span id="synth-reagents">150</span>　コストは完成時のダメージで決定（&lt;80→100 / 80–129→150 / 130+→200）</p>
+  <p class="mol-hint">原子・官能基を置き、結合モードで手（価数）をつなぐ。繋いだ原子は自動で隣接します。手が余っているとカード化不可。</p>
+  <p style="font-size:12px;color:#94a3b8">試薬 <span id="synth-reagents">150</span>　コスト: ダメージ50→100試薬 〜 ダメージ300→1000試薬</p>
   <div class="menu-label">パーツ</div>
   <div class="atom-palette" id="atom-palette"></div>
   <div class="row-btns">
@@ -236,7 +234,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
     <button type="button" class="glass-btn mini-btn danger" onclick="clearMol()">全消去</button>
   </div>
   <div id="mol-canvas-wrap"><canvas id="mol-canvas"></canvas></div>
-  <div id="mol-status" style="font-size:12px;color:#cbd5e1;min-height:40px"></div>
+  <div id="mol-status" style="font-size:12px;color:#cbd5e1;min-height:48px"></div>
   <input id="orig-name" class="synth-input" style="width:100%" placeholder="カード名（空欄で自動）" maxlength="20">
   <button type="button" class="glass-btn success wide" style="margin-top:8px" onclick="createOriginalCard()">分子をカード化</button>
   <div id="synth-msg" style="font-size:12px;color:#fbbf24;margin-top:8px"></div>
@@ -412,7 +410,6 @@ const RANK_BY_LEVEL=[
 ];
 function expToReachLevel(lv){if(lv<=1)return 0;var t=0;for(var i=1;i<lv;i++)t+=20+i*12;return t;}
 const LAB_THRESH=[0,30,70,120,180,250,330,420,520,650];
-
 const REACTION_TREE=[
 {id:"nitro_bz",name:"ニトロ化（ベンゼン）",path:"ベンゼン + 濃硝酸",chain:"芳香族",reward:25},
 {id:"nitro_tol",name:"ニトロ化（トルエン）",path:"トルエン + 濃硝酸",chain:"芳香族",reward:30},
@@ -437,11 +434,7 @@ const REACTION_TREE=[
 {id:"fg_oh",name:"基＋OH",path:"炭化水素基 + OH",chain:"官能基",reward:20},
 {id:"fg_no2",name:"基＋NO2",path:"フェニル + ニトロ基",chain:"官能基",reward:25}
 ];
-
-/* 中間体としてコンボに使える生成物名 */
 const INTERMEDIATE_NAMES=["ニトロベンゼン","アニリン","アゾベンゼン","酢酸エチル","アセトアニリド","アセチルサリチル酸"];
-
-/* カードごとの関与反応（長押し用・試薬側も掲載） */
 const CARD_REACT_FULL={
 "ベンゼン":"・+ニトロ基 → ニトロベンゼン（中間体）\n・+濃硝酸 → ニトロ化\n・+濃硫酸 → スルホン化\n・+塩素/臭素+触媒 → ハロゲン化",
 "トルエン":"・+濃硝酸 → ニトロ化（高火力）\n・+KMnO4 → 側鎖酸化→安息香酸系",
@@ -479,7 +472,6 @@ const CARD_REACT_FULL={
 "1-プロパノール":"・+濃硫酸 脱水 / +Na / 酸化","2-プロパノール":"・酸化でケトン","メタノール":"・+Na / 酸化",
 "アセトアルデヒド":"・酸化でカルボン酸へ","オレイン酸":"・+NaOH けん化"
 };
-
 const ACHIEVEMENTS=[
 {id:"first_win",name:"初勝利",desc:"初めて敵を倒す",reward:30,check:function(s){return s.kills>=1}},
 {id:"kills_30",name:"撃破30",desc:"30体倒す",reward:60,check:function(s){return s.kills>=30}},
@@ -526,7 +518,6 @@ const ACHIEVEMENTS=[
 {id:"iso10",name:"異性体10",desc:"異性体10正解",reward:50,check:function(s){return (s.flags.isoOk||0)>=10}},
 {id:"rich",name:"試薬長者",desc:"試薬800以上",reward:80,check:function(s){return (s.reagents||0)>=800}}
 ];
-
 const DAILY_QUESTS=[{key:"nitro",label:"ニトロ化を1回"},{key:"sapon",label:"けん化を1回"},{key:"poly",label:"重合を1回"},{key:"ester",label:"エステル化を1回"},{key:"oxid",label:"酸化を1回"},{key:"acetyl",label:"アセチル化を1回"},{key:"dehyd",label:"脱水を1回"}];
 const FULL_REACTION_TEXT="中間体連鎖でコンボ増加（生成物を手札に加え、次の反応に使う）\nベンゼン+ニトロ基→ニトロベンゼン→還元→アニリン→アゾ/アセチル\n酢酸+エタノール→酢酸エチル→けん化\n触媒なし1.5/あり2.0 弱点1.5 精製×1.15";
 const SYNTH_PAIRS=[{a:["ベンゼン"],b:["ニトロ基","濃硝酸","濃硫酸","塩素","臭素"]},{a:["トルエン"],b:["濃硝酸","過マンガン酸カリウム"]},{a:["フェノール"],b:["濃硝酸","金属ナトリウム"]},{a:["アニリン"],b:["ジアゾ化剤","無水酢酸"]},{a:["ニトロベンゼン"],b:["還元剤","水素化ホウ素ナトリウム"]},{a:["酢酸"],b:["エタノール","水酸化ナトリウム"]},{a:["エタノール"],b:["酢酸","濃硫酸","金属ナトリウム","過マンガン酸カリウム"]},{a:["エチレン"],b:["塩素","臭素","重合触媒(Ziegler)"]},{a:["スチレン","プロピレン"],b:["重合触媒(Ziegler)"]},{a:["サリチル酸"],b:["無水酢酸"]},{a:["トリパルミチン","トリステアリン","トリオレイン","オレイン酸","酢酸エチル"],b:["水酸化ナトリウム"]},{a:["メチル基","エチル基","フェニル基","ビニル基"],b:["ヒドロキシ基","カルボキシ基","アミノ基","ニトロ基"]}];
@@ -542,8 +533,6 @@ const GACHA_TYPES=[
 {id:"heal",name:"回復特化ガチャ",cost:90,desc:"回復",rates:function(){return{SSR:15,SR:40,R:100};},pool:function(){return ALL_CARDS.filter(function(c){return (c.healPower||0)>0;});}},
 {id:"premium",name:"SSR・SSSR確定",cost:1000,desc:"SSR93%/SSSR7%",rates:function(){return{SSSR:7,SSR:100};},pool:function(){return ALL_CARDS.filter(function(c){return c.rarity==='SSR'||c.rarity==='SSSR';});}}
 ];
-
-/* 分子ビルダー用パーツ */
 const MOL_PARTS=[
 {id:"C",label:"C",val:4,sym:"C",cls:"C",atk:12},
 {id:"H",label:"H",val:1,sym:"H",cls:"H",atk:2},
@@ -575,28 +564,20 @@ function cardPowerText(card){
   if(!h)h='<div class="card-dmg">0ダメージ</div>';
   return h;
 }
-function isIntermediateCard(c){
-  if(!c)return false;
-  if(c._fromMid)return true;
-  return INTERMEDIATE_NAMES.indexOf(baseName(c.name))>=0;
-}
+function isIntermediateCard(c){if(!c)return false;if(c._fromMid)return true;return INTERMEDIATE_NAMES.indexOf(baseName(c.name))>=0;}
 function getLongPressText(card){
-  var bn=baseName(card.name);
-  var body=CARD_REACT_FULL[bn]||'';
-  if(!body){
-    /* 部分一致で試薬・基 */
-    for(var k in CARD_REACT_FULL){if(bn.indexOf(k)>=0||k.indexOf(bn)>=0){body=CARD_REACT_FULL[k];break;}}
-  }
+  var bn=baseName(card.name),body=CARD_REACT_FULL[bn]||'';
+  if(!body){for(var k in CARD_REACT_FULL){if(bn.indexOf(k)>=0||k.indexOf(bn)>=0){body=CARD_REACT_FULL[k];break;}}}
   if(!body)body=(card.healPower>0)?'回復カード':'単体投擲・特殊カード';
   if(String(card.name).indexOf('精製')===0)body='【精製カード】通常名と同じ反応が可能\n威力×1.15\n\n'+(CARD_REACT_FULL[bn]||body);
   if(isIntermediateCard(card))body+='\n\n※中間体：これを使った次の合成で連鎖コンボ+1';
   if(card.rarity==='ORIGIN')body+='\n（分子ビルダー製）';
   return body;
 }
+/** ダメージ50→100試薬、300→1000試薬（線形） */
 function synthCostForDamage(atk){
-  if(atk<80)return 100;
-  if(atk<130)return 150;
-  return 200;
+  var d=Math.max(50,Math.min(300,atk));
+  return Math.round(100+(d-50)/250*900);
 }
 
 var gameState={
@@ -607,7 +588,6 @@ var gameState={
   deckSlots:[{name:'',cards:[]},{name:'',cards:[]},{name:'',cards:[]}],
   labLevel:1,labExp:0,labFreeDate:'',zukanRewards:{r30:false,r60:false,r90:false},lastReplay:[],nextDamageBonus:1.0
 };
-
 var returnToMenu=false,menuOpen=false,isBattleOver=false,isProcessing=false,botulinumActive=false,isPractice=false,gachaBusy=false;
 var pendingIntermediate=null,fromBattleToHistory=false;
 var battleHistory=[],battleTurnCount=0,bossTurnLimit=0,comboCount=0,zukanFilter='all';
@@ -615,8 +595,6 @@ var battleUsedCatalyst=false,battleBigSpend=false,battleAttrsUsed={},battleOrigi
 var qoScore=0,qoTotal=0,isoScore=0,isoStreak=0;
 var bDeck=[],bHand=[],bSelected=[],monsterHP=500,isPlayerTurn=true;
 var memoList=[],memoIdx=0,memoShow=false;
-
-/* 分子ビルダー状態 */
 var molAtoms=[],molBonds=[],bondMode=false,bondPick=null,molHistory=[];
 
 function openFieldMenu(){menuOpen=true;var m=document.getElementById('field-menu');if(m)m.style.display='flex';}
@@ -751,7 +729,66 @@ function tryAddBond(i,j){
   if(i===j)return;
   if(molBonds.some(function(b){return (b[0]===i&&b[1]===j)||(b[0]===j&&b[1]===i);}))return;
   if(freeVal(i)<=0||freeVal(j)<=0){alert('結合の手が足りません');return;}
-  pushMolHist();molBonds.push([i,j]);
+  pushMolHist();
+  molBonds.push([i,j]);
+  pullAtomsAdjacent(i,j);
+  layoutConnectedComponent(i);
+}
+function pullAtomsAdjacent(i,j){
+  var a=molAtoms[i],b=molAtoms[j];
+  if(!a||!b)return;
+  var dx=b.x-a.x,dy=b.y-a.y;
+  var dist=Math.sqrt(dx*dx+dy*dy)||1;
+  var target=44;
+  var mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+  var nx=dx/dist,ny=dy/dist;
+  a.x=mx-nx*target/2;a.y=my-ny*target/2;
+  b.x=mx+nx*target/2;b.y=my+ny*target/2;
+  clampAtomPos(a);clampAtomPos(b);
+}
+function clampAtomPos(a){
+  var canvas=document.getElementById('mol-canvas');
+  if(!canvas)return;
+  var w=canvas.clientWidth,h=canvas.clientHeight;
+  a.x=Math.max(24,Math.min(w-24,a.x));
+  a.y=Math.max(24,Math.min(h-24,a.y));
+}
+function layoutConnectedComponent(startIdx){
+  var n=molAtoms.length;
+  if(!n)return;
+  var adj=[];for(var i=0;i<n;i++)adj[i]=[];
+  molBonds.forEach(function(b){if(b[0]<n&&b[1]<n){adj[b[0]].push(b[1]);adj[b[1]].push(b[0]);}});
+  var seen={},queue=[startIdx],order=[];
+  seen[startIdx]=true;
+  while(queue.length){
+    var u=queue.shift();order.push(u);
+    adj[u].forEach(function(v){if(!seen[v]){seen[v]=true;queue.push(v);}});
+  }
+  if(order.length<=1)return;
+  for(var iter=0;iter<8;iter++){
+    molBonds.forEach(function(b){
+      if(!seen[b[0]]||!seen[b[1]])return;
+      var a=molAtoms[b[0]],c=molAtoms[b[1]];
+      var dx=c.x-a.x,dy=c.y-a.y;
+      var dist=Math.sqrt(dx*dx+dy*dy)||1;
+      var target=44,f=(dist-target)*0.35;
+      var nx=dx/dist,ny=dy/dist;
+      a.x+=nx*f*0.5;a.y+=ny*f*0.5;
+      c.x-=nx*f*0.5;c.y-=ny*f*0.5;
+    });
+    for(var p=0;p<order.length;p++){
+      for(var q=p+1;q<order.length;q++){
+        var A=molAtoms[order[p]],B=molAtoms[order[q]];
+        var dx2=B.x-A.x,dy2=B.y-A.y;
+        var d2=Math.sqrt(dx2*dx2+dy2*dy2)||1;
+        if(d2<32){
+          var push=(32-d2)*0.5,nx2=dx2/d2,ny2=dy2/d2;
+          A.x-=nx2*push;A.y-=ny2*push;B.x+=nx2*push;B.y+=ny2*push;
+        }
+      }
+    }
+  }
+  order.forEach(function(i){clampAtomPos(molAtoms[i]);});
 }
 function hitAtom(x,y){
   for(var i=0;i<molAtoms.length;i++){
@@ -783,24 +820,31 @@ function drawMol(){
   });
 }
 function updateMolStatus(){
-  var atk=0,heal=0,parts=[],open=0;
-  molAtoms.forEach(function(a,i){atk+=a.atk;heal+=a.heal;parts.push(a.sym);open+=freeVal(i);});
-  var cost=synthCostForDamage(atk);
+  var atk=0,heal=0,open=0;
+  molAtoms.forEach(function(a,i){atk+=a.atk;heal+=a.heal;open+=freeVal(i);});
+  atk=Math.min(300,atk);
+  var cost=synthCostForDamage(Math.max(50,atk));
   document.getElementById('mol-status').innerHTML=
-    '原子数 '+molAtoms.length+' · 結合 '+molBonds.length+' · 余っている手 <b style="color:'+(open?'#fbbf24':'#4ade80')+'">'+open+'</b><br>'+
-    '予想: <b>'+atk+'ダメージ</b>'+(heal?' / '+heal+'回復':'')+' · 必要試薬 <b style="color:#fbbf24">'+cost+'</b>'+
-    (open>0?'<br><span style="color:#94a3b8">余った手をつなぐか、Hなどで埋めると完成度が上がります</span>':'');
+    '原子数 '+molAtoms.length+' · 結合 '+molBonds.length+
+    ' · 余っている手 <b style="color:'+(open?'#f87171':'#4ade80')+'">'+open+'</b><br>'+
+    '予想ダメージ: <b>'+atk+'</b>（上限300）'+(heal?' / 回復 '+heal:'')+
+    ' · 必要試薬 <b style="color:#fbbf24">'+cost+'</b><br>'+
+    (open>0
+      ?'<span style="color:#f87171">手が余っているためカード化できません。結合で埋めてください。</span>'
+      :(atk<50
+        ?'<span style="color:#fbbf24">ダメージが弱すぎます（最低50必要）。原子を足してください。</span>'
+        :'<span style="color:#4ade80">完成可能 — カード化できます</span>'));
 }
 function createOriginalCard(){
   if(molAtoms.length<1){alert('原子を置いてください');return;}
-  var atk=0,heal=0,parts=[];
-  molAtoms.forEach(function(a){atk+=a.atk;heal+=a.heal;parts.push(a.sym);});
+  var open=0,atk=0,heal=0,parts=[];
+  molAtoms.forEach(function(a,i){open+=freeVal(i);atk+=a.atk;heal+=a.heal;parts.push(a.sym);});
+  if(open>0){alert('手が余っている状態ではカードにできません。\n余っている手: '+open+'\n結合モードでつなぐか、Hなどで埋めてください。');return;}
+  atk=Math.min(300,atk);
+  if(atk<50){alert('ダメージが弱すぎます（最低50）。\n原子・官能基を追加してください。');return;}
   var cost=synthCostForDamage(atk);
-  if(gameState.reagents<cost){alert('試薬が足りません（必要 '+cost+'）');return;}
+  if(gameState.reagents<cost){alert('試薬が足りません（必要 '+cost+' / 所持 '+gameState.reagents+'）');return;}
   gameState.reagents-=cost;
-  var open=0;molAtoms.forEach(function(a,i){open+=freeVal(i);});
-  /* 余手が多いと少し弱体 */
-  if(open>2)atk=Math.max(5,atk-open*3);
   var custom=document.getElementById('orig-name').value.trim();
   var name=custom||('合成分子·'+parts.slice(0,4).join('')+(parts.length>4?'…':''));
   var formula=parts.join('-');
@@ -1000,7 +1044,6 @@ function executePlayerAttack(){
   var hasCat=has(n,'濃硫酸')||has(n,'重合触媒(Ziegler)')||has(n,'塩化アルミニウム')||has(n,'鉄');
   if(hasCat)battleUsedCatalyst=true;
   bSelected.forEach(function(c){battleAttrsUsed[c.attribute]=1;if(c.rarity==='ORIGIN'||c.origin)battleOriginCount++;});
-  /* 連鎖コンボ: 合成に「中間体カード」を1枚以上使ったときだけ+1 */
   var usedMidInThis=bSelected.some(function(c){return isIntermediateCard(c);});
   var catMul=hasCat?2.0:1.5,bossCond=gameState.currentMonster&&gameState.currentMonster.condition;
   function dmgLog(t,d){return t+'\n相手に '+(d===Infinity?'∞':d)+' ダメージ！';}
@@ -1056,14 +1099,8 @@ function executePlayerAttack(){
   else{var healSum=bSelected.reduce(function(a,c){return a+(c.healPower||0);},0);var atkSum=bSelected.reduce(function(a,c){return a+(c.attackPower===Infinity?0:(c.attackPower||0));},0);if(healSum>0&&atkSum===0){baseHeal=healSum;gameState.flags.healed=true;logMessage='複合回復 '+healSum+'回復';}else{logMessage='不活性\n'+getReactionHint(bSelected);}}
 
   if(isReaction){
-    if(usedMidInThis){
-      comboCount++;
-      gameState.flags.midReact=(gameState.flags.midReact||0)+1;
-      logMessage+='\n🔗 連鎖コンボ×'+comboCount+'（中間体を使用）';
-    }else{
-      /* 通常の合成はコンボを増やさない（リセットもしない＝途切れないが伸びない） */
-      logMessage+='\n（中間体未使用のため連鎖コンボは据え置き: '+comboCount+'）';
-    }
+    if(usedMidInThis){comboCount++;gameState.flags.midReact=(gameState.flags.midReact||0)+1;logMessage+='\n🔗 連鎖コンボ×'+comboCount+'（中間体を使用）';}
+    else logMessage+='\n（中間体未使用のため連鎖コンボは据え置き: '+comboCount+'）';
     if(recipeId)unlockRecipe(recipeId);
     var comboMul=1+Math.min(comboCount,8)*0.05;
     if(baseDamage!==Infinity&&baseDamage>0&&comboCount>0)baseDamage=Math.floor(baseDamage*comboMul);
