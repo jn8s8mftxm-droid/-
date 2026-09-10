@@ -47,7 +47,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .card-dmg{font-size:9px;color:#dc2626;line-height:1.2}.card-heal{font-size:9px;color:#16a34a;line-height:1.2}
 .battle-actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:4px}
 .choice-box{display:none;position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);width:86%;max-width:320px;z-index:50;background:rgba(15,23,42,.97);border:1px solid #fbbf24;border-radius:16px;padding:16px;text-align:center;flex-direction:column;gap:10px}
-#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen,#tree-screen{
+#deck-edit-screen,#gacha-screen,#zukan-screen,#achieve-screen,#history-screen,#quiz-only-screen,#isomer-screen,#lab-screen,#refine-screen,#synth-screen,#tree-screen,#boss-prep-screen{
   background:linear-gradient(180deg,#0f172a,#020617);padding:24px 12px 12px;overflow:hidden
 }
 .deck-list{flex:1;overflow-y:auto;max-height:32vh;margin-top:6px}
@@ -69,7 +69,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .gacha-card-view.reveal{animation:gachaPop .45s ease-out}
 @keyframes gachaShake{0%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}100%{transform:translateX(0)}}
 @keyframes gachaPop{0%{transform:scale(.6);opacity:.3}100%{transform:scale(1);opacity:1}}
-.longpress-popup,#pool-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;background:rgba(15,23,42,.98);border:1px solid #38bdf8;border-radius:16px;padding:16px;z-index:100;max-height:70vh;overflow-y:auto}
+.longpress-popup,#pool-modal,#recommend-modal{display:none;position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:88%;max-width:340px;background:rgba(15,23,42,.98);border:1px solid #38bdf8;border-radius:16px;padding:16px;z-index:100;max-height:70vh;overflow-y:auto}
 .filter-row,.row-btns{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;align-items:center}
 .row-btns .glass-btn{flex:1;min-width:90px}
 .gacha-type-card{background:rgba(30,41,59,.9);border:1px solid rgba(71,85,105,.5);border-radius:12px;padding:12px;margin-bottom:8px;text-align:left}
@@ -90,11 +90,23 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
 .atom-btn.C{border-color:#94a3b8;background:#334155}.atom-btn.H{border-color:#e2e8f0;background:#475569}
 .atom-btn.O{border-color:#f87171;background:#7f1d1d}.atom-btn.N{border-color:#60a5fa;background:#1e3a5f}
 .atom-btn.Cl{border-color:#4ade80;background:#14532d}.atom-btn.S{border-color:#fbbf24;background:#78350f}
+.atom-btn.P{border-color:#c084fc;background:#4c1d95}
 .atom-btn.FG{border-color:#e879f9;background:#581c87;width:auto;padding:0 10px;border-radius:12px;height:40px}
 #mol-canvas-wrap{position:relative;width:100%;height:220px;background:#0b1220;border:1px solid #334155;border-radius:12px;overflow:hidden;margin:8px 0}
 #mol-canvas{width:100%;height:100%;display:block}
 .mol-hint{font-size:11px;color:#94a3b8;line-height:1.45}
 .bond-mode{background:rgba(56,189,248,.2);border-color:#38bdf8}
+#boss-prep-screen{align-items:center;justify-content:space-between;padding:20px 14px 18px;background:radial-gradient(ellipse at 50% 0%,#312e81,#0f172a 45%,#020617)}
+.boss-card{width:100%;max-width:380px;background:linear-gradient(180deg,#1e3a5f,#0f172a);border:2px solid rgba(167,139,250,.5);border-radius:18px;padding:18px 16px;text-align:center;box-shadow:0 8px 32px rgba(124,58,237,.25)}
+.boss-card .boss-badge{display:inline-block;background:#a855f7;color:#fff;font-size:11px;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.boss-card h2{font-size:18px;color:#e9d5ff;margin:6px 0 10px}
+.boss-stat{font-size:13px;color:#cbd5e1;line-height:1.7;text-align:left;background:rgba(15,23,42,.7);border-radius:12px;padding:12px;margin-top:10px}
+.boss-stat b{color:#fbbf24}
+.boss-actions{display:flex;gap:8px;width:100%;max-width:380px;margin-top:12px}
+.boss-actions .glass-btn{flex:1;padding:14px 8px;font-size:13px}
+#recommend-modal .rec-opt{display:block;width:100%;margin:6px 0;text-align:left}
+.filter-chip{padding:6px 10px;font-size:11px;min-width:0}
+.filter-chip.on{outline:2px solid #38bdf8}
 </style>
 </head>
 <body>
@@ -147,6 +159,28 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
       <button type="button" class="glass-btn pink wide" onclick="menuGoIsomer()">異性体</button>
       <button type="button" class="glass-btn slate wide" style="margin-top:8px" onclick="closeFieldMenu(true)">閉じる</button>
     </div>
+  </div>
+</div>
+
+<div id="boss-prep-screen" class="screen">
+  <div style="width:100%;max-width:380px;text-align:center;color:#c4b5fd;font-size:12px;margin-bottom:8px">BOSS ENCOUNTER</div>
+  <div class="boss-card">
+    <span class="boss-badge">BOSS</span>
+    <h2 id="boss-prep-name">—</h2>
+    <div style="font-size:28px;margin:8px 0">👾</div>
+    <div class="boss-stat">
+      <div>レベル: <b id="boss-prep-lv">—</b></div>
+      <div>HP: <b id="boss-prep-hp">—</b></div>
+      <div>弱点属性: <b id="boss-prep-weak" style="color:#fb923c">—</b></div>
+      <div>条件属性: <b id="boss-prep-cond" style="color:#e879f9">—</b></div>
+      <div>制限ターン: <b id="boss-prep-turn">—</b></div>
+      <div style="margin-top:8px;font-size:11px;color:#94a3b8">弱点属性のカードで火力UP／条件属性を含むと攻撃が通る</div>
+    </div>
+  </div>
+  <div class="boss-actions">
+    <button type="button" class="glass-btn danger" onclick="cancelBossPrep()">やめる</button>
+    <button type="button" class="glass-btn orange" onclick="confirmBossBattle()">戦う</button>
+    <button type="button" class="glass-btn primary" onclick="goBossDeckEdit()">デッキ編集</button>
   </div>
 </div>
 
@@ -283,13 +317,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
   <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px">
     <div><h3 style="font-size:16px">デッキ編集 (<span id="deck-count">0</span>/50)</h3><p style="font-size:11px;color:#94a3b8">最低20 / 最大50</p></div>
     <div class="row-btns">
-      <button type="button" class="glass-btn mini-btn warn" onclick="recommendDeck()">おすすめ</button>
+      <button type="button" class="glass-btn mini-btn warn" onclick="openRecommendModal()">おすすめ</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('name')">名前</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('rarity')">レア</button>
       <button type="button" class="glass-btn mini-btn slate" onclick="sortDeck('power')">火力</button>
       <button type="button" id="deck-done-btn" class="glass-btn success" onclick="finishDeckEdit()">完了</button>
     </div>
   </div>
+  <div class="filter-row" id="deck-attr-filters"></div>
   <div class="preset-row"><input id="preset-name-0" placeholder="スロット1" maxlength="12"><button type="button" class="glass-btn mini-btn primary" onclick="saveDeckSlot(0)">保存1</button><button type="button" class="glass-btn mini-btn primary" onclick="loadDeckSlot(0)">読込1</button></div>
   <div class="preset-row"><input id="preset-name-1" placeholder="スロット2" maxlength="12"><button type="button" class="glass-btn mini-btn primary" onclick="saveDeckSlot(1)">保存2</button><button type="button" class="glass-btn mini-btn primary" onclick="loadDeckSlot(1)">読込2</button></div>
   <div class="preset-row"><input id="preset-name-2" placeholder="スロット3" maxlength="12"><button type="button" class="glass-btn mini-btn primary" onclick="saveDeckSlot(2)">保存3</button><button type="button" class="glass-btn mini-btn primary" onclick="loadDeckSlot(2)">読込3</button></div>
@@ -321,6 +356,16 @@ body,html{width:100%;height:100%;overflow:hidden;background:#05080f;color:#e8eef
   <div style="color:#e879f9;margin-bottom:8px;font-size:15px" id="pool-title">排出一覧</div>
   <div id="pool-body"></div>
   <button type="button" class="glass-btn slate wide" style="margin-top:12px" onclick="closePoolModal()">閉じる</button>
+</div>
+<div id="recommend-modal">
+  <div style="color:#fbbf24;margin-bottom:10px;font-size:15px">おすすめ編成</div>
+  <button type="button" class="glass-btn primary wide rec-opt" onclick="applyRecommend('balance')">バランス（合成＋回復）</button>
+  <button type="button" class="glass-btn orange wide rec-opt" onclick="applyRecommend('power')">火力重視</button>
+  <button type="button" class="glass-btn pink wide rec-opt" onclick="applyRecommend('combo')">コンボ重視（反応ペア）</button>
+  <button type="button" class="glass-btn success wide rec-opt" onclick="applyRecommend('Aromatic')">芳香族重視</button>
+  <button type="button" class="glass-btn success wide rec-opt" onclick="applyRecommend('Alcohol')">アルコール・酸重視</button>
+  <button type="button" class="glass-btn success wide rec-opt" onclick="applyRecommend('Alkenyl')">付加・重合重視</button>
+  <button type="button" class="glass-btn slate wide" style="margin-top:10px" onclick="closeRecommendModal()">閉じる</button>
 </div>
 
 <script>
@@ -409,7 +454,7 @@ const RANK_BY_LEVEL=[
 {name:"教授",level:70,reagentBonus:2.5,gachaBoost:2.2,promoteReward:200}
 ];
 function expToReachLevel(lv){if(lv<=1)return 0;var t=0;for(var i=1;i<lv;i++)t+=20+i*12;return t;}
-const LAB_THRESH=[0,30,70,120,180,250,330,420,520,650];
+const LAB_THRESH=[0,30,70,120,180,250,330,420,520,650,800];
 const REACTION_TREE=[
 {id:"nitro_bz",name:"ニトロ化（ベンゼン）",path:"ベンゼン + 濃硝酸",chain:"芳香族",reward:25},
 {id:"nitro_tol",name:"ニトロ化（トルエン）",path:"トルエン + 濃硝酸",chain:"芳香族",reward:30},
@@ -514,6 +559,7 @@ const ACHIEVEMENTS=[
 {id:"plv_20",name:"レベル20",desc:"プレイヤーLv20",reward:60,check:function(s){return (s.playerLevel||1)>=20}},
 {id:"plv_40",name:"レベル40",desc:"プレイヤーLv40",reward:100,check:function(s){return (s.playerLevel||1)>=40}},
 {id:"lab5",name:"研究室Lv5",desc:"研究室Lv5",reward:80,check:function(s){return (s.labLevel||1)>=5}},
+{id:"lab10",name:"研究室Lv10",desc:"研究室Lv10",reward:150,check:function(s){return (s.labLevel||1)>=10}},
 {id:"quiz10",name:"クイズ10",desc:"クイズ10正解",reward:50,check:function(s){return (s.flags.quizOk||0)>=10}},
 {id:"iso10",name:"異性体10",desc:"異性体10正解",reward:50,check:function(s){return (s.flags.isoOk||0)>=10}},
 {id:"rich",name:"試薬長者",desc:"試薬800以上",reward:80,check:function(s){return (s.reagents||0)>=800}}
@@ -540,6 +586,7 @@ const MOL_PARTS=[
 {id:"N",label:"N",val:3,sym:"N",cls:"N",atk:11},
 {id:"Cl",label:"Cl",val:1,sym:"Cl",cls:"Cl",atk:14},
 {id:"S",label:"S",val:2,sym:"S",cls:"S",atk:12},
+{id:"P",label:"P",val:3,sym:"P",cls:"P",atk:13},
 {id:"OH",label:"OH",val:1,sym:"OH",cls:"FG",atk:18,heal:0},
 {id:"COOH",label:"COOH",val:1,sym:"COOH",cls:"FG",atk:28,heal:0},
 {id:"NH2",label:"NH2",val:1,sym:"NH2",cls:"FG",atk:20,heal:0},
@@ -547,6 +594,7 @@ const MOL_PARTS=[
 {id:"CH3",label:"CH3",val:1,sym:"CH3",cls:"FG",atk:15,heal:0},
 {id:"Nut",label:"栄養",val:1,sym:"Nut",cls:"FG",atk:0,heal:35}
 ];
+const DECK_ATTR_FILTERS=['all','Aromatic','Alcohol','Acid','Ester','Alkenyl','Halogen','Reagent','Catalyst','Nutrient','FunctionalGroup','Phenol','Oxidant','ORIGIN'];
 
 function uniqCount(s){var set={},n=0;(s.collection||[]).forEach(function(c){var k=baseName(c.name);if(!set[k]){set[k]=1;n++;}});return n;}
 function treeDoneCount(s){var n=0;REACTION_TREE.forEach(function(r){if(s.recipes&&s.recipes[r.id])n++;});return n;}
@@ -574,10 +622,17 @@ function getLongPressText(card){
   if(card.rarity==='ORIGIN')body+='\n（分子ビルダー製）';
   return body;
 }
-/** ダメージ50→100試薬、300→1000試薬（線形） */
 function synthCostForDamage(atk){
   var d=Math.max(50,Math.min(300,atk));
   return Math.round(100+(d-50)/250*900);
+}
+function getLabGachaBoost(){
+  var lv=gameState.labLevel||1;
+  if(lv>=10)return 1.2;
+  if(lv>=8)return 0.8;
+  if(lv>=6)return 0.5;
+  if(lv>=4)return 0.25;
+  return 0;
 }
 
 var gameState={
@@ -589,8 +644,8 @@ var gameState={
   labLevel:1,labExp:0,labFreeDate:'',zukanRewards:{r30:false,r60:false,r90:false},lastReplay:[],nextDamageBonus:1.0
 };
 var returnToMenu=false,menuOpen=false,isBattleOver=false,isProcessing=false,botulinumActive=false,isPractice=false,gachaBusy=false;
-var pendingIntermediate=null,fromBattleToHistory=false;
-var battleHistory=[],battleTurnCount=0,bossTurnLimit=0,comboCount=0,zukanFilter='all';
+var pendingIntermediate=null,fromBattleToHistory=false,returnToBossPrep=false;
+var battleHistory=[],battleTurnCount=0,bossTurnLimit=0,comboCount=0,zukanFilter='all',deckAttrFilter='all';
 var battleUsedCatalyst=false,battleBigSpend=false,battleAttrsUsed={},battleOriginCount=0;
 var qoScore=0,qoTotal=0,isoScore=0,isoStreak=0;
 var bDeck=[],bHand=[],bSelected=[],monsterHP=500,isPlayerTurn=true;
@@ -599,10 +654,13 @@ var molAtoms=[],molBonds=[],bondMode=false,bondPick=null,molHistory=[];
 
 function openFieldMenu(){menuOpen=true;var m=document.getElementById('field-menu');if(m)m.style.display='flex';}
 function closeFieldMenu(clearFlag){menuOpen=false;var m=document.getElementById('field-menu');if(m)m.style.display='none';if(clearFlag)returnToMenu=false;}
-function menuGo(s){returnToMenu=true;closeFieldMenu(false);switchState(s);}
-function menuGoQuiz(){returnToMenu=true;closeFieldMenu(false);startQuizOnly();}
-function menuGoIsomer(){returnToMenu=true;closeFieldMenu(false);startIsomerMode();}
-function goBackFromMenu(){switchState('field');if(returnToMenu)openFieldMenu();}
+function menuGo(s){returnToMenu=true;returnToBossPrep=false;closeFieldMenu(false);switchState(s);}
+function menuGoQuiz(){returnToMenu=true;returnToBossPrep=false;closeFieldMenu(false);startQuizOnly();}
+function menuGoIsomer(){returnToMenu=true;returnToBossPrep=false;closeFieldMenu(false);startIsomerMode();}
+function goBackFromMenu(){
+  if(returnToBossPrep){returnToBossPrep=false;showBossPrep();return;}
+  switchState('field');if(returnToMenu)openFieldMenu();
+}
 
 function initDaily(){var t=todayStr();if(gameState.dailyDate!==t){gameState.dailyDate=t;gameState.dailyKey=DAILY_QUESTS[Math.floor(Math.random()*DAILY_QUESTS.length)].key;gameState.dailyDone=false;}}
 function getDailyLabel(){var q=DAILY_QUESTS.find(function(x){return x.key===gameState.dailyKey;});return q?q.label:'—';}
@@ -610,7 +668,7 @@ function getRank(){var r=RANK_BY_LEVEL[0],lv=gameState.playerLevel||1;for(var i=
 function checkRankUp(){var r=getRank();if(r.name!==gameState.lastRank){if(r.promoteReward>0){gameState.reagents+=r.promoteReward;alert('肩書きアップ！ '+gameState.lastRank+' → '+r.name+'\n試薬 +'+r.promoteReward);}gameState.lastRank=r.name;}}
 function addPlayerExp(n){if(n<=0)return;gameState.playerExp+=n;var leveled=false;while(true){var need=expToReachLevel(gameState.playerLevel+1);if(gameState.playerExp>=need){gameState.playerLevel++;leveled=true;}else break;}if(leveled){checkRankUp();setTimeout(function(){alert('プレイヤーレベルアップ！ Lv.'+gameState.playerLevel);},200);}checkAchievements(true);}
 function enemyExpReward(m){if(!m)return 5;if(m.isBoss)return 55+Math.floor(Math.random()*15);if(m.level>=3)return 22;if(m.level===2)return 14;return 7;}
-function addLabExp(n){gameState.labExp+=n;while(gameState.labLevel<LAB_THRESH.length&&gameState.labExp>=(LAB_THRESH[gameState.labLevel]||99999)){gameState.labLevel++;var bonus=20+gameState.labLevel*5;gameState.reagents+=bonus;(function(lv,b){setTimeout(function(){alert('研究室 Lv.'+lv+'\n試薬 +'+b);},200);})(gameState.labLevel,bonus);}}
+function addLabExp(n){gameState.labExp+=n;while(gameState.labLevel<10&&gameState.labExp>=(LAB_THRESH[gameState.labLevel]||99999)){gameState.labLevel++;var bonus=20+gameState.labLevel*5;gameState.reagents+=bonus;(function(lv,b){setTimeout(function(){alert('研究室 Lv.'+lv+'\n試薬 +'+b);},200);})(gameState.labLevel,bonus);}}
 function checkZukanRewards(){var n=uniqCount(gameState),pct=Math.floor(n/ALL_CARDS.length*100);if(pct>=30&&!gameState.zukanRewards.r30){gameState.zukanRewards.r30=true;gameState.reagents+=40;}if(pct>=60&&!gameState.zukanRewards.r60){gameState.zukanRewards.r60=true;gameState.reagents+=80;}if(pct>=90&&!gameState.zukanRewards.r90){gameState.zukanRewards.r90=true;gameState.reagents+=150;}}
 function unlockRecipe(id){if(!id||(gameState.recipes&&gameState.recipes[id]))return;if(!gameState.recipes)gameState.recipes={};var rec=REACTION_TREE.find(function(r){return r.id===id;});if(!rec)return;gameState.recipes[id]=true;gameState.reagents+=rec.reward;setTimeout(function(){alert('反応ツリー解放: '+rec.name+'\n試薬 +'+rec.reward);},300);checkAchievements();}
 function checkAchievements(silent){var gained=[];for(var i=0;i<ACHIEVEMENTS.length;i++){var a=ACHIEVEMENTS[i];if(gameState.achieved[a.id])continue;if(a.check(gameState)){gameState.achieved[a.id]=true;gameState.reagents+=a.reward;gained.push(a.name+'(+'+a.reward+')');}}checkZukanRewards();if(gained.length&&!silent)setTimeout(function(){alert('実績達成！\n'+gained.join('\n'));},250);else if(gained.length&&silent){if(!checkAchievements._batch){checkAchievements._batch=gained.slice();setTimeout(function(){if(checkAchievements._batch&&checkAchievements._batch.length)alert('未受け取り実績を遡って付与\n'+checkAchievements._batch.join('\n'));checkAchievements._batch=null;},400);}else checkAchievements._batch=checkAchievements._batch.concat(gained);}}
@@ -627,23 +685,24 @@ function loadGame(){
     gameState.flags=Object.assign({nitro:false,sapon:false,poly:false,ester:false,oxid:false,acetyl:false,dehyd:false,fat:false,boss:false,combo3:false,combo5:false,combo8:false,refined:false,refineCount:0,gachaCount:0,origin:false,originCount:0,memoCount:0,dailyTotal:0,bossKills:0,healed:false,hfUsed:false,quizOk:0,isoOk:0,noCatBoss:false,saveBoss:false,midReact:0,hardKills:0,monoWin:false,originWin:false},data.flags||{});
     gameState.achieved=data.achieved||{};gameState.recipes=data.recipes||{};
     gameState.dailyDate=data.dailyDate||'';gameState.dailyKey=data.dailyKey||'';gameState.dailyDone=!!data.dailyDone;
-    gameState.deckListOrder=data.deckListOrder||[];gameState.labLevel=data.labLevel||1;gameState.labExp=data.labExp||0;gameState.labFreeDate=data.labFreeDate||'';
+    gameState.deckListOrder=data.deckListOrder||[];gameState.labLevel=Math.min(10,data.labLevel||1);gameState.labExp=data.labExp||0;gameState.labFreeDate=data.labFreeDate||'';
     gameState.zukanRewards=Object.assign({r30:false,r60:false,r90:false},data.zukanRewards||{});gameState.lastReplay=data.lastReplay||[];gameState.nextDamageBonus=1.0;
     if(data.deckSlots&&data.deckSlots[0]&&data.deckSlots[0].cards)gameState.deckSlots=data.deckSlots;else gameState.deckSlots=[{name:'',cards:[]},{name:'',cards:[]},{name:'',cards:[]}];
     var need={高校生:5,大学生:12,大学院生:20,助教:30,准教授:42,博士:55,教授:70};
     if(need[gameState.lastRank]&&gameState.playerLevel<need[gameState.lastRank]){gameState.playerLevel=need[gameState.lastRank];gameState.playerExp=Math.max(gameState.playerExp,expToReachLevel(gameState.playerLevel));}
-    returnToMenu=false;initDaily();checkAchievements(true);updateFieldUI();switchState('field');alert('ロードしました');
+    returnToMenu=false;returnToBossPrep=false;initDaily();checkAchievements(true);updateFieldUI();switchState('field');alert('ロードしました');
   }catch(e){alert('ロード失敗');}
 }
 
 function switchState(s){
-  var ids=['deck-select-screen','field-screen','battle-screen','deck-edit-screen','gacha-screen','zukan-screen','achieve-screen','history-screen','quiz-only-screen','isomer-screen','lab-screen','refine-screen','synth-screen','tree-screen'];
+  var ids=['deck-select-screen','field-screen','battle-screen','deck-edit-screen','gacha-screen','zukan-screen','achieve-screen','history-screen','quiz-only-screen','isomer-screen','lab-screen','refine-screen','synth-screen','tree-screen','boss-prep-screen'];
   for(var i=0;i<ids.length;i++){var el=document.getElementById(ids[i]);if(el)el.classList.remove('active');}
   if(s!=='field')closeFieldMenu(false);
   if(s==='deckSelection')document.getElementById('deck-select-screen').classList.add('active');
   if(s==='field'){document.getElementById('field-screen').classList.add('active');updateFieldUI();initThreeJS();}
+  if(s==='bossPrep'){document.getElementById('boss-prep-screen').classList.add('active');}
   if(s==='battle'){returnToMenu=false;document.getElementById('battle-screen').classList.add('active');}
-  if(s==='deckEdit'){document.getElementById('deck-edit-screen').classList.add('active');renderDeckEdit();}
+  if(s==='deckEdit'){document.getElementById('deck-edit-screen').classList.add('active');renderDeckAttrFilters();renderDeckEdit();}
   if(s==='gacha'){document.getElementById('gacha-screen').classList.add('active');document.getElementById('gacha-reagents').innerText=gameState.reagents;document.getElementById('gacha-rank').innerText=getRank().name;renderGachaTypes();}
   if(s==='zukan'){document.getElementById('zukan-screen').classList.add('active');exitMemoMode();renderZukan();}
   if(s==='achieve'){document.getElementById('achieve-screen').classList.add('active');checkAchievements(true);renderAchieve();}
@@ -676,14 +735,45 @@ function updateFieldUI(){
 function renderTree(){document.getElementById('tree-done').innerText=treeDoneCount(gameState);document.getElementById('tree-total').innerText=REACTION_TREE.length;var list=document.getElementById('tree-list');list.innerHTML='';var chains={};REACTION_TREE.forEach(function(r){if(!chains[r.chain])chains[r.chain]=[];chains[r.chain].push(r);});Object.keys(chains).forEach(function(ch){var h=document.createElement('div');h.style.cssText='color:#f9a8d4;font-size:13px;margin:10px 0 6px';h.innerText='▸ '+ch;list.appendChild(h);chains[ch].forEach(function(r){var done=!!(gameState.recipes&&gameState.recipes[r.id]);var div=document.createElement('div');div.className='tree-node'+(done?' done':'');div.innerHTML='<div class="tree-title">'+(done?'✅ ':'🔒 ')+r.name+'</div><div class="tree-path">'+r.path+'</div><div class="tree-rew">'+(done?'解放済':'未解放')+' · 試薬'+r.reward+'</div>';list.appendChild(div);});});}
 
 function assignStarterDeck(type){
-  gameState.currentDeck=[];gameState.collection=[];gameState.deckListOrder=[];returnToMenu=false;
+  gameState.currentDeck=[];gameState.collection=[];gameState.deckListOrder=[];returnToMenu=false;returnToBossPrep=false;
   gameState.playerLevel=1;gameState.playerExp=0;gameState.lastRank='初学者';gameState.recipes={};
   var names=type==='Aromatic'?['ベンゼン','トルエン','濃硝酸','濃硫酸','フェノール','グルコース','ニトロ基']:type==='Polymer'?['エチレン','臭素','塩素','重合触媒(Ziegler)','グルコース','エタノール']:['エタノール','酢酸','水酸化ナトリウム','過マンガン酸カリウム','グルコース','アセトアルデヒド'];
   var base=[];for(var i=0;i<names.length;i++){var c=ALL_CARDS.find(function(x){return x.name===names[i];});if(c)base.push(c);}
   for(var j=0;j<40;j++){var src=base[j%base.length];gameState.currentDeck.push(Object.assign({},src,{id:uid()}));gameState.collection.push(Object.assign({},src,{id:uid()}));}
   gameState.playerHP=gameState.playerMaxHP;initDaily();switchState('field');
 }
-function finishDeckEdit(){if(gameState.currentDeck.length<20){alert('最低20枚');return;}goBackFromMenu();}
+function finishDeckEdit(){
+  if(gameState.currentDeck.length<20){alert('最低20枚');return;}
+  if(returnToBossPrep){returnToBossPrep=false;showBossPrep();return;}
+  goBackFromMenu();
+}
+
+/* ===== ボス待機 ===== */
+function showBossPrep(){
+  var m=gameState.currentMonster;
+  if(!m){switchState('field');return;}
+  document.getElementById('boss-prep-name').innerText=m.name;
+  document.getElementById('boss-prep-lv').innerText=m.level;
+  document.getElementById('boss-prep-hp').innerText=m.hp+' / '+m.maxHP;
+  document.getElementById('boss-prep-weak').innerText=(m.weakness&&m.weakness.length)?m.weakness.join(' / '):'なし';
+  document.getElementById('boss-prep-cond').innerText=m.condition||'なし';
+  document.getElementById('boss-prep-turn').innerText=m.turnLimit||'—';
+  switchState('bossPrep');
+}
+function cancelBossPrep(){
+  returnToBossPrep=false;
+  gameState.currentMonster=null;
+  switchState('field');
+}
+function confirmBossBattle(){
+  returnToBossPrep=false;
+  startBattle(false);
+}
+function goBossDeckEdit(){
+  returnToBossPrep=true;
+  returnToMenu=false;
+  switchState('deckEdit');
+}
 
 /* ===== 分子ビルダー ===== */
 function initMolBuilder(){
@@ -812,7 +902,7 @@ function drawMol(){
   molAtoms.forEach(function(a,i){
     var free=freeVal(i);
     ctx.beginPath();ctx.arc(a.x,a.y,16,0,Math.PI*2);
-    ctx.fillStyle=i===bondPick?'#fbbf24':(a.cls==='O'?'#7f1d1d':a.cls==='N'?'#1e3a5f':a.cls==='Cl'?'#14532d':a.cls==='S'?'#78350f':a.cls==='FG'?'#581c87':'#334155');
+    ctx.fillStyle=i===bondPick?'#fbbf24':(a.cls==='O'?'#7f1d1d':a.cls==='N'?'#1e3a5f':a.cls==='Cl'?'#14532d':a.cls==='S'?'#78350f':a.cls==='P'?'#4c1d95':a.cls==='FG'?'#581c87':'#334155');
     ctx.fill();ctx.strokeStyle=free>0?'#38bdf8':'#94a3b8';ctx.lineWidth=free>0?2:1;ctx.stroke();
     ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText(a.sym,a.x,a.y);
@@ -883,7 +973,7 @@ function drawGachaType(id){
   var ticks=0;var iv=setInterval(function(){ticks++;var flash=g.pool()[Math.floor(Math.random()*g.pool().length)];res.innerHTML='<div style="font-size:11px;opacity:.7">'+g.name+'</div><div style="font-size:15px;margin-top:8px">'+flash.name+'</div>';if(ticks>=12){clearInterval(iv);res.classList.remove('rolling');finishGachaPull(g,res);}},80);
 }
 function finishGachaPull(g,res){
-  var boost=getRank().gachaBoost,rates=g.rates(boost),rand=Math.random()*100,rarity='R',order=['SSSR','SSR','SR','R'];
+  var boost=getRank().gachaBoost+getLabGachaBoost(),rates=g.rates(boost),rand=Math.random()*100,rarity='R',order=['SSSR','SSR','SR','R'];
   for(var i=0;i<order.length;i++){if(rates[order[i]]==null)continue;if(rand<rates[order[i]]){rarity=order[i];break;}}
   var pool=g.pool().filter(function(c){return c.rarity===rarity;});if(!pool.length)pool=g.pool();
   var pulled=pool[Math.floor(Math.random()*pool.length)];var newCard=Object.assign({},pulled,{id:uid()});
@@ -908,13 +998,99 @@ function saveDeckSlot(i){if(gameState.currentDeck.length<20){alert('最低20枚'
 function loadDeckSlot(i){var slot=gameState.deckSlots[i];if(!slot||!slot.cards||!slot.cards.length){alert('空');return;}var owned={};gameState.collection.forEach(function(c){owned[c.name]=(owned[c.name]||0)+1;});var used={},rebuilt=[];for(var j=0;j<slot.cards.length;j++){var c=slot.cards[j];if((used[c.name]||0)<(owned[c.name]||0)){used[c.name]=(used[c.name]||0)+1;rebuilt.push(Object.assign({},c,{id:uid()}));}}gameState.currentDeck=rebuilt;var inp=document.getElementById('preset-name-'+i);if(inp)inp.value=slot.name||'';renderDeckEdit();}
 function calcSynthRate(){var names=new Set(gameState.currentDeck.map(function(c){return baseName(c.name);}));if(!names.size)return{rate:0,ok:0,total:SYNTH_PAIRS.length,missing:[],healCount:0};var ok=0,missing=[];SYNTH_PAIRS.forEach(function(pair){var hasA=pair.a.some(function(n){return names.has(n);}),hasB=pair.b.some(function(n){return names.has(n);});if(hasA&&hasB)ok++;else if(hasA&&!hasB)missing.push(pair.a.find(function(n){return names.has(n);})+'の相手不足');else if(!hasA&&hasB)missing.push(pair.b.find(function(n){return names.has(n);})+'の相手不足');});return{rate:Math.round(ok/SYNTH_PAIRS.length*100),ok:ok,total:SYNTH_PAIRS.length,missing:missing.slice(0,4),healCount:gameState.currentDeck.filter(function(c){return (c.healPower||0)>0;}).length};}
 function getReactionHint(selected){var n=selected.map(function(c){return baseName(c.name);});if(n.indexOf('酢酸')>=0)return 'ヒント: エタノールかNaOH';if(n.indexOf('エタノール')>=0)return 'ヒント: 酢酸・濃硫酸・Na';if(n.indexOf('ベンゼン')>=0)return 'ヒント: 濃硝酸・ニトロ基';return '長押しで各カードの反応を確認';}
-function recommendDeck(){if(!gameState.collection.length){alert('所持なし');return;}var owned={};gameState.collection.forEach(function(c){owned[c.name]=(owned[c.name]||0)+1;});var used={};function pick(name){if((used[name]||0)>=(owned[name]||0))return false;used[name]=(used[name]||0)+1;return true;}function total(){var s=0;for(var k in used)s+=used[k];return s;}var MAX=50,healN=0;Object.keys(owned).filter(function(n){var c=gameState.collection.find(function(x){return x.name===n;});return c&&(c.healPower||0)>0;}).forEach(function(name){while(healN<8&&total()<MAX&&pick(name))healN++;});SYNTH_PAIRS.forEach(function(pair){for(var t=0;t<10&&total()<MAX-1;t++){var aKey=null,bKey=null,i,k;for(i=0;i<pair.a.length;i++){for(k in owned){if(baseName(k)===pair.a[i]&&(used[k]||0)<owned[k]){aKey=k;break;}}if(aKey)break;}for(i=0;i<pair.b.length;i++){for(k in owned){if(baseName(k)===pair.b[i]&&(used[k]||0)<owned[k]){bKey=k;break;}}if(bKey)break;}if(!aKey||!bKey)break;pick(aKey);pick(bKey);}});Object.keys(owned).sort(function(a,b){return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));}).forEach(function(name){while(total()<MAX&&pick(name)){}});var newDeck=[];for(var name in used){var need=used[name];for(var i=0;i<gameState.collection.length&&need>0;i++){if(gameState.collection[i].name===name){newDeck.push(Object.assign({},gameState.collection[i],{id:uid()}));need--;}}}gameState.currentDeck=newDeck;renderDeckEdit();alert('おすすめ '+newDeck.length+'枚');}
+
+function openRecommendModal(){document.getElementById('recommend-modal').style.display='block';}
+function closeRecommendModal(){document.getElementById('recommend-modal').style.display='none';}
+function applyRecommend(mode){
+  closeRecommendModal();
+  if(!gameState.collection.length){alert('所持なし');return;}
+  var owned={};gameState.collection.forEach(function(c){owned[c.name]=(owned[c.name]||0)+1;});
+  var used={};
+  function pick(name){if((used[name]||0)>=(owned[name]||0))return false;used[name]=(used[name]||0)+1;return true;}
+  function total(){var s=0;for(var k in used)s+=used[k];return s;}
+  var MAX=50;
+
+  if(mode==='power'){
+    Object.keys(owned).sort(function(a,b){
+      return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));
+    }).forEach(function(name){while(total()<MAX&&pick(name)){}});
+  }else if(mode==='combo'){
+    SYNTH_PAIRS.forEach(function(pair){
+      for(var t=0;t<12&&total()<MAX-1;t++){
+        var aKey=null,bKey=null,i,k;
+        for(i=0;i<pair.a.length;i++){for(k in owned){if(baseName(k)===pair.a[i]&&(used[k]||0)<owned[k]){aKey=k;break;}}if(aKey)break;}
+        for(i=0;i<pair.b.length;i++){for(k in owned){if(baseName(k)===pair.b[i]&&(used[k]||0)<owned[k]){bKey=k;break;}}if(bKey)break;}
+        if(!aKey||!bKey)break;pick(aKey);pick(bKey);
+      }
+    });
+    Object.keys(owned).sort(function(a,b){return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));}).forEach(function(name){while(total()<MAX&&pick(name)){}});
+  }else if(mode==='Aromatic'||mode==='Alcohol'||mode==='Alkenyl'){
+    var focusMap={Aromatic:['Aromatic','Phenol','Reagent','FunctionalGroup','Catalyst'],Alcohol:['Alcohol','Acid','Ester','Oxidant','Aldehyde','Ketone','Base'],Alkenyl:['Alkenyl','Alkynyl','Halogen','Catalyst','Hydrocarbon']};
+    var focus=focusMap[mode]||[];
+    var healN=0;
+    Object.keys(owned).forEach(function(name){
+      var c=gameState.collection.find(function(x){return x.name===name;});
+      if(c&&(c.healPower||0)>0){while(healN<6&&total()<MAX&&pick(name))healN++;}
+    });
+    Object.keys(owned).filter(function(name){
+      var c=gameState.collection.find(function(x){return x.name===name;});
+      return c&&focus.indexOf(c.attribute)>=0;
+    }).sort(function(a,b){return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));})
+    .forEach(function(name){while(total()<MAX&&pick(name)){}});
+    Object.keys(owned).sort(function(a,b){return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));}).forEach(function(name){while(total()<MAX&&pick(name)){}});
+  }else{
+    var healN2=0;
+    Object.keys(owned).filter(function(n){var c=gameState.collection.find(function(x){return x.name===n;});return c&&(c.healPower||0)>0;}).forEach(function(name){while(healN2<8&&total()<MAX&&pick(name))healN2++;});
+    SYNTH_PAIRS.forEach(function(pair){
+      for(var t=0;t<10&&total()<MAX-1;t++){
+        var aKey=null,bKey=null,i,k;
+        for(i=0;i<pair.a.length;i++){for(k in owned){if(baseName(k)===pair.a[i]&&(used[k]||0)<owned[k]){aKey=k;break;}}if(aKey)break;}
+        for(i=0;i<pair.b.length;i++){for(k in owned){if(baseName(k)===pair.b[i]&&(used[k]||0)<owned[k]){bKey=k;break;}}if(bKey)break;}
+        if(!aKey||!bKey)break;pick(aKey);pick(bKey);
+      }
+    });
+    Object.keys(owned).sort(function(a,b){return powerValue(gameState.collection.find(function(x){return x.name===b;}))-powerValue(gameState.collection.find(function(x){return x.name===a;}));}).forEach(function(name){while(total()<MAX&&pick(name)){}});
+  }
+
+  var newDeck=[];
+  for(var name in used){
+    var need=used[name];
+    for(var i=0;i<gameState.collection.length&&need>0;i++){
+      if(gameState.collection[i].name===name){newDeck.push(Object.assign({},gameState.collection[i],{id:uid()}));need--;}
+    }
+  }
+  gameState.currentDeck=newDeck;
+  renderDeckEdit();
+  alert('おすすめ（'+mode+'） '+newDeck.length+'枚');
+}
 
 function startQuizOnly(){qoScore=0;qoTotal=0;document.getElementById('qo-score').innerText='0';document.getElementById('qo-total').innerText='0';document.getElementById('qo-feedback').innerText='';switchState('quizOnly');nextQuizOnly();}
 function nextQuizOnly(){var q=QUIZ_BANK[Math.floor(Math.random()*QUIZ_BANK.length)];document.getElementById('qo-question').innerText=q.q;document.getElementById('qo-feedback').innerText='';var box=document.getElementById('qo-options');box.innerHTML='';q.opts.map(function(t,i){return{text:t,ok:i===q.ok};}).sort(function(){return Math.random()-0.5;}).forEach(function(c){var b=document.createElement('button');b.className='quiz-btn';b.innerText=c.text;b.onclick=function(){qoTotal++;if(c.ok){qoScore++;gameState.flags.quizOk=(gameState.flags.quizOk||0)+1;checkAchievements();document.getElementById('qo-feedback').innerText='⭕ '+q.ex;}else document.getElementById('qo-feedback').innerText='❌ '+q.ex;document.getElementById('qo-score').innerText=qoScore;document.getElementById('qo-total').innerText=qoTotal;for(var i=0;i<box.children.length;i++)box.children[i].disabled=true;};box.appendChild(b);});}
 function startIsomerMode(){isoScore=0;isoStreak=0;document.getElementById('iso-score').innerText='0';document.getElementById('iso-streak').innerText='0';document.getElementById('iso-feedback').innerText='';switchState('isomer');nextIsomerQ();}
 function nextIsomerQ(){var q=ISOMER_BANK[Math.floor(Math.random()*ISOMER_BANK.length)];document.getElementById('iso-question').innerText=q.q;document.getElementById('iso-feedback').innerText='';var box=document.getElementById('iso-options');box.innerHTML='';q.opts.map(function(t,i){return{text:t,ok:i===q.ok};}).sort(function(){return Math.random()-0.5;}).forEach(function(c){var b=document.createElement('button');b.className='quiz-btn';b.innerText=c.text;b.onclick=function(){if(c.ok){isoStreak++;var gain=8+Math.min(isoStreak,5)*2;isoScore+=gain;gameState.reagents+=gain;gameState.flags.isoOk=(gameState.flags.isoOk||0)+1;checkAchievements();document.getElementById('iso-feedback').innerText='⭕ +'+gain;}else{isoStreak=0;document.getElementById('iso-feedback').innerText='❌';}document.getElementById('iso-score').innerText=isoScore;document.getElementById('iso-streak').innerText=isoStreak;for(var i=0;i<box.children.length;i++)box.children[i].disabled=true;};box.appendChild(b);});}
-function renderLab(){document.getElementById('lab-lv').innerText=gameState.labLevel;var next=LAB_THRESH[gameState.labLevel]||999,prev=LAB_THRESH[gameState.labLevel-1]||0;document.getElementById('lab-exp').innerText=gameState.labExp;document.getElementById('lab-next').innerText=next;document.getElementById('lab-bar').style.width=Math.min(100,Math.floor((gameState.labExp-prev)/Math.max(1,next-prev)*100))+'%';var perks=['Lv1 基本','Lv2 撃破試薬+5%','Lv3 無料ガチャ','Lv4 +10%','Lv5 コンボ試薬'],html='';for(var i=0;i<perks.length;i++)html+='<div style="opacity:'+(gameState.labLevel>i?1:0.45)+'">'+(gameState.labLevel>i?'✅':'🔒')+' '+perks[i]+'</div>';document.getElementById('lab-perks').innerHTML=html;document.getElementById('lab-free-gacha-btn').disabled=!(gameState.labLevel>=3&&gameState.labFreeDate!==todayStr());document.getElementById('lab-msg').innerText=gameState.labLevel<3?'無料はLv3から':(gameState.labFreeDate===todayStr()?'今日使用済':'OK');}
+function renderLab(){
+  document.getElementById('lab-lv').innerText=gameState.labLevel;
+  var next=LAB_THRESH[gameState.labLevel]||999,prev=LAB_THRESH[gameState.labLevel-1]||0;
+  document.getElementById('lab-exp').innerText=gameState.labExp;
+  document.getElementById('lab-next').innerText=gameState.labLevel>=10?'MAX':next;
+  document.getElementById('lab-bar').style.width=gameState.labLevel>=10?'100%':Math.min(100,Math.floor((gameState.labExp-prev)/Math.max(1,next-prev)*100))+'%';
+  var perks=[
+    'Lv1 基本運用',
+    'Lv2 撃破試薬+5%',
+    'Lv3 無料ガチャ解放',
+    'Lv4 撃破試薬+10% / ガチャ微アップ',
+    'Lv5 コンボ試薬ボーナス',
+    'Lv6 ガチャ確率アップ',
+    'Lv7 撃破経験微増',
+    'Lv8 ガチャ確率さらにアップ',
+    'Lv9 大ダメ試薬消費-5（最低15）',
+    'Lv10 ガチャ最大ブースト / 研究室完成'
+  ],html='';
+  for(var i=0;i<perks.length;i++)html+='<div style="opacity:'+(gameState.labLevel>i?1:0.45)+'">'+(gameState.labLevel>i?'✅':'🔒')+' '+perks[i]+'</div>';
+  document.getElementById('lab-perks').innerHTML=html;
+  document.getElementById('lab-free-gacha-btn').disabled=!(gameState.labLevel>=3&&gameState.labFreeDate!==todayStr());
+  document.getElementById('lab-msg').innerText=gameState.labLevel<3?'無料はLv3から':(gameState.labFreeDate===todayStr()?'今日使用済':'OK');
+}
 function labFreeGacha(){if(gameState.labLevel<3||gameState.labFreeDate===todayStr())return;gameState.labFreeDate=todayStr();gameState.reagents+=100;returnToMenu=true;switchState('gacha');drawGachaType('normal');}
 function renderRefine(){var counts={};gameState.collection.forEach(function(c){if(String(c.name).indexOf('精製')===0)return;counts[c.name]=(counts[c.name]||0)+1;});var list=document.getElementById('refine-list');list.innerHTML='';Object.keys(counts).sort(function(a,b){return a.localeCompare(b,'ja');}).forEach(function(name){var n=counts[name],div=document.createElement('div');div.className='deck-item';div.innerHTML='<div>'+name+' ×'+n+'</div>';var btn=document.createElement('button');btn.type='button';btn.className='glass-btn mini-btn warn';btn.innerText='精製';btn.disabled=n<3;btn.onclick=function(){doRefine(name);};div.appendChild(btn);list.appendChild(div);});}
 function doRefine(name){var cards=gameState.collection.filter(function(c){return c.name===name;});if(cards.length<3){alert('3枚必要');return;}var rem=3;gameState.collection=gameState.collection.filter(function(c){if(c.name===name&&rem>0){rem--;return false;}return true;});var drem=3;gameState.currentDeck=gameState.currentDeck.filter(function(c){if(c.name===name&&drem>0){drem--;return false;}return true;});var base=cards[0];gameState.collection.push(Object.assign({},base,{name:'精製'+name,attackPower:base.attackPower===Infinity?Infinity:Math.floor((base.attackPower||0)*1.15),healPower:Math.floor((base.healPower||0)*1.15),id:uid()}));gameState.flags.refined=true;gameState.flags.refineCount=(gameState.flags.refineCount||0)+1;checkAchievements();alert('精製完了');renderRefine();}
@@ -944,7 +1120,7 @@ function initThreeJS(){
     playerNode.position.x+=(targetPlayerPos.x-playerNode.position.x)*0.15;playerNode.position.z+=(targetPlayerPos.z-playerNode.position.z)*0.15;
     camera.position.x=playerNode.position.x;camera.position.z=playerNode.position.z+10;
     var active=document.getElementById('field-screen').classList.contains('active')&&!menuOpen;
-    monsters.forEach(function(m){if(!m.isActive||!active)return;m.mesh.rotation.y+=0.012;m.changeDirTimer--;if(m.changeDirTimer<=0){m.vx=(Math.random()-0.5)*0.08;m.vz=(Math.random()-0.5)*0.08;m.changeDirTimer=30+Math.random()*60;}m.mesh.position.x+=m.vx;m.mesh.position.z+=m.vz;if(Math.abs(m.mesh.position.x)>14)m.vx*=-1;if(m.mesh.position.z<-20||m.mesh.position.z>8)m.vz*=-1;var dx=playerNode.position.x-m.mesh.position.x,dz=playerNode.position.z-m.mesh.position.z;if(Math.sqrt(dx*dx+dz*dz)<=1){m.isActive=false;scene.remove(m.mesh);gameState.currentMonster=m;startBattle(false);}});
+    monsters.forEach(function(m){if(!m.isActive||!active)return;m.mesh.rotation.y+=0.012;m.changeDirTimer--;if(m.changeDirTimer<=0){m.vx=(Math.random()-0.5)*0.08;m.vz=(Math.random()-0.5)*0.08;m.changeDirTimer=30+Math.random()*60;}m.mesh.position.x+=m.vx;m.mesh.position.z+=m.vz;if(Math.abs(m.mesh.position.x)>14)m.vx*=-1;if(m.mesh.position.z<-20||m.mesh.position.z>8)m.vz*=-1;var dx=playerNode.position.x-m.mesh.position.x,dz=playerNode.position.z-m.mesh.position.z;if(Math.sqrt(dx*dx+dz*dz)<=1){m.isActive=false;scene.remove(m.mesh);gameState.currentMonster=m;if(m.isBoss){showBossPrep();}else{startBattle(false);}}});
     renderer.render(scene,camera);
   }
   anim(0);
@@ -963,7 +1139,7 @@ function spawnMonster(){
 var labScene,labCamera,labRenderer,enemyMesh;
 function initLabThreeJS(){var cont=document.getElementById('lab-canvas-container');cont.innerHTML='';labScene=new THREE.Scene();labScene.background=new THREE.Color(0x071018);labCamera=new THREE.PerspectiveCamera(50,cont.clientWidth/Math.max(1,cont.clientHeight),0.1,100);labCamera.position.set(0,1.6,5.2);labCamera.lookAt(0,0.7,0);labRenderer=new THREE.WebGLRenderer({antialias:true});labRenderer.setSize(cont.clientWidth,cont.clientHeight);cont.appendChild(labRenderer.domElement);labScene.add(new THREE.DirectionalLight(0x67e8f9,1.5));labScene.add(new THREE.AmbientLight(0xffffff,0.45));var col=(gameState.currentMonster&&gameState.currentMonster.isBoss)?0x7c3aed:0x22d3ee;enemyMesh=createMoleculeMesh(col);enemyMesh.scale.set(1.4,1.4,1.4);enemyMesh.position.set(0,0.9,0);labScene.add(enemyMesh);(function anim(){requestAnimationFrame(anim);if(enemyMesh){enemyMesh.rotation.y+=0.014;enemyMesh.position.y=0.9+Math.sin(Date.now()*0.002)*0.08;}if(labRenderer&&labScene&&labCamera)labRenderer.render(labScene,labCamera);})();}
 
-function startBattle(practice){isPractice=!!practice;returnToMenu=false;document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});document.getElementById('battle-screen').classList.add('active');if(!isPractice)initLabThreeJS();else document.getElementById('lab-canvas-container').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#67e8f9">練習</div>';setupBattle();}
+function startBattle(practice){isPractice=!!practice;returnToMenu=false;returnToBossPrep=false;document.querySelectorAll('.screen').forEach(function(el){el.classList.remove('active');});document.getElementById('battle-screen').classList.add('active');if(!isPractice)initLabThreeJS();else document.getElementById('lab-canvas-container').innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#67e8f9">練習</div>';setupBattle();}
 function startPractice(){gameState.currentMonster={name:'練習ダミー',level:1,hp:9999,maxHP:9999,attackPower:0,weakness:[],isBoss:false,condition:null,turnLimit:0};startBattle(true);}
 function setupBattle(){
   isBattleOver=false;isProcessing=false;botulinumActive=false;gameState.nextDamageBonus=1.0;pendingIntermediate=null;battleHistory=[];battleTurnCount=0;comboCount=0;
@@ -1119,11 +1295,79 @@ function executePlayerAttack(){
 }
 function chooseAttack(){document.getElementById('choice-box').style.display='none';if(!pendingIntermediate)return;var p=pendingIntermediate;applyEffectAndEndTurn(p.damage,p.heal,p.msg+(p.weak?'\n弱点！':''),p.weak);pendingIntermediate=null;}
 function chooseAddToHand(){document.getElementById('choice-box').style.display='none';if(!pendingIntermediate)return;if(bHand.length<7)bHand.push(pendingIntermediate.card);gameState.collection.push(Object.assign({},pendingIntermediate.card));document.getElementById('battle-log').innerText=pendingIntermediate.card.name+' を手札に（中間体）';pendingIntermediate=null;isProcessing=false;updateBattleUI();setTimeout(endPlayerTurn,1100);}
-function applyEffectAndEndTurn(damage,heal,message,isWeak){if(isBattleOver)return;if(damage===Infinity||damage>=400){if(gameState.reagents>=25){gameState.reagents-=25;battleBigSpend=true;message+='\n試薬25消費';}else if(damage!==Infinity){damage=Math.floor(damage*0.5);message+='\n半減';}}if(isWeak)message+='\n弱点！';if(damage===Infinity)monsterHP=0;else if(damage>0)monsterHP-=damage;if(heal>0){gameState.playerHP=Math.min(gameState.playerMaxHP,gameState.playerHP+heal);document.getElementById('battle-player-hp').innerText=gameState.playerHP;}document.getElementById('monster-hp').innerText=Math.max(0,monsterHP);document.getElementById('battle-log').innerText=message;pushHistory(message);if(monsterHP<=0)winBattle(isPractice?'練習クリア':'敵を分解！');else setTimeout(endPlayerTurn,1400);}
+function applyEffectAndEndTurn(damage,heal,message,isWeak){
+  if(isBattleOver)return;
+  var bigCost=25;if(gameState.labLevel>=9)bigCost=20;
+  if(damage===Infinity||damage>=400){if(gameState.reagents>=bigCost){gameState.reagents-=bigCost;battleBigSpend=true;message+='\n試薬'+bigCost+'消費';}else if(damage!==Infinity){damage=Math.floor(damage*0.5);message+='\n半減';}}
+  if(isWeak)message+='\n弱点！';
+  if(damage===Infinity)monsterHP=0;else if(damage>0)monsterHP-=damage;
+  if(heal>0){gameState.playerHP=Math.min(gameState.playerMaxHP,gameState.playerHP+heal);document.getElementById('battle-player-hp').innerText=gameState.playerHP;}
+  document.getElementById('monster-hp').innerText=Math.max(0,monsterHP);
+  document.getElementById('battle-log').innerText=message;pushHistory(message);
+  if(monsterHP<=0)winBattle(isPractice?'練習クリア':'敵を分解！');else setTimeout(endPlayerTurn,1400);
+}
 function endPlayerTurn(){if(isBattleOver)return;if(isPractice){startPlayerTurn(false);return;}isPlayerTurn=false;isProcessing=true;document.getElementById('battle-log').innerText='敵の攻撃…';updateBattleUI();setTimeout(function(){if(isBattleOver)return;if(monsterHP>0){var atk=gameState.currentMonster.attackPower||15;if(bossTurnLimit>0&&battleTurnCount>=bossTurnLimit-2)atk=Math.floor(atk*1.5);gameState.playerHP-=atk;document.getElementById('battle-player-hp').innerText=Math.max(0,gameState.playerHP);document.getElementById('battle-log').innerText='敵の攻撃\nあなたに '+atk+' ダメージ！';if(gameState.playerHP<=0){isBattleOver=true;gameState.playerHP=0;gameState.reagents=Math.max(0,gameState.reagents-25);document.getElementById('battle-log').innerText='敗北 試薬-25';finalizeReplay();setTimeout(function(){gameState.playerHP=gameState.playerMaxHP;switchState('field');},1400);return;}setTimeout(function(){if(!isBattleOver)startPlayerTurn(false);},1100);}else if(!isBattleOver)startPlayerTurn(false);},800);}
 
 function sortDeck(mode){var names=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;names.push(c.name);}});function rep(name){return gameState.collection.find(function(c){return c.name===name;})||ALL_CARDS.find(function(c){return c.name===baseName(name);});}names.sort(function(a,b){var ca=rep(a),cb=rep(b);if(!ca||!cb)return 0;if(mode==='name')return a.localeCompare(b,'ja');if(mode==='rarity'){var d=(RARITY_ORDER[ca.rarity]||9)-(RARITY_ORDER[cb.rarity]||9);return d||a.localeCompare(b,'ja');}if(mode==='power'){var d2=powerValue(cb)-powerValue(ca);return d2||a.localeCompare(b,'ja');}return a.localeCompare(b,'ja');});gameState.deckListOrder=names.slice();var rebuilt=[];names.forEach(function(name){gameState.currentDeck.filter(function(c){return c.name===name;}).forEach(function(c){rebuilt.push(c);});});gameState.currentDeck=rebuilt;renderDeckEdit();}
-function renderDeckEdit(){document.getElementById('deck-count').innerText=gameState.currentDeck.length;document.getElementById('deck-reaction-list').innerText=FULL_REACTION_TEXT;for(var i=0;i<3;i++){var inp=document.getElementById('preset-name-'+i);if(inp&&gameState.deckSlots[i])inp.value=gameState.deckSlots[i].name||'';}document.getElementById('preset-labels').innerText=[0,1,2].map(function(i){var s=gameState.deckSlots[i];return(s&&s.cards&&s.cards.length)?('S'+(i+1)+':'+(s.name||'無題')+'('+s.cards.length+')'):('S'+(i+1)+':空');}).join(' / ');var syn=calcSynthRate();document.getElementById('synth-rate-text').innerText=syn.rate+'% 回復'+syn.healCount;document.getElementById('synth-rate-bar').style.width=syn.rate+'%';document.getElementById('synth-hint').innerText=syn.missing.length?'不足: '+syn.missing.join(' / '):'';var allNames=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;allNames.push(c.name);}});var ordered;if(gameState.deckListOrder&&gameState.deckListOrder.length){ordered=gameState.deckListOrder.filter(function(n){return seen[n];});allNames.filter(function(n){return ordered.indexOf(n)<0;}).sort(function(a,b){return a.localeCompare(b,'ja');}).forEach(function(n){ordered.push(n);});}else ordered=allNames.sort(function(a,b){return a.localeCompare(b,'ja');});var list=document.getElementById('deck-list');list.innerHTML='';ordered.forEach(function(name){var owned=gameState.collection.filter(function(c){return c.name===name;}).length;var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;var card=gameState.collection.find(function(c){return c.name===name;});if(!card)return;var val;if(baseName(name)==='ボツリヌス毒素')val='毎ターン200ダメージ';else if((card.attackPower||0)>0&&(card.healPower||0)>0)val=fmt(card.attackPower)+'ダメージ/'+card.healPower+'回復';else if(card.healPower>0)val=card.healPower+'回復';else val=fmt(card.attackPower)+'ダメージ';var div=document.createElement('div');div.className='deck-item'+(inD>0?' in-deck':'');var left=document.createElement('div');left.innerHTML='<span class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</span> <span style="color:'+(inD>0?'#4ade80':'#e2e8f0')+'">'+name+' ['+inD+'/'+owned+']</span><div style="font-size:9px;color:#94a3b8">'+val+'</div>';var right=document.createElement('div');if(inD>0){var rm=document.createElement('button');rm.type='button';rm.className='action-btn';rm.style.color='#f87171';rm.innerText='➖';rm.onclick=function(){removeFromDeck(name);};right.appendChild(rm);}var add=document.createElement('button');add.type='button';add.className='action-btn';add.style.color=(inD<owned&&gameState.currentDeck.length<50)?'#38bdf8':'#475569';add.innerText='➕';add.disabled=!(inD<owned&&gameState.currentDeck.length<50);add.onclick=function(){addToDeck(name);};right.appendChild(add);div.appendChild(left);div.appendChild(right);list.appendChild(div);});var btn=document.getElementById('deck-done-btn');btn.disabled=gameState.currentDeck.length<20;btn.style.opacity=gameState.currentDeck.length>=20?'1':'0.45';}
+function renderDeckAttrFilters(){
+  var box=document.getElementById('deck-attr-filters');if(!box)return;box.innerHTML='';
+  DECK_ATTR_FILTERS.forEach(function(a){
+    var b=document.createElement('button');b.type='button';
+    b.className='glass-btn mini-btn filter-chip slate'+(deckAttrFilter===a?' on':'');
+    b.innerText=a==='all'?'全て':a;
+    b.onclick=function(){deckAttrFilter=a;renderDeckAttrFilters();renderDeckEdit();};
+    box.appendChild(b);
+  });
+}
+function renameOriginCard(oldName){
+  if(gameState.reagents<25){alert('試薬が足りません（25必要）');return;}
+  var neu=prompt('新しいカード名（最大20文字）',oldName);
+  if(neu==null)return;
+  neu=String(neu).trim().slice(0,20);
+  if(!neu){alert('名前が空です');return;}
+  if(neu===oldName)return;
+  gameState.reagents-=25;
+  gameState.collection.forEach(function(c){if(c.name===oldName&&(c.rarity==='ORIGIN'||c.origin))c.name=neu;});
+  gameState.currentDeck.forEach(function(c){if(c.name===oldName&&(c.rarity==='ORIGIN'||c.origin))c.name=neu;});
+  if(gameState.deckListOrder)gameState.deckListOrder=gameState.deckListOrder.map(function(n){return n===oldName?neu:n;});
+  saveGame(true);renderDeckEdit();alert('改名完了: '+neu+'（試薬-25）');
+}
+function renderDeckEdit(){
+  document.getElementById('deck-count').innerText=gameState.currentDeck.length;
+  document.getElementById('deck-reaction-list').innerText=FULL_REACTION_TEXT;
+  for(var i=0;i<3;i++){var inp=document.getElementById('preset-name-'+i);if(inp&&gameState.deckSlots[i])inp.value=gameState.deckSlots[i].name||'';}
+  document.getElementById('preset-labels').innerText=[0,1,2].map(function(i){var s=gameState.deckSlots[i];return(s&&s.cards&&s.cards.length)?('S'+(i+1)+':'+(s.name||'無題')+'('+s.cards.length+')'):('S'+(i+1)+':空');}).join(' / ');
+  var syn=calcSynthRate();document.getElementById('synth-rate-text').innerText=syn.rate+'% 回復'+syn.healCount;document.getElementById('synth-rate-bar').style.width=syn.rate+'%';document.getElementById('synth-hint').innerText=syn.missing.length?'不足: '+syn.missing.join(' / '):'';
+  var allNames=[],seen={};gameState.collection.forEach(function(c){if(!seen[c.name]){seen[c.name]=1;allNames.push(c.name);}});
+  var ordered;if(gameState.deckListOrder&&gameState.deckListOrder.length){ordered=gameState.deckListOrder.filter(function(n){return seen[n];});allNames.filter(function(n){return ordered.indexOf(n)<0;}).sort(function(a,b){return a.localeCompare(b,'ja');}).forEach(function(n){ordered.push(n);});}else ordered=allNames.sort(function(a,b){return a.localeCompare(b,'ja');});
+  if(deckAttrFilter!=='all'){
+    ordered=ordered.filter(function(name){
+      var card=gameState.collection.find(function(c){return c.name===name;});
+      if(!card)return false;
+      if(deckAttrFilter==='ORIGIN')return card.rarity==='ORIGIN'||card.origin;
+      return card.attribute===deckAttrFilter;
+    });
+  }
+  var list=document.getElementById('deck-list');list.innerHTML='';
+  ordered.forEach(function(name){
+    var owned=gameState.collection.filter(function(c){return c.name===name;}).length;
+    var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;
+    var card=gameState.collection.find(function(c){return c.name===name;});
+    if(!card)return;
+    var val;if(baseName(name)==='ボツリヌス毒素')val='毎ターン200ダメージ';else if((card.attackPower||0)>0&&(card.healPower||0)>0)val=fmt(card.attackPower)+'ダメージ/'+card.healPower+'回復';else if(card.healPower>0)val=card.healPower+'回復';else val=fmt(card.attackPower)+'ダメージ';
+    var div=document.createElement('div');div.className='deck-item'+(inD>0?' in-deck':'');
+    var left=document.createElement('div');
+    left.innerHTML='<span class="card-rarity rarity-'+card.rarity+'">'+card.rarity+'</span> <span style="color:'+(inD>0?'#4ade80':'#e2e8f0')+'">'+name+' ['+inD+'/'+owned+']</span><div style="font-size:9px;color:#94a3b8">'+val+' · '+card.attribute+'</div>';
+    var right=document.createElement('div');right.style.display='flex';right.style.alignItems='center';right.style.gap='2px';
+    if(card.rarity==='ORIGIN'||card.origin){
+      var rn=document.createElement('button');rn.type='button';rn.className='action-btn';rn.title='改名（試薬25）';rn.innerText='✏️';rn.onclick=function(){renameOriginCard(name);};right.appendChild(rn);
+    }
+    if(inD>0){var rm=document.createElement('button');rm.type='button';rm.className='action-btn';rm.style.color='#f87171';rm.innerText='➖';rm.onclick=function(){removeFromDeck(name);};right.appendChild(rm);}
+    var add=document.createElement('button');add.type='button';add.className='action-btn';add.style.color=(inD<owned&&gameState.currentDeck.length<50)?'#38bdf8':'#475569';add.innerText='➕';add.disabled=!(inD<owned&&gameState.currentDeck.length<50);add.onclick=function(){addToDeck(name);};right.appendChild(add);
+    div.appendChild(left);div.appendChild(right);list.appendChild(div);
+  });
+  var btn=document.getElementById('deck-done-btn');btn.disabled=gameState.currentDeck.length<20;btn.style.opacity=gameState.currentDeck.length>=20?'1':'0.45';
+}
 function addToDeck(name){var owned=gameState.collection.filter(function(c){return c.name===name;}).length;var inD=gameState.currentDeck.filter(function(c){return c.name===name;}).length;var card=gameState.collection.find(function(c){return c.name===name;});if(card&&gameState.currentDeck.length<50&&inD<owned){gameState.currentDeck.push(Object.assign({},card,{id:uid()}));renderDeckEdit();}}
 function removeFromDeck(name){var i=gameState.currentDeck.findIndex(function(c){return c.name===name;});if(i>=0){gameState.currentDeck.splice(i,1);renderDeckEdit();}}
 
